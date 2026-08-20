@@ -9,36 +9,46 @@ window.MCA = window.MCA || {};
 (function(){
   const { clampNum, fmt, gradeFromPct } = window.MCA.grading;
 
-  /* ---------- CIE Finalizer (Table 4.2.1 – 4.2.3) ---------- */
+  /* ---------- CIE Finalizer (Table 4.2.1 – 4.2.3) ----------
+     Quiz and Test each have three attempts (I, II, III); only the best two
+     of the three count, matching how these are actually run. Experiential
+     Learning is a single combined mark out of 40 rather than the three
+     sub-components broken out — the syllabus doesn't require tracking the
+     case-study / program-specific / seminar split separately to arrive at
+     a finalized CIE. */
+  function bestTwoOfThree(a,b,c){
+    return [a,b,c].sort((x,y)=>y-x).slice(0,2).reduce((s,n)=>s+n,0);
+  }
+
   function computeCIE(type, v){
-    const q1=clampNum(v.q1,0,10), q2=clampNum(v.q2,0,10);
-    const t1=clampNum(v.t1,0,50), t2=clampNum(v.t2,0,50);
-    const el1=clampNum(v.el1,0,10), el2=clampNum(v.el2,0,20), el3=clampNum(v.el3,0,10);
+    const q1=clampNum(v.q1,0,10), q2=clampNum(v.q2,0,10), q3=clampNum(v.q3,0,10);
+    const t1=clampNum(v.t1,0,50), t2=clampNum(v.t2,0,50), t3=clampNum(v.t3,0,50);
+    const el=clampNum(v.el,0,40);
     const lab=clampNum(v.lab,0, type==='lab'?40:50);
     const elLab=clampNum(v.elLab,0,10);
 
-    const quiz = q1+q2;
-    const testScaled = (t1+t2)/100*40;
-    const elTotal = el1+el2+el3;
-    const theoryCIE = quiz+testScaled+elTotal;
+    const quiz = bestTwoOfThree(q1,q2,q3);           // best 2 of 3, each /10 → /20
+    const testRaw = bestTwoOfThree(t1,t2,t3);         // best 2 of 3, each /50 → /100
+    const testScaled = testRaw/100*40;                 // scaled down to /40
+    const theoryCIE = quiz+testScaled+el;
     const quizTest = quiz+testScaled;
 
     let rows=[], total=0, max=0, note='';
     if(type==='theory'){
       total = theoryCIE; max = 100;
       rows = [
-        ['Quiz (I+II)', fmt(quiz)+' / 20'],
-        ['Test (scaled)', fmt(testScaled)+' / 40'],
-        ['Experiential Learning', fmt(elTotal)+' / 40'],
+        ['Quiz (best 2 of 3)', fmt(quiz)+' / 20'],
+        ['Test (best 2 of 3, scaled)', fmt(testScaled)+' / 40'],
+        ['Experiential Learning', fmt(el)+' / 40'],
       ];
       const ok = quizTest>=30 && total>=50;
-      note = `Passing floor: Quiz+Test &ge;30/60 <b>and</b> overall CIE &ge;50/100. Currently Quiz+Test ${fmt(quizTest)}/60, CIE ${fmt(total)}/100 &mdash; <b style="color:${ok?'#0e6e55':'#b33a3a'}">${ok?'meets the CIE floor':'below the CIE floor'}</b>.`;
+      note = `Passing floor: Quiz+Test &ge;30/60 <b>and</b> overall CIE &ge;50/100. Currently Quiz+Test ${fmt(quizTest)}/60, CIE ${fmt(total)}/100 &mdash; <b style="color:${ok?'#16a34a':'#dc2626'}">${ok?'meets the CIE floor':'below the CIE floor'}</b>.`;
     } else if(type==='theory-lab'){
       total = theoryCIE + lab; max = 150;
       rows = [
-        ['Quiz (I+II)', fmt(quiz)+' / 20'],
-        ['Test (scaled)', fmt(testScaled)+' / 40'],
-        ['Experiential Learning', fmt(elTotal)+' / 40'],
+        ['Quiz (best 2 of 3)', fmt(quiz)+' / 20'],
+        ['Test (best 2 of 3, scaled)', fmt(testScaled)+' / 40'],
+        ['Experiential Learning', fmt(el)+' / 40'],
         ['Theory CIE subtotal', fmt(theoryCIE)+' / 100'],
         ['Lab / Practical CIE', fmt(lab)+' / 50'],
       ];
@@ -53,7 +63,7 @@ window.MCA = window.MCA || {};
         ['Experiential Learning', fmt(elLab)+' / 10'],
       ];
       const ok = total>=25;
-      note = `Passing floor: CIE &ge;25/50 &mdash; currently <b style="color:${ok?'#0e6e55':'#b33a3a'}">${fmt(total)}/50 ${ok?'(met)':'(not met)'}</b>.`;
+      note = `Passing floor: CIE &ge;25/50 &mdash; currently <b style="color:${ok?'#16a34a':'#dc2626'}">${fmt(total)}/50 ${ok?'(met)':'(not met)'}</b>.`;
     }
     const pct = max ? total/max*100 : 0;
     return { rows, total, max, pct, note };
@@ -87,40 +97,38 @@ window.MCA = window.MCA || {};
     }
   }
 
-  /* ---------- Final Grade Calculator (Table 4.3 + 4.4) ---------- */
+  /* ---------- Final Grade Calculator (Table 4.3 + 4.4) ----------
+     Takes only the finalized CIE total and SEE total for the course — no
+     quiz/test/lab sub-breakdown. The pass/fail floors applied here are the
+     TOTAL-row conditions from Table 4.4 (the row that already speaks in
+     terms of overall CIE and overall SEE, not the individual Theory/Practice
+     sub-components), so nothing is lost by only asking for the two totals:
+       Theory only        CIE ≥50%, SEE ≥40%, Aggregate ≥50%
+       Theory + Practice   CIE ≥50%, SEE ≥50%, Aggregate ≥50%   (Table 4.4 TOTAL row)
+       Practice only        CIE ≥50%, SEE ≥50%, Aggregate ≥50% */
+  function finalGradeMax(type){
+    if(type==='theory') return { cieMax:100, seeMax:100 };
+    if(type==='theory-lab') return { cieMax:150, seeMax:150 };
+    return { cieMax:50, seeMax:50 };
+  }
+
   function computeFinalGrade(type, v){
-    let total, max, badges=[], allOk=true;
-    if(type==='theory'){
-      const qt = clampNum(v.qt,0,60), cie = clampNum(v.cie,0,100), see = clampNum(v.see,0,100);
-      total = cie+see; max=200;
-      const b1 = qt>=30 && cie>=50; badges.push(['CIE floor (Quiz+Test ≥30 & CIE ≥50)', b1]);
-      const b2 = see>=40; badges.push(['SEE ≥40/100', b2]);
-      const b3 = (total/max*100)>=50; badges.push(['Aggregate ≥50%', b3]);
-      allOk = b1&&b2&&b3;
-    } else if(type==='theory-lab'){
-      const qt=clampNum(v.qt,0,60), cieT=clampNum(v.cieT,0,100), cieL=clampNum(v.cieL,0,50);
-      const seeT=clampNum(v.seeT,0,100), seeL=clampNum(v.seeL,0,50);
-      total = cieT+cieL+seeT+seeL; max=300;
-      const b1 = qt>=24 && cieT>=40; badges.push(['Theory CIE floor', b1]);
-      const b2 = cieL>=25; badges.push(['Lab CIE ≥25/50', b2]);
-      const b3 = (cieT+cieL)>=75; badges.push(['Combined CIE ≥75/150', b3]);
-      const b4 = seeT>=40; badges.push(['Theory SEE ≥40/100', b4]);
-      const b5 = seeL>=25; badges.push(['Lab SEE ≥25/50', b5]);
-      const b6 = (seeT+seeL)>=75; badges.push(['Combined SEE ≥75/150', b6]);
-      const b7 = (total/max*100)>=50; badges.push(['Aggregate ≥50%', b7]);
-      allOk = b1&&b2&&b3&&b4&&b5&&b6&&b7;
-    } else {
-      const cie=clampNum(v.cie,0,50), see=clampNum(v.see,0,50);
-      total = cie+see; max=100;
-      const b1 = cie>=25; badges.push(['CIE ≥25/50', b1]);
-      const b2 = see>=25; badges.push(['SEE ≥25/50', b2]);
-      const b3 = (total/max*100)>=50; badges.push(['Aggregate ≥50%', b3]);
-      allOk = b1&&b2&&b3;
-    }
+    const { cieMax, seeMax } = finalGradeMax(type);
+    const cie = clampNum(v.cie,0,cieMax);
+    const see = clampNum(v.see,0,seeMax);
+    const total = cie+see, max = cieMax+seeMax;
+    const seeFloorPct = type==='theory' ? 40 : 50;
+
+    const badges = [];
+    const b1 = (cie/cieMax*100) >= 50; badges.push([`CIE ≥50% (${cieMax*0.5}/${cieMax})`, b1]);
+    const b2 = (see/seeMax*100) >= seeFloorPct; badges.push([`SEE ≥${seeFloorPct}% (${Math.round(seeMax*seeFloorPct/100)}/${seeMax})`, b2]);
+    const b3 = (total/max*100) >= 50; badges.push(['Aggregate ≥50%', b3]);
+    const allOk = b1&&b2&&b3;
+
     const pct = total/max*100;
     const band = gradeFromPct(pct);
     const isPass = allOk && band.grade!=='F';
-    return { total, max, pct, badges, isPass, letter: allOk?band.grade:'F', gp: allOk?band.gp:0 };
+    return { total, max, pct, cie, cieMax, see, seeMax, badges, isPass, letter: allOk?band.grade:'F', gp: allOk?band.gp:0 };
   }
 
   /* ---------- SGPA ---------- */

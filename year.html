@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Choose your year — MCA Grade Ledger</title>
+<meta name="description" content="Choose Year 1 or Year 2 of the RVCE MCA program.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/variables.css">
+<link rel="stylesheet" href="css/base.css">
+<link rel="stylesheet" href="css/layout.css">
+<link rel="stylesheet" href="css/components.css">
+</head>
+<body>
+<header id="site-header" class="site-header"></header>
+
+<div class="wrap">
+  <div class="page-hero">
+    <div class="eyebrow">Step 2 of 4</div>
+    <h1>Which year are you in?</h1>
+    <p>MCA is a 2-year, 4-semester program under the 2024 scheme.</p>
+  </div>
+
+  <div id="breadcrumb"></div>
+
+  <main id="app">
+    <div class="card">
+      <div class="step-track">
+        <span class="step done">1 &middot; Scheme</span>
+        <span class="step active">2 &middot; Year</span>
+        <span class="step">3 &middot; Semester</span>
+        <span class="step">4 &middot; Tool</span>
+      </div>
+      <div class="choice-grid" id="yearGrid"></div>
+    </div>
+  </main>
+
+  <footer id="site-footer" class="site-footer"></footer>
+</div>
+
+<script src="js/data.js"></script>
+<script src="js/grading.js"></script>
+<script src="js/site.js"></script>
+<script src="js/pages/year.js"></script>
+</body>
+</html>

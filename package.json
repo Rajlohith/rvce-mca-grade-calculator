@@ -1,11 +1,16 @@
 {
   "name": "mca-grade-ledger",
-  "version": "1.0.0",
+  "version": "2.0.0",
   "private": true,
-  "description": "Unofficial CIE/SEE/grade/GPA calculator for RVCE MCA students (2024 scheme).",
+  "description": "Unofficial CIE, SEE, final-grade and GPA calculator for RVCE MCA students (2024 scheme).",
   "scripts": {
     "start": "npx --yes serve . -l 5173",
     "dev": "npx --yes serve . -l 5173"
   },
-  "license": "MIT"
+  "license": "Apache-2.0",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Rajlohith/rvce-mca-grade-calculator"
+  },
+  "author": "B R Lohith Raj <brlohithraj.mca25@rvce.edu.in>"
 }

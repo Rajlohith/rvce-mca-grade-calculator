@@ -4,56 +4,60 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>MCA Grade Ledger — RVCE</title>
-<meta name="description" content="Unofficial CIE, SEE, grade, and GPA calculator for RVCE MCA students, built from the PG Academic Handbook.">
+<meta name="description" content="Unofficial CIE, SEE, grade, and GPA calculator for RVCE MCA students, built from the PG Academic Handbook and the 2024 scheme syllabus.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="css/variables.css">
 <link rel="stylesheet" href="css/base.css">
 <link rel="stylesheet" href="css/layout.css">
 <link rel="stylesheet" href="css/components.css">
 </head>
 <body>
-<div class="wrap" id="appTop">
+<header id="site-header" class="site-header"></header>
 
-  <div class="topnav">
-    <div class="brand" data-gnav="home" style="cursor:pointer;">
-      <div class="brand-mark">M</div>
-      <div class="brand-name">MCA Grade Ledger</div>
-    </div>
-    <div class="gnav">
-      <span data-gnav="home">Home</span>
-      <span data-gnav="faq">FAQ</span>
-      <span data-gnav="cgpa">CGPA</span>
-      <a href="https://github.com/Rajlohith/rvce-mca-grade-calculator" target="_blank" rel="noopener">GitHub</a>
-    </div>
-  </div>
-
-  <div class="masthead">
-    <div class="serial">RVCE · MCA<br>2024 SCHEME · PG</div>
-    <div class="eyebrow">Rashtreeya Sikshana Samithi Trust — R V College of Engineering</div>
+<div class="wrap" id="top">
+  <div class="page-hero">
+    <div class="eyebrow">RVCE &middot; Master of Computer Applications &middot; 2024 Scheme</div>
     <h1>MCA Grade Ledger</h1>
-    <p>CIE finalization, SEE requirements, final grades and GPA — for every course in the RVCE MCA 2024 scheme, worked out exactly the way the PG Academic Handbook defines it.</p>
+    <p>CIE finalization, SEE requirements, final grades and GPA — worked out exactly the way the RVCE PG Academic Handbook defines it, for every course in the MCA 2024 scheme.</p>
   </div>
 
-  <div id="breadcrumb" style="display:none;"></div>
-
-  <div id="app"></div>
-
-  <div class="site-footer">
-    <div class="footer-links">
-      <a href="https://github.com/Rajlohith/rvce-mca-grade-calculator" target="_blank" rel="noopener">github.com/Rajlohith/rvce-mca-grade-calculator</a>
-      <a href="mailto:brlohithraj.mca25@rvce.edu.in">brlohithraj.mca25@rvce.edu.in</a>
+  <main id="app">
+    <div class="card" style="text-align:center;padding:40px 24px;">
+      <div class="hero-kicker">Get started</div>
+      <h2 style="font-size:26px;margin-bottom:8px;">Pick your scheme, then your semester.</h2>
+      <p class="sub" style="max-width:54ch;margin:0 auto 22px;">Every calculator on this site is pre-loaded with the real MCA course list, credit values and CIE/SEE structure for the semester you choose — nothing is left to guesswork.</p>
+      <a class="btn amber" style="padding:13px 26px;font-size:14.5px;" href="scheme.html">Calculate your marks &rarr;</a>
     </div>
-    Built from the RVCE Academic Planning, Assessment &amp; Evaluation Handbook (PG Programs, w.e.f. 2024–25) and the MCA 2024 Scheme syllabus.<br>
-    Unofficial student tool · not affiliated with RVCE · always confirm against your grade card.
-  </div>
+
+    <div class="disclaimer-banner">
+      <b>Disclaimer:</b> Not an official RVCE tool. No responsibility is taken for discrepancies — always confirm against your official grade card.
+    </div>
+
+    <div class="quick-links">
+      <a class="quick-link" href="faq.html">
+        <div class="ql-title">FAQ</div>
+        <div class="ql-sub">How every formula works</div>
+      </a>
+      <a class="quick-link" href="cgpa.html">
+        <div class="ql-title">CGPA Calculator</div>
+        <div class="ql-sub">Across all four semesters</div>
+      </a>
+      <a class="quick-link" href="docs/MCA-2024-Scheme-Syllabus.pdf" target="_blank" rel="noopener">
+        <div class="ql-title">Syllabus PDF</div>
+        <div class="ql-sub">2024 scheme, Semester I&ndash;IV</div>
+      </a>
+    </div>
+  </main>
+
+  <footer id="site-footer" class="site-footer"></footer>
 </div>
 
 <script src="js/data.js"></script>
 <script src="js/grading.js"></script>
-<script src="js/engine.js"></script>
-<script src="js/faqContent.js"></script>
-<script src="js/views.js"></script>
-<script src="js/app.js"></script>
+<script src="js/site.js"></script>
+<script>
+  window.MCA.site.mount({ active: 'home' });
+</script>
 </body>
 </html>

@@ -1,31 +1,40 @@
 /* ==========================================================================
    Design tokens — MCA Grade Ledger
-   Ledger / punch-card motif: cool paper background, navy ink, single
-   amber accent used sparingly. Deliberately not the cream+terracotta or
-   dark+neon defaults.
+   Clean, neutral SaaS system: white cards on a soft gray gradient, a single
+   near-black primary action color, blue used only for focus/interactive
+   states, green/red reserved for pass/fail semantics. No serif display
+   font — plain, confident system sans throughout.
    ========================================================================== */
 :root{
-  --ink:        #182338;
-  --ink-soft:   #4b5568;
-  --ink-faint:  #8b93a6;
-  --paper:      #eef1f4;
+  --ink:        #111827;   /* gray-900 — headings, primary text */
+  --ink-soft:   #4b5563;   /* gray-600 — body text */
+  --ink-faint:  #9ca3af;   /* gray-400 — muted / hint text */
+  --paper:      #f3f4f6;   /* gray-100 — page background (bottom of gradient) */
+  --paper-top:  #f9fafb;   /* gray-50  — page background (top of gradient) */
   --card:       #ffffff;
-  --line:       #d7dce3;
-  --hole:       #c7cdd6;
+  --line:       #e5e7eb;   /* gray-200 — default border */
+  --line-strong:#d1d5db;   /* gray-300 — input borders */
 
-  --amber:      #c98a2b;
-  --amber-deep: #9c6a1c;
-  --teal:       #0e6e55;
-  --teal-bg:    #e4f3ee;
-  --crimson:    #b33a3a;
-  --crimson-bg: #fbe9e7;
+  --amber:      #111827;   /* primary action color (kept the token name for
+                               drop-in compatibility with existing markup;
+                               value is near-black to match the reference UI) */
+  --amber-deep: #000000;
+  --focus:      #3b82f6;   /* blue-500 — focus rings */
+  --link:       #2563eb;   /* blue-600 — links */
+  --teal:       #16a34a;   /* green-600 — pass / success */
+  --teal-bg:    #f0fdf4;   /* green-50 */
+  --crimson:    #dc2626;   /* red-600 — fail / error */
+  --crimson-bg: #fef2f2;   /* red-50 */
 
-  --radius-lg: 14px;
-  --radius-md: 10px;
-  --radius-sm: 7px;
-  --shadow: 0 1px 2px rgba(24,35,56,.06), 0 8px 24px -12px rgba(24,35,56,.18);
+  --radius-lg: 24px;   /* rounded-3xl */
+  --radius-md: 16px;   /* rounded-2xl */
+  --radius-sm: 12px;   /* rounded-xl */
+  --shadow-sm: 0 1px 2px rgba(0,0,0,.04);
+  --shadow: 0 1px 3px rgba(0,0,0,.06), 0 1px 2px rgba(0,0,0,.04);
+  --shadow-lg: 0 10px 15px -3px rgba(0,0,0,.08), 0 4px 6px -4px rgba(0,0,0,.05);
+  --shadow-xl: 0 20px 25px -5px rgba(0,0,0,.10), 0 8px 10px -6px rgba(0,0,0,.06);
 
-  --font-display: 'Fraunces', serif;
-  --font-body: 'Inter', system-ui, sans-serif;
+  --font-display: 'Inter', ui-sans-serif, system-ui, sans-serif;
+  --font-body: 'Inter', ui-sans-serif, system-ui, -apple-system, sans-serif;
   --font-mono: 'JetBrains Mono', ui-monospace, monospace;
 }

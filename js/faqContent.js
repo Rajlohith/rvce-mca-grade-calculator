@@ -10,11 +10,11 @@ window.MCA.FAQ = [
     q: "How is CIE (Continuous Internal Evaluation) calculated?",
     a: `For a theory course, CIE is out of 100 and made of three parts:
     <ul>
-      <li><b>Quizzes</b> — two quizzes, 10 marks each, added directly (out of 20).</li>
-      <li><b>Tests</b> — two tests of 50 marks each (100 combined), then <b>scaled down to 40</b>: <code>(Test I + Test II) / 100 × 40</code>.</li>
-      <li><b>Experiential Learning (EL)</b> — case-study teaching (10) + program-specific requirement (20) + a short video seminar (10) = 40.</li>
+      <li><b>Quizzes</b> — three quizzes are held (Quiz I, II, III), 10 marks each, but only the <b>best two of the three</b> are added (out of 20).</li>
+      <li><b>Tests</b> — three tests are held (Test I, II, III), 50 marks each; the <b>best two of the three</b> are added (100 combined), then <b>scaled down to 40</b>: <code>(best two of Test I/II/III) / 100 × 40</code>.</li>
+      <li><b>Experiential Learning (EL)</b> — a single combined mark out of 40, covering case-study teaching, the program-specific requirement and the video seminar together.</li>
     </ul>
-    Quiz + Test(scaled) + EL = CIE out of 100. For a course with an integrated lab, the lab CIE (out of 50, record + test) is added on top, making CIE out of 150. Lab-only courses use a smaller scheme: Lab (record+test, out of 40) + EL (out of 10) = 50.`
+    Quiz(best 2) + Test(best 2, scaled) + EL = CIE out of 100. For a course with an integrated lab, the lab CIE (out of 50, record + test) is added on top, making CIE out of 150. Lab-only courses use a smaller scheme: Lab (record+test, out of 40) + EL (out of 10) = 50.`
   },
   {
     q: "How is SEE (Semester End Examination) structured?",
@@ -26,11 +26,10 @@ window.MCA.FAQ = [
   },
   {
     q: "What's the minimum I need to pass — is 50% overall enough?",
-    a: `No — a 50% aggregate isn't enough on its own. Each course has its own floor conditions that must <i>all</i> be met:
+    a: `No — a 50% aggregate isn't enough on its own. Each course has its own floor conditions that must <i>all</i> be met. This site checks them at two different levels of detail depending on which tool you're using:
     <ul>
-      <li><b>Theory only:</b> Quiz+Test ≥50% of 60, overall CIE ≥50% of 100, SEE ≥40% of 100, aggregate ≥50%.</li>
-      <li><b>Theory + Lab:</b> Theory Quiz+Test ≥40% of 60 and Theory CIE ≥40% of 100; Lab CIE ≥50% of 50; combined CIE ≥50% of 150; Theory SEE ≥40% of 100; Lab SEE ≥50% of 50; combined SEE ≥50% of 150; aggregate ≥50%.</li>
-      <li><b>Lab only:</b> CIE ≥50% of 50, SEE ≥50% of 50, aggregate ≥50%.</li>
+      <li>The <b>CIE Finalization tool</b> checks the full, granular Table 4.4 conditions while you're still building up your CIE — e.g. for a theory course, Quiz+Test ≥50% of 60 <i>and</i> overall CIE ≥50% of 100.</li>
+      <li>The <b>Final Grade tool</b> works from your finalized CIE and SEE totals only, so it checks the Table 4.4 <i>total-row</i> conditions: Theory only &mdash; CIE ≥50%, SEE ≥40%, aggregate ≥50%. Theory + Lab and Lab-only &mdash; CIE ≥50%, SEE ≥50%, aggregate ≥50%.</li>
     </ul>
     Miss any one of these and the course is recorded as <b>F</b>, even if the raw combined percentage looks like a pass.`
   },
@@ -84,6 +83,14 @@ window.MCA.FAQ = [
   {
     q: "Does this calculator work for Internship, Project, or NPTEL courses?",
     a: `Not the CIE/SEE/Grade calculators — those three follow the standard theory/lab scheme only. Internship, Minor/Major Project, and NPTEL courses (like Research Methodology) are evaluated differently — projects go through guide + external panel evaluation and a viva-voce, and NPTEL is graded entirely online with no local CIE component. You can still enter their final letter grade directly into the SGPA/CGPA calculators once it's out.`
+  },
+  {
+    q: "Why can't I add a custom or manual course?",
+    a: `On purpose. Every course list on this site — in the CIE/SEE tool, the Final Grade tool and the Final GPA table — is pulled directly from the 2024 scheme syllabus, and only those exact courses can be selected. Letting anyone type in an arbitrary course name, credit value or CIE/SEE split would make it easy to end up with numbers that don't correspond to anything RVCE actually offers. If a course is genuinely missing or a credit value looks wrong, please open an issue on the GitHub repository (link in the footer) rather than editing it locally.`
+  },
+  {
+    q: "How does the Scheme &rarr; Year &rarr; Semester navigation work?",
+    a: `Scheme comes first because it is the thing that actually determines everything else — course list, credit structure and CIE/SEE weightage are all fixed once for the whole four-semester program by the scheme you were admitted under. Only the <b>2024 Scheme</b> is implemented right now; a 2026 Scheme option is visible but disabled until that syllabus is published. After the scheme, you pick your year (Year 1 = Semesters I &amp; II, Year 2 = Semesters III &amp; IV) and then the semester itself, which opens the CIE/SEE, Final Grade and Final GPA tools pre-loaded with that semester's real courses.`
   },
   {
     q: "Is this an official RVCE tool?",

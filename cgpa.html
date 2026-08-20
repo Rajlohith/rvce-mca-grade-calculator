@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CGPA Calculator — MCA Grade Ledger</title>
+<meta name="description" content="Compute CGPA across all four semesters of the RVCE MCA 2024 scheme.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/variables.css">
+<link rel="stylesheet" href="css/base.css">
+<link rel="stylesheet" href="css/layout.css">
+<link rel="stylesheet" href="css/components.css">
+</head>
+<body>
+<header id="site-header" class="site-header"></header>
+
+<div class="wrap">
+  <div class="page-hero">
+    <div class="eyebrow">2024 Scheme &middot; all semesters</div>
+    <h1>CGPA Calculator</h1>
+    <p>Credits per semester are fixed by the scheme (19 + 23 + 20 + 18 = 80). Tick off the semesters you've completed and enter their SGPA.</p>
+  </div>
+
+  <div id="breadcrumb"></div>
+
+  <main id="app">
+    <div class="card">
+      <table class="ledger" id="cgTable">
+        <thead><tr><th class="check-col">Done</th><th>Semester</th><th>Credits</th><th>SGPA</th></tr></thead>
+        <tbody></tbody>
+      </table>
+
+      <hr class="rule">
+      <div class="result" id="cgResult"></div>
+      <div style="margin-top:10px;">
+        <div class="breakdown"><div class="row"><span>Credits accumulated</span><span id="cgProgLabel">0 / 80</span></div></div>
+        <div class="progress-track"><div class="progress-fill" id="cgProgFill" style="width:0%"></div></div>
+      </div>
+      <div class="callout">Degree class applies only once every semester clears with no F grade outstanding (Section 4.12d).</div>
+    </div>
+  </main>
+
+  <footer id="site-footer" class="site-footer"></footer>
+</div>
+
+<script src="js/data.js"></script>
+<script src="js/grading.js"></script>
+<script src="js/engine.js"></script>
+<script src="js/course-picker.js"></script>
+<script src="js/site.js"></script>
+<script src="js/pages/cgpa.js"></script>
+</body>
+</html>
