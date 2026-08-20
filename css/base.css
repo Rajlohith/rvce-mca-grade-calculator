@@ -1,0 +1,41 @@
+/* ==========================================================================
+   Base resets & typography
+   ========================================================================== */
+*{ box-sizing: border-box; }
+html,body{ margin:0; padding:0; }
+
+body{
+  background:
+    radial-gradient(circle at 6px 6px, var(--hole) 2.4px, transparent 2.5px) 0 0/28px 28px,
+    var(--paper);
+  color: var(--ink);
+  font-family: var(--font-body);
+  -webkit-font-smoothing: antialiased;
+  min-height: 100vh;
+  padding: 28px 16px 60px;
+}
+
+h1,h2,h3{ font-family: var(--font-display); margin:0; }
+
+a{ color: var(--ink-soft); }
+
+input[type=number], input[type=text], select{
+  font-family: var(--font-mono);
+  font-size: 14.5px;
+  padding: 9px 10px;
+  border-radius: 9px;
+  border: 1.5px solid var(--line);
+  background: #fbfbfc;
+  color: var(--ink);
+  width: 100%;
+}
+input[type=text]{ font-family: var(--font-body); }
+input:focus, select:focus{
+  outline: 2.5px solid var(--amber);
+  outline-offset: 1px;
+  border-color: var(--amber);
+}
+
+hr.rule{ border:none; border-top:1px dashed var(--line); margin:18px 0; }
+
+.hint{ font-size:11px; color:var(--ink-faint); font-weight:400; }

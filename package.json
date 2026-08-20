@@ -1,0 +1,11 @@
+{
+  "name": "mca-grade-ledger",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Unofficial CIE/SEE/grade/GPA calculator for RVCE MCA students (2024 scheme).",
+  "scripts": {
+    "start": "npx --yes serve . -l 5173",
+    "dev": "npx --yes serve . -l 5173"
+  },
+  "license": "MIT"
+}

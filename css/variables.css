@@ -1,0 +1,31 @@
+/* ==========================================================================
+   Design tokens — MCA Grade Ledger
+   Ledger / punch-card motif: cool paper background, navy ink, single
+   amber accent used sparingly. Deliberately not the cream+terracotta or
+   dark+neon defaults.
+   ========================================================================== */
+:root{
+  --ink:        #182338;
+  --ink-soft:   #4b5568;
+  --ink-faint:  #8b93a6;
+  --paper:      #eef1f4;
+  --card:       #ffffff;
+  --line:       #d7dce3;
+  --hole:       #c7cdd6;
+
+  --amber:      #c98a2b;
+  --amber-deep: #9c6a1c;
+  --teal:       #0e6e55;
+  --teal-bg:    #e4f3ee;
+  --crimson:    #b33a3a;
+  --crimson-bg: #fbe9e7;
+
+  --radius-lg: 14px;
+  --radius-md: 10px;
+  --radius-sm: 7px;
+  --shadow: 0 1px 2px rgba(24,35,56,.06), 0 8px 24px -12px rgba(24,35,56,.18);
+
+  --font-display: 'Fraunces', serif;
+  --font-body: 'Inter', system-ui, sans-serif;
+  --font-mono: 'JetBrains Mono', ui-monospace, monospace;
+}
