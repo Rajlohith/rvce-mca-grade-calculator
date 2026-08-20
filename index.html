@@ -1,0 +1,841 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MCA Grade Ledger — RVCE 2024 Scheme</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#182338;
+    --ink-soft:#4b5568;
+    --paper:#eef1f4;
+    --card:#ffffff;
+    --line:#d7dce3;
+    --amber:#c98a2b;
+    --amber-deep:#9c6a1c;
+    --teal:#0e6e55;
+    --teal-bg:#e4f3ee;
+    --crimson:#b33a3a;
+    --crimson-bg:#fbe9e7;
+    --hole:#c7cdd6;
+    --radius:14px;
+    --shadow: 0 1px 2px rgba(24,35,56,.06), 0 8px 24px -12px rgba(24,35,56,.18);
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:
+      radial-gradient(circle at 6px 6px, var(--hole) 2.4px, transparent 2.5px) 0 0/28px 28px,
+      var(--paper);
+    color:var(--ink);
+    font-family:'Inter',system-ui,sans-serif;
+    -webkit-font-smoothing:antialiased;
+    min-height:100vh;
+    padding: 28px 16px 60px;
+  }
+  .wrap{max-width:960px;margin:0 auto;}
+
+  /* ---------- Masthead ---------- */
+  .masthead{
+    background:var(--ink);
+    color:#f2ede1;
+    border-radius:var(--radius);
+    padding:26px 26px 22px;
+    position:relative;
+    overflow:hidden;
+    box-shadow:var(--shadow);
+    margin-bottom:18px;
+  }
+  .masthead::before{
+    content:"";
+    position:absolute; inset:0;
+    background-image: radial-gradient(circle, rgba(242,237,225,.16) 1.6px, transparent 1.7px);
+    background-size: 14px 14px;
+    background-position: -4px -4px;
+    mask-image: linear-gradient(to right, black, transparent 60%);
+  }
+  .masthead .eyebrow{
+    font-family:'JetBrains Mono',monospace;
+    font-size:11.5px;
+    letter-spacing:.14em;
+    text-transform:uppercase;
+    color:#d9c79a;
+    position:relative;
+  }
+  .masthead h1{
+    font-family:'Fraunces',serif;
+    font-weight:600;
+    font-size:clamp(28px,5vw,40px);
+    margin:6px 0 4px;
+    position:relative;
+    letter-spacing:.2px;
+  }
+  .masthead p{
+    margin:0;
+    color:#c7cadb;
+    font-size:14.5px;
+    position:relative;
+    max-width:56ch;
+  }
+  .masthead .serial{
+    position:absolute; top:20px; right:24px;
+    font-family:'JetBrains Mono',monospace;
+    font-size:11px; color:#9aa1b8;
+    text-align:right;
+    line-height:1.5;
+  }
+
+  /* ---------- Tabs (punch-card strip) ---------- */
+  .tabs{
+    display:flex; gap:8px; overflow-x:auto;
+    padding:6px 4px 14px;
+    -webkit-overflow-scrolling:touch;
+  }
+  .tab{
+    flex: 0 0 auto;
+    font-family:'JetBrains Mono',monospace;
+    font-size:12.5px;
+    letter-spacing:.03em;
+    background:var(--card);
+    border:1px solid var(--line);
+    color:var(--ink-soft);
+    padding:10px 16px 10px 14px;
+    border-radius:999px;
+    cursor:pointer;
+    display:flex; align-items:center; gap:8px;
+    transition: all .15s ease;
+    white-space:nowrap;
+  }
+  .tab .dot{
+    width:8px; height:8px; border-radius:50%;
+    border:1.5px solid var(--ink-soft);
+    flex:0 0 auto;
+  }
+  .tab.active{
+    background:var(--ink); color:#f2ede1; border-color:var(--ink);
+  }
+  .tab.active .dot{ background:var(--amber); border-color:var(--amber); }
+  .tab:hover:not(.active){ border-color:var(--ink-soft); }
+
+  /* ---------- Panels / cards ---------- */
+  .panel{ display:none; }
+  .panel.active{ display:block; animation: fade .25s ease; }
+  @keyframes fade{ from{opacity:0; transform:translateY(4px);} to{opacity:1; transform:none;} }
+
+  .card{
+    background:var(--card);
+    border:1px solid var(--line);
+    border-radius:var(--radius);
+    box-shadow:var(--shadow);
+    padding:22px 22px 20px;
+    margin-bottom:16px;
+  }
+  .card h2{
+    font-family:'Fraunces',serif;
+    font-size:21px; font-weight:600; margin:0 0 2px;
+  }
+  .card .sub{ color:var(--ink-soft); font-size:13.5px; margin:0 0 18px; }
+
+  .field-row{ display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr)); gap:12px 14px; margin-bottom:14px;}
+  .field{ display:flex; flex-direction:column; gap:5px; }
+  .field label{ font-size:12.5px; color:var(--ink-soft); font-weight:600; }
+  .field .hint{ font-size:11px; color:#8b93a6; font-weight:400; }
+  input[type=number], select, input[type=text]{
+    font-family:'JetBrains Mono',monospace;
+    font-size:14.5px;
+    padding:9px 10px;
+    border-radius:9px;
+    border:1.5px solid var(--line);
+    background:#fbfbfc;
+    color:var(--ink);
+    width:100%;
+  }
+  input[type=text]{ font-family:'Inter',sans-serif; }
+  input:focus, select:focus{ outline:2.5px solid var(--amber); outline-offset:1px; border-color:var(--amber);}
+
+  .type-select{ display:flex; gap:8px; flex-wrap:wrap; margin-bottom:18px; }
+  .type-opt{
+    border:1.5px solid var(--line); border-radius:10px; padding:9px 14px;
+    font-size:13px; cursor:pointer; color:var(--ink-soft); background:#fbfbfc;
+  }
+  .type-opt.sel{ border-color:var(--ink); color:var(--ink); background:#f2ede1; font-weight:600;}
+
+  hr.rule{ border:none; border-top:1px dashed var(--line); margin:18px 0; }
+
+  /* ---------- Result stamp ---------- */
+  .result{
+    display:flex; align-items:center; gap:18px; flex-wrap:wrap;
+    background:var(--paper); border-radius:12px; padding:16px 18px; margin-top:6px;
+  }
+  .stamp{
+    width:78px; height:78px; border-radius:50%;
+    border:3px solid currentColor;
+    display:flex; align-items:center; justify-content:center;
+    flex-direction:column;
+    transform:rotate(-6deg);
+    font-family:'JetBrains Mono',monospace;
+    flex:0 0 auto;
+  }
+  .stamp .g{ font-size:22px; font-weight:700; line-height:1; }
+  .stamp .t{ font-size:8.5px; letter-spacing:.08em; margin-top:2px; }
+  .stamp.pass{ color:var(--teal); }
+  .stamp.fail{ color:var(--crimson); }
+  .result-detail{ flex:1; min-width:220px; }
+  .result-detail .big{ font-family:'JetBrains Mono',monospace; font-size:15px; font-weight:600; }
+  .result-detail .note{ font-size:12.5px; color:var(--ink-soft); margin-top:4px; line-height:1.5; }
+  .badge-list{ display:flex; gap:6px; flex-wrap:wrap; margin-top:8px; }
+  .badge{
+    font-family:'JetBrains Mono',monospace; font-size:11px; padding:3px 8px; border-radius:6px;
+    border:1px solid var(--line);
+  }
+  .badge.ok{ background:var(--teal-bg); color:var(--teal); border-color:transparent; }
+  .badge.no{ background:var(--crimson-bg); color:var(--crimson); border-color:transparent; }
+
+  .breakdown{
+    font-family:'JetBrains Mono',monospace; font-size:13px;
+    display:flex; flex-direction:column; gap:4px; margin-top:8px;
+  }
+  .breakdown .row{ display:flex; justify-content:space-between; gap:12px; }
+  .breakdown .row.total{ border-top:1px solid var(--line); padding-top:6px; margin-top:2px; font-weight:700;}
+  .breakdown .row span:first-child{ color:var(--ink-soft); font-weight:400; }
+
+  /* ---------- Tables (SGPA/CGPA) ---------- */
+  table.ledger{ width:100%; border-collapse:collapse; margin-top:6px; }
+  table.ledger th{
+    text-align:left; font-size:11px; letter-spacing:.05em; text-transform:uppercase;
+    color:var(--ink-soft); padding:6px 8px; border-bottom:1.5px solid var(--ink);
+  }
+  table.ledger td{ padding:6px 8px; border-bottom:1px solid var(--line); vertical-align:middle; }
+  table.ledger input, table.ledger select{ padding:7px 8px; font-size:13.5px; }
+  table.ledger td.credit-col{ width:90px; }
+  table.ledger td.grade-col{ width:110px; }
+  table.ledger td.action-col{ width:36px; text-align:center; }
+  .icon-btn{
+    background:none; border:none; cursor:pointer; color:var(--crimson); font-size:16px;
+    width:28px; height:28px; border-radius:6px;
+  }
+  .icon-btn:hover{ background:var(--crimson-bg); }
+
+  .btn{
+    font-family:'Inter',sans-serif; font-weight:600; font-size:13.5px;
+    background:var(--ink); color:#f2ede1; border:none; border-radius:9px;
+    padding:10px 16px; cursor:pointer; display:inline-flex; align-items:center; gap:7px;
+  }
+  .btn:hover{ background:#0f1729; }
+  .btn.ghost{ background:transparent; color:var(--ink); border:1.5px solid var(--line); }
+  .btn.ghost:hover{ border-color:var(--ink); }
+  .btn.amber{ background:var(--amber); color:#241704; }
+  .btn.amber:hover{ background:var(--amber-deep); }
+  .toolbar{ display:flex; gap:10px; margin-top:14px; flex-wrap:wrap; }
+
+  .credit-chips{ display:flex; gap:6px; flex-wrap:wrap; margin-top:8px;}
+  .chip{
+    font-family:'JetBrains Mono',monospace; font-size:11.5px;
+    border:1px solid var(--line); background:#fbfbfc; border-radius:7px;
+    padding:4px 9px; cursor:pointer; color:var(--ink-soft);
+  }
+  .chip:hover{ border-color:var(--amber); color:var(--ink); }
+
+  .progress-track{ background:var(--paper); border-radius:999px; height:10px; overflow:hidden; margin-top:8px; }
+  .progress-fill{ background:var(--amber); height:100%; border-radius:999px; transition:width .3s ease; }
+
+  .foot{
+    text-align:center; font-size:11.5px; color:#8b93a6; margin-top:26px; line-height:1.7;
+    font-family:'JetBrains Mono',monospace;
+  }
+  .foot a{ color:var(--ink-soft); }
+
+  .callout{
+    font-size:12.5px; color:var(--ink-soft); background:var(--paper); border-radius:9px;
+    padding:10px 12px; margin-top:14px; line-height:1.55;
+  }
+  .callout b{ color:var(--ink); }
+
+  @media(max-width:520px){
+    .masthead .serial{ display:none; }
+    .card{ padding:18px 16px; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="masthead">
+    <div class="serial">RVCE · MCA<br>2024 SCHEME · PG</div>
+    <div class="eyebrow">Rashtreeya Sikshana Samithi Trust — R V College of Engineering</div>
+    <h1>MCA Grade Ledger</h1>
+    <p>An unofficial calculator for Master of Computer Applications students — CIE finalization, SEE requirement estimation, final grades, SGPA and CGPA, built strictly from the 2024 PG Academic Handbook.</p>
+  </div>
+
+  <div class="tabs" id="tabs">
+    <div class="tab active" data-tab="cie"><span class="dot"></span>CIE Finalizer</div>
+    <div class="tab" data-tab="see"><span class="dot"></span>SEE Estimator</div>
+    <div class="tab" data-tab="grade"><span class="dot"></span>Final Grade</div>
+    <div class="tab" data-tab="sgpa"><span class="dot"></span>SGPA</div>
+    <div class="tab" data-tab="cgpa"><span class="dot"></span>CGPA</div>
+  </div>
+
+  <!-- ================= CIE FINALIZER ================= -->
+  <div class="panel active" id="panel-cie">
+    <div class="card">
+      <h2>CIE Finalizer</h2>
+      <p class="sub">Quizzes + Tests + Experiential Learning, per the MCA CIE scheme (Table 4.2.1 – 4.2.3).</p>
+
+      <div class="type-select" id="cieType">
+        <div class="type-opt sel" data-type="theory">Theory only</div>
+        <div class="type-opt" data-type="theory-lab">Theory + Lab</div>
+        <div class="type-opt" data-type="lab">Lab only</div>
+      </div>
+
+      <div id="cie-theory-fields">
+        <div class="field-row">
+          <div class="field"><label>Quiz I <span class="hint">/10</span></label><input type="number" id="c_q1" min="0" max="10" value="0"></div>
+          <div class="field"><label>Quiz II <span class="hint">/10</span></label><input type="number" id="c_q2" min="0" max="10" value="0"></div>
+          <div class="field"><label>Test I <span class="hint">/50</span></label><input type="number" id="c_t1" min="0" max="50" value="0"></div>
+          <div class="field"><label>Test II <span class="hint">/50</span></label><input type="number" id="c_t2" min="0" max="50" value="0"></div>
+        </div>
+        <div class="field-row">
+          <div class="field"><label>EL — Case study teaching <span class="hint">/10</span></label><input type="number" id="c_el1" min="0" max="10" value="0"></div>
+          <div class="field"><label>EL — Program specific req. <span class="hint">/20</span></label><input type="number" id="c_el2" min="0" max="20" value="0"></div>
+          <div class="field"><label>EL — Video seminar <span class="hint">/10</span></label><input type="number" id="c_el3" min="0" max="10" value="0"></div>
+        </div>
+      </div>
+
+      <div id="cie-lab-fields" style="display:none;">
+        <div class="field-row">
+          <div class="field"><label>Lab / Practical CIE <span class="hint" id="lab-max-hint">/50</span></label><input type="number" id="c_lab" min="0" value="0"></div>
+          <div class="field"><label>EL <span class="hint">(lab-only courses) /10</span></label><input type="number" id="c_elLab" min="0" max="10" value="0"></div>
+        </div>
+      </div>
+
+      <div class="result" id="cieResult"></div>
+      <div class="callout" id="cieNote"></div>
+    </div>
+  </div>
+
+  <!-- ================= SEE ESTIMATOR ================= -->
+  <div class="panel" id="panel-see">
+    <div class="card">
+      <h2>SEE Requirement Estimator</h2>
+      <p class="sub">How much you need in the Semester End Exam to hit a target grade, given your finalized CIE.</p>
+
+      <div class="type-select" id="seeType">
+        <div class="type-opt sel" data-type="theory">Theory only</div>
+        <div class="type-opt" data-type="theory-lab">Theory + Lab</div>
+        <div class="type-opt" data-type="lab">Lab only</div>
+      </div>
+
+      <div id="see-theory-fields" class="field-row">
+        <div class="field"><label>Finalized CIE <span class="hint">/100</span></label><input type="number" id="s_cie" min="0" max="100" value="0"></div>
+      </div>
+      <div id="see-lab-fields" class="field-row" style="display:none;">
+        <div class="field"><label>Theory CIE <span class="hint">/100</span></label><input type="number" id="s_cieT" min="0" max="100" value="0"></div>
+        <div class="field"><label>Lab CIE <span class="hint">/50</span></label><input type="number" id="s_cieL" min="0" max="50" value="0"></div>
+      </div>
+      <div id="see-labonly-fields" class="field-row" style="display:none;">
+        <div class="field"><label>Finalized CIE <span class="hint">/50</span></label><input type="number" id="s_cieO" min="0" max="50" value="0"></div>
+      </div>
+
+      <div class="field-row">
+        <div class="field">
+          <label>Target grade</label>
+          <select id="s_target">
+            <option value="50">C — Pass (≥50%)</option>
+            <option value="55">B (≥55%)</option>
+            <option value="60">B+ (≥60%)</option>
+            <option value="70">A (≥70%)</option>
+            <option value="80">A+ (≥80%)</option>
+            <option value="90">O (≥90%)</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="result" id="seeResult"></div>
+      <div class="callout">Per Table 4.4, SEE alone must also clear its own floor — <b>≥40%</b> for a theory paper, <b>≥50%</b> for a lab/practice component — even if the aggregate needed is lower. The estimator applies whichever is higher.</div>
+    </div>
+  </div>
+
+  <!-- ================= FINAL GRADE ================= -->
+  <div class="panel" id="panel-grade">
+    <div class="card">
+      <h2>Final Grade Calculator</h2>
+      <p class="sub">Enter what you actually scored in CIE and SEE to get the letter grade and pass/fail check (Table 4.3 &amp; 4.4).</p>
+
+      <div class="type-select" id="gradeType">
+        <div class="type-opt sel" data-type="theory">Theory only</div>
+        <div class="type-opt" data-type="theory-lab">Theory + Lab</div>
+        <div class="type-opt" data-type="lab">Lab only</div>
+      </div>
+
+      <div id="grade-theory-fields">
+        <div class="field-row">
+          <div class="field"><label>CIE — Quiz+Test subtotal <span class="hint">/60</span></label><input type="number" id="g_qt" min="0" max="60" value="0"></div>
+          <div class="field"><label>CIE total <span class="hint">/100</span></label><input type="number" id="g_cie" min="0" max="100" value="0"></div>
+          <div class="field"><label>SEE <span class="hint">/100</span></label><input type="number" id="g_see" min="0" max="100" value="0"></div>
+        </div>
+      </div>
+
+      <div id="grade-lab-fields" style="display:none;">
+        <div class="field-row">
+          <div class="field"><label>Theory CIE — Quiz+Test subtotal <span class="hint">/60</span></label><input type="number" id="g_qtL" min="0" max="60" value="0"></div>
+          <div class="field"><label>Theory CIE total <span class="hint">/100</span></label><input type="number" id="g_cieT" min="0" max="100" value="0"></div>
+          <div class="field"><label>Lab CIE <span class="hint">/50</span></label><input type="number" id="g_cieL" min="0" max="50" value="0"></div>
+        </div>
+        <div class="field-row">
+          <div class="field"><label>Theory SEE <span class="hint">/100</span></label><input type="number" id="g_seeT" min="0" max="100" value="0"></div>
+          <div class="field"><label>Lab SEE <span class="hint">/50</span></label><input type="number" id="g_seeL" min="0" max="50" value="0"></div>
+        </div>
+      </div>
+
+      <div id="grade-labonly-fields" style="display:none;">
+        <div class="field-row">
+          <div class="field"><label>CIE <span class="hint">/50</span></label><input type="number" id="g_cieO" min="0" max="50" value="0"></div>
+          <div class="field"><label>SEE <span class="hint">/50</span></label><input type="number" id="g_seeO" min="0" max="50" value="0"></div>
+        </div>
+      </div>
+
+      <div class="result" id="gradeResult"></div>
+    </div>
+  </div>
+
+  <!-- ================= SGPA ================= -->
+  <div class="panel" id="panel-sgpa">
+    <div class="card">
+      <h2>SGPA Calculator</h2>
+      <p class="sub">Add every course registered this semester with its credits and final letter grade.</p>
+      <div class="credit-chips">
+        Quick credit fill: 
+        <span class="chip" data-c="1">1</span><span class="chip" data-c="2">2</span>
+        <span class="chip" data-c="3">3</span><span class="chip" data-c="4">4</span>
+        <span class="chip" data-c="5">5</span>
+        <span class="hint" style="align-self:center;">— MCA courses run 1–5 credits per Table 3.4</span>
+      </div>
+
+      <table class="ledger" id="sgpaTable">
+        <thead><tr><th>Course</th><th>Credits</th><th>Grade</th><th></th></tr></thead>
+        <tbody></tbody>
+      </table>
+
+      <div class="toolbar">
+        <button class="btn ghost" id="sgpaAddRow">+ Add course</button>
+        <button class="btn amber" id="sgpaSample">Load sample semester</button>
+      </div>
+
+      <hr class="rule">
+      <div class="result" id="sgpaResult"></div>
+      <div class="callout">SGPA excludes transitional grades (<b>W, I, X, DX, AB</b>) from both credits and grade points, per Section 4.3(f)–(g). An <b>F</b> grade still counts its credits, weighted at 0 grade points.</div>
+    </div>
+  </div>
+
+  <!-- ================= CGPA ================= -->
+  <div class="panel" id="panel-cgpa">
+    <div class="card">
+      <h2>CGPA Calculator</h2>
+      <p class="sub">Enter the SGPA and credits earned each semester. MCA needs 80 credits across 4 semesters (Table 3.5).</p>
+
+      <table class="ledger" id="cgpaTable">
+        <thead><tr><th>Semester</th><th>SGPA</th><th>Credits</th><th></th></tr></thead>
+        <tbody></tbody>
+      </table>
+
+      <div class="toolbar">
+        <button class="btn ghost" id="cgpaAddRow">+ Add semester</button>
+        <button class="btn amber" id="cgpaSample">Load 4-semester sample</button>
+      </div>
+
+      <hr class="rule">
+      <div class="result" id="cgpaResult"></div>
+
+      <div style="margin-top:10px;">
+        <div class="breakdown"><div class="row"><span>Credits accumulated</span><span id="creditProgLabel">0 / 80</span></div></div>
+        <div class="progress-track"><div class="progress-fill" id="creditProgFill" style="width:0%"></div></div>
+      </div>
+
+      <div class="callout">Degree class per Section 4.12(d) — <b>First Class with Distinction</b> at CGPA ≥7.0, <b>First Class</b> at ≥6.0, <b>Second Class</b> at ≥5.0 — applies only once every semester is cleared with no F grade outstanding.</div>
+    </div>
+  </div>
+
+  <div class="foot">MCA Grade Ledger — built from the RVCE Academic Planning, Assessment &amp; Evaluation Handbook, PG Programs, effective 2024–25.<br>Unofficial student tool · always confirm against your grade card and the Controller of Examinations.</div>
+</div>
+
+<script>
+/* ===================== shared helpers ===================== */
+const GRADE_BANDS = [
+  {g:'O',  gp:10, min:90},
+  {g:'A+', gp:9,  min:80},
+  {g:'A',  gp:8,  min:70},
+  {g:'B+', gp:7,  min:60},
+  {g:'B',  gp:6,  min:55},
+  {g:'C',  gp:5,  min:50},
+  {g:'F',  gp:0,  min:0},
+];
+function gradeFromPct(pct){
+  for(const b of GRADE_BANDS) if(pct >= b.min - 1e-9) return b;
+  return GRADE_BANDS[GRADE_BANDS.length-1];
+}
+function gpFromLetter(letter){
+  const b = GRADE_BANDS.find(x=>x.g===letter);
+  return b ? b.gp : null;
+}
+const TRANSITIONAL = ['W','I','X','DX','AB'];
+function clampNum(v, lo, hi){
+  v = parseFloat(v); if(isNaN(v)) v = 0;
+  if(lo!==undefined) v = Math.max(lo, v);
+  if(hi!==undefined) v = Math.min(hi, v);
+  return v;
+}
+function fmt(n){ return (Math.round(n*100)/100).toString(); }
+
+/* ===================== tabs ===================== */
+document.querySelectorAll('.tab').forEach(t=>{
+  t.addEventListener('click', ()=>{
+    document.querySelectorAll('.tab').forEach(x=>x.classList.remove('active'));
+    document.querySelectorAll('.panel').forEach(x=>x.classList.remove('active'));
+    t.classList.add('active');
+    document.getElementById('panel-'+t.dataset.tab).classList.add('active');
+  });
+});
+
+/* ===================== type selectors (shared pattern) ===================== */
+function wireTypeSelect(containerId, onChange){
+  const el = document.getElementById(containerId);
+  el.querySelectorAll('.type-opt').forEach(opt=>{
+    opt.addEventListener('click', ()=>{
+      el.querySelectorAll('.type-opt').forEach(o=>o.classList.remove('sel'));
+      opt.classList.add('sel');
+      onChange(opt.dataset.type);
+    });
+  });
+}
+
+/* ===================== CIE FINALIZER ===================== */
+let cieType = 'theory';
+wireTypeSelect('cieType', (t)=>{
+  cieType = t;
+  document.getElementById('cie-theory-fields').style.display = (t==='theory'||t==='theory-lab') ? '' : 'none';
+  document.getElementById('cie-lab-fields').style.display = (t==='theory-lab'||t==='lab') ? '' : 'none';
+  document.getElementById('lab-max-hint').textContent = t==='lab' ? '' : '/50';
+  document.getElementById('c_lab').style.display = t==='lab' ? 'none' : '';
+  document.getElementById('c_lab').previousElementSibling ? null : null;
+  computeCIE();
+});
+['c_q1','c_q2','c_t1','c_t2','c_el1','c_el2','c_el3','c_lab','c_elLab'].forEach(id=>{
+  document.getElementById(id).addEventListener('input', computeCIE);
+});
+
+function computeCIE(){
+  const q1=clampNum(document.getElementById('c_q1').value,0,10);
+  const q2=clampNum(document.getElementById('c_q2').value,0,10);
+  const t1=clampNum(document.getElementById('c_t1').value,0,50);
+  const t2=clampNum(document.getElementById('c_t2').value,0,50);
+  const el1=clampNum(document.getElementById('c_el1').value,0,10);
+  const el2=clampNum(document.getElementById('c_el2').value,0,20);
+  const el3=clampNum(document.getElementById('c_el3').value,0,10);
+  const lab=clampNum(document.getElementById('c_lab').value,0, cieType==='lab'?40:50);
+  const elLab=clampNum(document.getElementById('c_elLab').value,0,10);
+
+  const quiz = q1+q2;
+  const testScaled = (t1+t2)/100*40;
+  const elTotal = el1+el2+el3;
+  const theoryCIE = quiz+testScaled+elTotal;
+  const quizTest = quiz+testScaled;
+
+  let rows = [], total=0, max=0, floorInfo='';
+  const box = document.getElementById('cieResult');
+  const note = document.getElementById('cieNote');
+
+  if(cieType==='theory'){
+    total = theoryCIE; max = 100;
+    rows = [
+      ['Quiz (I+II)', fmt(quiz)+' / 20'],
+      ['Test (scaled)', fmt(testScaled)+' / 40'],
+      ['Experiential Learning', fmt(elTotal)+' / 40'],
+    ];
+    const ok = quizTest>=30 && total>=50;
+    note.innerHTML = `Passing floor for a theory-only course: Quiz+Test ≥30/60 <b>and</b> overall CIE ≥50/100. Currently: Quiz+Test ${fmt(quizTest)}/60, CIE ${fmt(total)}/100 — <b style="color:${ok?'#0e6e55':'#b33a3a'}">${ok?'meets the CIE floor':'below the CIE floor'}</b>. This alone doesn't decide pass/fail — SEE still counts equally.`;
+  } else if(cieType==='theory-lab'){
+    total = theoryCIE + lab; max = 150;
+    rows = [
+      ['Quiz (I+II)', fmt(quiz)+' / 20'],
+      ['Test (scaled)', fmt(testScaled)+' / 40'],
+      ['Experiential Learning', fmt(elTotal)+' / 40'],
+      ['Theory CIE subtotal', fmt(theoryCIE)+' / 100'],
+      ['Lab / Practical CIE', fmt(lab)+' / 50'],
+    ];
+    const thOk = quizTest>=24 && theoryCIE>=40;
+    const labOk = lab>=25;
+    const totOk = total>=75;
+    note.innerHTML = `Passing floor: Theory Quiz+Test ≥24/60 &amp; Theory CIE ≥40/100 (${thOk?'met':'not met'}); Lab CIE ≥25/50 (${labOk?'met':'not met'}); combined CIE ≥75/150 (${totOk?'met':'not met'}).`;
+  } else { // lab only
+    total = lab + elLab; max = 50;
+    rows = [
+      ['Lab (record + test)', fmt(lab)+' / 40'],
+      ['Experiential Learning', fmt(elLab)+' / 10'],
+    ];
+    const ok = total>=25;
+    note.innerHTML = `Passing floor for a lab-only course: CIE ≥25/50 — currently <b style="color:${ok?'#0e6e55':'#b33a3a'}">${fmt(total)}/50 ${ok?'(met)':'(not met)'}</b>.`;
+  }
+
+  const pct = max ? total/max*100 : 0;
+  box.innerHTML = `
+    <div style="flex:1;">
+      <div class="breakdown">
+        ${rows.map(r=>`<div class="row"><span>${r[0]}</span><span>${r[1]}</span></div>`).join('')}
+        <div class="row total"><span>Finalized CIE</span><span>${fmt(total)} / ${max}  ·  ${fmt(pct)}%</span></div>
+      </div>
+    </div>`;
+}
+computeCIE();
+
+/* ===================== SEE ESTIMATOR ===================== */
+let seeType='theory';
+wireTypeSelect('seeType', (t)=>{
+  seeType=t;
+  document.getElementById('see-theory-fields').style.display = t==='theory' ? '' : 'none';
+  document.getElementById('see-lab-fields').style.display = t==='theory-lab' ? '' : 'none';
+  document.getElementById('see-labonly-fields').style.display = t==='lab' ? '' : 'none';
+  computeSEE();
+});
+['s_cie','s_cieT','s_cieL','s_cieO','s_target'].forEach(id=>{
+  document.getElementById(id).addEventListener('input', computeSEE);
+  document.getElementById(id).addEventListener('change', computeSEE);
+});
+
+function computeSEE(){
+  const target = parseFloat(document.getElementById('s_target').value);
+  const box = document.getElementById('seeResult');
+  let html='';
+
+  if(seeType==='theory'){
+    const cie = clampNum(document.getElementById('s_cie').value,0,100);
+    const maxTotal = 200; // 100 CIE + 100 SEE
+    const neededAgg = target/100*maxTotal;
+    let neededSEE = neededAgg - cie;
+    neededSEE = Math.max(neededSEE, 40); // SEE floor
+    const achievable = neededSEE <= 100;
+    html = seeCard(cie,100,'CIE', achievable, neededSEE, 100, `Need ${fmt(Math.max(neededSEE,0))} / 100 in the theory SEE.`);
+  } else if(seeType==='theory-lab'){
+    const cieT = clampNum(document.getElementById('s_cieT').value,0,100);
+    const cieL = clampNum(document.getElementById('s_cieL').value,0,50);
+    const cie = cieT+cieL;
+    const maxTotal = 300; // 150 CIE + 150 SEE
+    const neededAgg = target/100*maxTotal;
+    let neededSEE = neededAgg - cie;
+    const floor = 40+25; // theory floor 40 + lab floor 25
+    neededSEE = Math.max(neededSEE, floor);
+    const achievable = neededSEE <= 150;
+    html = seeCard(cie,150,'CIE (Theory+Lab)', achievable, neededSEE, 150,
+      `Need at least ${fmt(Math.max(neededSEE,0))} / 150 combined SEE — with a minimum of 40/100 in the theory paper and 25/50 in the lab, whichever split you choose.`);
+  } else {
+    const cie = clampNum(document.getElementById('s_cieO').value,0,50);
+    const maxTotal = 100;
+    const neededAgg = target/100*maxTotal;
+    let neededSEE = neededAgg - cie;
+    neededSEE = Math.max(neededSEE, 25);
+    const achievable = neededSEE <= 50;
+    html = seeCard(cie,50,'CIE', achievable, neededSEE, 50, `Need ${fmt(Math.max(neededSEE,0))} / 50 in the lab SEE.`);
+  }
+  box.innerHTML = html;
+}
+function seeCard(cie,cieMax,cieLabel,achievable,neededSEE,seeMax,msg){
+  const stampClass = achievable ? 'pass':'fail';
+  const stampText = achievable ? fmt(Math.max(neededSEE,0)) : '—';
+  return `
+    <div class="stamp ${stampClass}"><span class="g">${achievable? Math.ceil(Math.max(neededSEE,0)) : '×'}</span><span class="t">${achievable?'SEE NEEDED':'NOT REACHABLE'}</span></div>
+    <div class="result-detail">
+      <div class="big">${cieLabel}: ${fmt(cie)} / ${cieMax}</div>
+      <div class="note">${achievable ? msg : `Even a full ${seeMax}/${seeMax} in SEE won't reach this target from a CIE of ${fmt(cie)}/${cieMax}. Aim for a lower grade band or raise CIE first.`}</div>
+    </div>`;
+}
+computeSEE();
+
+/* ===================== FINAL GRADE ===================== */
+let gradeType='theory';
+wireTypeSelect('gradeType', (t)=>{
+  gradeType=t;
+  document.getElementById('grade-theory-fields').style.display = t==='theory' ? '' : 'none';
+  document.getElementById('grade-lab-fields').style.display = t==='theory-lab' ? '' : 'none';
+  document.getElementById('grade-labonly-fields').style.display = t==='lab' ? '' : 'none';
+  computeGrade();
+});
+['g_qt','g_cie','g_see','g_qtL','g_cieT','g_cieL','g_seeT','g_seeL','g_cieO','g_seeO'].forEach(id=>{
+  document.getElementById(id).addEventListener('input', computeGrade);
+});
+
+function computeGrade(){
+  const box = document.getElementById('gradeResult');
+  let total, max, badges=[], allOk=true;
+
+  if(gradeType==='theory'){
+    const qt = clampNum(document.getElementById('g_qt').value,0,60);
+    const cie = clampNum(document.getElementById('g_cie').value,0,100);
+    const see = clampNum(document.getElementById('g_see').value,0,100);
+    total = cie+see; max=200;
+    const b1 = qt>=30 && cie>=50; badges.push(['CIE floor (Quiz+Test ≥30 & CIE ≥50)', b1]);
+    const b2 = see>=40; badges.push(['SEE ≥40/100', b2]);
+    const b3 = (total/max*100)>=50; badges.push(['Aggregate ≥50%', b3]);
+    allOk = b1&&b2&&b3;
+  } else if(gradeType==='theory-lab'){
+    const qt = clampNum(document.getElementById('g_qtL').value,0,60);
+    const cieT = clampNum(document.getElementById('g_cieT').value,0,100);
+    const cieL = clampNum(document.getElementById('g_cieL').value,0,50);
+    const seeT = clampNum(document.getElementById('g_seeT').value,0,100);
+    const seeL = clampNum(document.getElementById('g_seeL').value,0,50);
+    total = cieT+cieL+seeT+seeL; max=300;
+    const b1 = qt>=24 && cieT>=40; badges.push(['Theory CIE floor', b1]);
+    const b2 = cieL>=25; badges.push(['Lab CIE ≥25/50', b2]);
+    const b3 = (cieT+cieL)>=75; badges.push(['Combined CIE ≥75/150', b3]);
+    const b4 = seeT>=40; badges.push(['Theory SEE ≥40/100', b4]);
+    const b5 = seeL>=25; badges.push(['Lab SEE ≥25/50', b5]);
+    const b6 = (seeT+seeL)>=75; badges.push(['Combined SEE ≥75/150', b6]);
+    const b7 = (total/max*100)>=50; badges.push(['Aggregate ≥50%', b7]);
+    allOk = b1&&b2&&b3&&b4&&b5&&b6&&b7;
+  } else {
+    const cie = clampNum(document.getElementById('g_cieO').value,0,50);
+    const see = clampNum(document.getElementById('g_seeO').value,0,50);
+    total = cie+see; max=100;
+    const b1 = cie>=25; badges.push(['CIE ≥25/50', b1]);
+    const b2 = see>=25; badges.push(['SEE ≥25/50', b2]);
+    const b3 = (total/max*100)>=50; badges.push(['Aggregate ≥50%', b3]);
+    allOk = b1&&b2&&b3;
+  }
+
+  const pct = total/max*100;
+  let band = gradeFromPct(pct);
+  const isPass = allOk && band.g!=='F';
+  const finalLetter = allOk ? band.g : 'F';
+  const finalGp = allOk ? band.gp : 0;
+
+  box.innerHTML = `
+    <div class="stamp ${isPass?'pass':'fail'}"><span class="g">${finalLetter}</span><span class="t">${isPass?'PASS':'FAIL'}</span></div>
+    <div class="result-detail">
+      <div class="big">${fmt(total)} / ${max}  ·  ${fmt(pct)}%  ·  Grade point ${finalGp}</div>
+      <div class="note">${isPass ? `Meets every passing condition — grade ${finalLetter} stands.` : `One or more passing conditions from Table 4.4 aren't met, so this course would be recorded as F regardless of the raw percentage.`}</div>
+      <div class="badge-list">
+        ${badges.map(b=>`<span class="badge ${b[1]?'ok':'no'}">${b[1]?'✓':'✕'} ${b[0]}</span>`).join('')}
+      </div>
+    </div>`;
+}
+computeGrade();
+
+/* ===================== SGPA ===================== */
+const sgpaBody = document.querySelector('#sgpaTable tbody');
+function sgpaGradeOptions(sel){
+  const opts = ['O','A+','A','B+','B','C','F','W','I','X','DX','AB'];
+  return opts.map(o=>`<option value="${o}" ${o===sel?'selected':''}>${o}</option>`).join('');
+}
+function addSgpaRow(name='', credits=3, grade='O'){
+  const tr = document.createElement('tr');
+  tr.innerHTML = `
+    <td><input type="text" class="sg-name" value="${name}" placeholder="Course name"></td>
+    <td class="credit-col"><input type="number" class="sg-credit" min="0" max="10" value="${credits}"></td>
+    <td class="grade-col"><select class="sg-grade">${sgpaGradeOptions(grade)}</select></td>
+    <td class="action-col"><button class="icon-btn" title="remove">✕</button></td>
+  `;
+  tr.querySelector('.icon-btn').addEventListener('click', ()=>{ tr.remove(); computeSGPA(); });
+  tr.querySelector('.sg-credit').addEventListener('input', computeSGPA);
+  tr.querySelector('.sg-grade').addEventListener('change', computeSGPA);
+  tr.querySelector('.sg-name').addEventListener('input', computeSGPA);
+  sgpaBody.appendChild(tr);
+}
+document.getElementById('sgpaAddRow').addEventListener('click', ()=>{ addSgpaRow(); computeSGPA(); });
+document.getElementById('sgpaSample').addEventListener('click', ()=>{
+  sgpaBody.innerHTML='';
+  addSgpaRow('Advanced Data Structures & Algorithms',4,'A+');
+  addSgpaRow('Database Management Systems',4,'O');
+  addSgpaRow('Object Oriented Programming Lab',2,'A');
+  addSgpaRow('Operating Systems',3,'B+');
+  addSgpaRow('Professional Elective I',3,'A');
+  addSgpaRow('Technical Seminar',2,'O');
+  computeSGPA();
+});
+document.querySelectorAll('.credit-chips .chip').forEach(chip=>{
+  chip.addEventListener('click', ()=>{ addSgpaRow('', parseInt(chip.dataset.c), 'O'); computeSGPA(); });
+});
+
+function computeSGPA(){
+  let regCredits=0, countedCredits=0, weighted=0, earnedCredits=0;
+  sgpaBody.querySelectorAll('tr').forEach(tr=>{
+    const credit = clampNum(tr.querySelector('.sg-credit').value,0,20);
+    const grade = tr.querySelector('.sg-grade').value;
+    regCredits += credit;
+    if(!TRANSITIONAL.includes(grade)){
+      const gp = gpFromLetter(grade) ?? 0;
+      countedCredits += credit;
+      weighted += credit*gp;
+      if(grade!=='F') earnedCredits += credit;
+    }
+  });
+  const sgpa = countedCredits ? weighted/countedCredits : 0;
+  document.getElementById('sgpaResult').innerHTML = `
+    <div style="flex:1">
+      <div class="breakdown">
+        <div class="row"><span>Credits registered</span><span>${fmt(regCredits)}</span></div>
+        <div class="row"><span>Credits counted toward SGPA</span><span>${fmt(countedCredits)}</span></div>
+        <div class="row"><span>Credits earned</span><span>${fmt(earnedCredits)}</span></div>
+        <div class="row total"><span>SGPA</span><span>${fmt(sgpa)}</span></div>
+      </div>
+    </div>`;
+}
+addSgpaRow('', 3, 'O');
+computeSGPA();
+
+/* ===================== CGPA ===================== */
+const cgpaBody = document.querySelector('#cgpaTable tbody');
+function addCgpaRow(label='Semester', sgpa=0, credits=20){
+  const tr = document.createElement('tr');
+  tr.innerHTML = `
+    <td><input type="text" class="cg-label" value="${label}"></td>
+    <td class="credit-col"><input type="number" class="cg-sgpa" min="0" max="10" step="0.01" value="${sgpa}"></td>
+    <td class="credit-col"><input type="number" class="cg-credit" min="0" max="40" value="${credits}"></td>
+    <td class="action-col"><button class="icon-btn" title="remove">✕</button></td>
+  `;
+  tr.querySelector('.icon-btn').addEventListener('click', ()=>{ tr.remove(); computeCGPA(); });
+  tr.querySelectorAll('input').forEach(i=>i.addEventListener('input', computeCGPA));
+  cgpaBody.appendChild(tr);
+}
+document.getElementById('cgpaAddRow').addEventListener('click', ()=>{ addCgpaRow('Semester '+(cgpaBody.children.length+1)); computeCGPA(); });
+document.getElementById('cgpaSample').addEventListener('click', ()=>{
+  cgpaBody.innerHTML='';
+  addCgpaRow('Semester 1', 8.4, 22);
+  addCgpaRow('Semester 2', 8.1, 20);
+  addCgpaRow('Semester 3', 7.9, 20);
+  addCgpaRow('Semester 4', 8.3, 18);
+  computeCGPA();
+});
+
+function computeCGPA(){
+  let totalCredits=0, weighted=0;
+  cgpaBody.querySelectorAll('tr').forEach(tr=>{
+    const sgpa = clampNum(tr.querySelector('.cg-sgpa').value,0,10);
+    const credits = clampNum(tr.querySelector('.cg-credit').value,0,60);
+    totalCredits += credits;
+    weighted += sgpa*credits;
+  });
+  const cgpa = totalCredits ? weighted/totalCredits : 0;
+
+  let cls = 'Not yet eligible';
+  if(cgpa>=7) cls='First Class with Distinction (FCD)';
+  else if(cgpa>=6) cls='First Class (FC)';
+  else if(cgpa>=5) cls='Second Class (SC)';
+
+  document.getElementById('cgpaResult').innerHTML = `
+    <div style="flex:1">
+      <div class="breakdown">
+        <div class="row"><span>Total credits entered</span><span>${fmt(totalCredits)}</span></div>
+        <div class="row total"><span>CGPA</span><span>${fmt(cgpa)}</span></div>
+        <div class="row"><span>Projected class</span><span>${cls}</span></div>
+      </div>
+    </div>`;
+
+  const pct = Math.min(100, totalCredits/80*100);
+  document.getElementById('creditProgFill').style.width = pct+'%';
+  document.getElementById('creditProgLabel').textContent = fmt(totalCredits)+' / 80';
+}
+addCgpaRow('Semester 1', 8.0, 20);
+computeCGPA();
+</script>
+</body>
+</html>
