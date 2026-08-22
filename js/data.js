@@ -175,19 +175,6 @@ window.MCA.DATA = {
           "page": 18,
           "core": true,
           "note": "Online"
-        },
-        {
-          "code": "MMA001TA",
-          "title": "Bridge Course Mathematics",
-          "ltp": "0-0-0",
-          "credits": 0,
-          "type": "theory",
-          "cie": 50,
-          "see": 0,
-          "page": 20,
-          "core": true,
-          "creditBearing": false,
-          "note": "Non-credit mandatory course; not counted for vertical progression."
         }
       ]
     },

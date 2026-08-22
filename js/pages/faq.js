@@ -4,7 +4,7 @@
   mount({
     active: 'faq',
     trail: [
-      { label:'Home', href:'index.html' },
+      { label:'Home', href:'../index.html' },
       { label:'FAQ' }
     ]
   });

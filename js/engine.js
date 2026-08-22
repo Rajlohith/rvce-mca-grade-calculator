@@ -20,21 +20,19 @@ window.MCA = window.MCA || {};
     return [a,b,c].sort((x,y)=>y-x).slice(0,2).reduce((s,n)=>s+n,0);
   }
 
-  function computeCIE(type, v){
+  function computeCIE(type, v, labScheme){
     const q1=clampNum(v.q1,0,10), q2=clampNum(v.q2,0,10), q3=clampNum(v.q3,0,10);
     const t1=clampNum(v.t1,0,50), t2=clampNum(v.t2,0,50), t3=clampNum(v.t3,0,50);
     const el=clampNum(v.el,0,40);
-    const lab=clampNum(v.lab,0, type==='lab'?40:50);
-    const elLab=clampNum(v.elLab,0,10);
 
     const quiz = bestTwoOfThree(q1,q2,q3);           // best 2 of 3, each /10 → /20
     const testRaw = bestTwoOfThree(t1,t2,t3);         // best 2 of 3, each /50 → /100
     const testScaled = testRaw/100*40;                 // scaled down to /40
-    const theoryCIE = quiz+testScaled+el;
     const quizTest = quiz+testScaled;
 
     let rows=[], total=0, max=0, note='';
     if(type==='theory'){
+      const theoryCIE = quizTest+el;
       total = theoryCIE; max = 100;
       rows = [
         ['Quiz (best 2 of 3)', fmt(quiz)+' / 20'],
@@ -43,20 +41,57 @@ window.MCA = window.MCA || {};
       ];
       const ok = quizTest>=30 && total>=50;
       note = `Passing floor: Quiz+Test &ge;30/60 <b>and</b> overall CIE &ge;50/100. Currently Quiz+Test ${fmt(quizTest)}/60, CIE ${fmt(total)}/100 &mdash; <b style="color:${ok?'#16a34a':'#dc2626'}">${ok?'meets the CIE floor':'below the CIE floor'}</b>.`;
+    } else if(type==='theory-lab' && labScheme==='sem23'){
+      /* Semester II & III: PBL (Project Based Learning) stands in for the
+         theory-side Experiential Learning mark — same 40-mark size, same
+         role in the floor checks, just relabeled. Lab / Practical CIE
+         stays a single 50-mark field (no separate lab EL here, since
+         that's folded into PBL too). Quiz+Test+PBL = 100 "theory"
+         subtotal + 50 lab = 150 total, mirroring Semester I's structure
+         exactly. PBL itself isn't named in the published handbook table —
+         it's how these two semesters are actually run — but the same
+         floors apply as they would for EL. */
+      const pbl = clampNum(v.pbl,0,40);
+      const labCIE = clampNum(v.lab,0,50);
+      const theoryEquiv = quizTest+pbl;
+      total = theoryEquiv + labCIE; max = 150;
+      rows = [
+        ['Quiz (best 2 of 3)', fmt(quiz)+' / 20'],
+        ['Test (best 2 of 3, scaled)', fmt(testScaled)+' / 40'],
+        ['PBL (Project Based Learning)', fmt(pbl)+' / 40'],
+        ['Theory-equivalent subtotal', fmt(theoryEquiv)+' / 100'],
+        ['Lab / Practical CIE', fmt(labCIE)+' / 50'],
+      ];
+      const thOk = quizTest>=24 && theoryEquiv>=40;
+      const labOk = labCIE>=25;
+      const totOk = total>=75;
+      note = `Semester II &amp; III use PBL in place of Experiential Learning — not a labeling in the published handbook table, but the same floors apply: Quiz+Test &ge;24/60 &amp; Quiz+Test+PBL &ge;40/100 (${thOk?'met':'not met'}); Lab CIE &ge;25/50 (${labOk?'met':'not met'}); combined CIE &ge;75/150 (${totOk?'met':'not met'}).`;
     } else if(type==='theory-lab'){
+      /* Semester I: Lab / Practical CIE is 40 (record + test), plus its own
+         10-mark Experiential Learning component — 50 combined, matching
+         Table 4.2.2's "Practicals 50" line. (An earlier version of this
+         tool lumped the lab component into a single /50 field; it's split
+         into its real two parts here.) */
+      const theoryCIE = quizTest+el;
+      const labCIE = clampNum(v.lab,0,40);
+      const labEL = clampNum(v.elLab,0,10);
+      const lab = labCIE+labEL;
       total = theoryCIE + lab; max = 150;
       rows = [
         ['Quiz (best 2 of 3)', fmt(quiz)+' / 20'],
         ['Test (best 2 of 3, scaled)', fmt(testScaled)+' / 40'],
         ['Experiential Learning', fmt(el)+' / 40'],
         ['Theory CIE subtotal', fmt(theoryCIE)+' / 100'],
-        ['Lab / Practical CIE', fmt(lab)+' / 50'],
+        ['Lab (record + test)', fmt(labCIE)+' / 40'],
+        ['Lab Experiential Learning', fmt(labEL)+' / 10'],
       ];
       const thOk = quizTest>=24 && theoryCIE>=40;
       const labOk = lab>=25;
       const totOk = total>=75;
-      note = `Theory Quiz+Test &ge;24/60 &amp; Theory CIE &ge;40/100 (${thOk?'met':'not met'}); Lab CIE &ge;25/50 (${labOk?'met':'not met'}); combined CIE &ge;75/150 (${totOk?'met':'not met'}).`;
+      note = `Theory Quiz+Test &ge;24/60 &amp; Theory CIE &ge;40/100 (${thOk?'met':'not met'}); Lab (CIE+EL) &ge;25/50 (${labOk?'met':'not met'}); combined CIE &ge;75/150 (${totOk?'met':'not met'}).`;
     } else {
+      const lab=clampNum(v.lab,0,40);
+      const elLab=clampNum(v.elLab,0,10);
       total = lab + elLab; max = 50;
       rows = [
         ['Lab (record + test)', fmt(lab)+' / 40'],
@@ -69,32 +104,24 @@ window.MCA = window.MCA || {};
     return { rows, total, max, pct, note };
   }
 
-  /* ---------- SEE Requirement Estimator ---------- */
-  function estimateSEE(type, v, targetPct){
-    if(type==='theory'){
-      const cie = clampNum(v.cie,0,100);
-      const maxTotal = 200;
-      const neededAgg = targetPct/100*maxTotal;
-      const neededSEE = Math.max(neededAgg - cie, 40);
-      return { cie, cieMax:100, cieLabel:'CIE', seeMax:100, neededSEE, achievable: neededSEE<=100,
-        message:`Need ${fmt(Math.max(neededSEE,0))} / 100 in the theory SEE.` };
-    } else if(type==='theory-lab'){
-      const cieT = clampNum(v.cieT,0,100), cieL = clampNum(v.cieL,0,50);
-      const cie = cieT+cieL;
-      const maxTotal = 300;
-      const neededAgg = targetPct/100*maxTotal;
-      const floor = 40+25;
-      const neededSEE = Math.max(neededAgg - cie, floor);
-      return { cie, cieMax:150, cieLabel:'CIE (Theory+Lab)', seeMax:150, neededSEE, achievable: neededSEE<=150,
-        message:`Need at least ${fmt(Math.max(neededSEE,0))} / 150 combined SEE &mdash; minimum 40/100 theory and 25/50 lab, split as you like.` };
-    } else {
-      const cie = clampNum(v.cieO,0,50);
-      const maxTotal = 100;
-      const neededAgg = targetPct/100*maxTotal;
-      const neededSEE = Math.max(neededAgg - cie, 25);
-      return { cie, cieMax:50, cieLabel:'CIE', seeMax:50, neededSEE, achievable: neededSEE<=50,
-        message:`Need ${fmt(Math.max(neededSEE,0))} / 50 in the lab SEE.` };
-    }
+  /* ---------- SEE Requirement Estimator ----------
+     Takes the CIE total and max straight from computeCIE() above — SEE
+     itself is unaffected by which CIE breakdown applied and stays
+     Theory 100 + Lab 50 either way. */
+  function estimateSEE(type, cie, cieMax, targetPct){
+    const seeMax = type==='theory' ? 100 : type==='theory-lab' ? 150 : 50;
+    const floor = type==='theory' ? 40 : type==='theory-lab' ? 65 : 25;
+    const cieLabel = type==='theory' ? 'CIE' : type==='theory-lab' ? 'CIE (Theory+Lab)' : 'CIE';
+    const maxTotal = cieMax+seeMax;
+    const neededAgg = targetPct/100*maxTotal;
+    const neededSEE = Math.max(neededAgg - cie, floor);
+    const achievable = neededSEE<=seeMax;
+    const message = type==='theory-lab'
+      ? `Need at least ${fmt(Math.max(neededSEE,0))} / 150 combined SEE &mdash; minimum 40/100 theory and 25/50 lab, split as you like.`
+      : type==='theory'
+        ? `Need ${fmt(Math.max(neededSEE,0))} / 100 in the theory SEE.`
+        : `Need ${fmt(Math.max(neededSEE,0))} / 50 in the lab SEE.`;
+    return { cie, cieMax, cieLabel, seeMax, neededSEE, achievable, message };
   }
 
   /* ---------- Final Grade Calculator (Table 4.3 + 4.4) ----------

@@ -10,7 +10,7 @@
   mount({
     active: 'start',
     trail: [
-      { label:'Home', href:'index.html' },
+      { label:'Home', href:'../index.html' },
       { label:'Scheme', href:'scheme.html' },
       { label:'2024 Scheme', href: withParams('year.html', { scheme }) },
       { label:'Year' }

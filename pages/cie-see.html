@@ -2,15 +2,16 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
+<script>(function(){try{var t=localStorage.getItem('mca-theme');if(t==='dark'){document.documentElement.setAttribute('data-theme','dark');}}catch(e){}})();</script>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>CIE &amp; SEE Calculator — MCA Grade Ledger</title>
+<title>CIE &amp; SEE Calculator — RVCE MCA Grade Calculator</title>
 <meta name="description" content="Finalize your CIE and find the SEE marks needed for a target grade, for RVCE MCA courses.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="css/variables.css">
-<link rel="stylesheet" href="css/base.css">
-<link rel="stylesheet" href="css/layout.css">
-<link rel="stylesheet" href="css/components.css">
+<link rel="stylesheet" href="../css/variables.css">
+<link rel="stylesheet" href="../css/base.css">
+<link rel="stylesheet" href="../css/layout.css">
+<link rel="stylesheet" href="../css/components.css">
 </head>
 <body>
 <header id="site-header" class="site-header"></header>
@@ -52,15 +53,23 @@
           <div class="field"><label for="t3">Test III <span class="hint">/50</span></label><input type="number" id="t3" min="0" max="50" value="0"></div>
         </div>
         <div class="callout" style="margin-top:-4px;margin-bottom:16px;">Only the best two of the three Quiz marks, and the best two of the three Test marks, are counted &mdash; matching how these are actually run.</div>
-        <div class="field-row">
+        <div class="field-row" id="theoryElRow">
           <div class="field"><label for="el">Experiential Learning <span class="hint">/40</span></label><input type="number" id="el" min="0" max="40" value="0"></div>
         </div>
       </div>
-      <div id="labFields" style="display:none;">
+      <div id="labFieldsSem1" style="display:none;">
         <div class="field-row">
-          <div class="field"><label for="lab">Lab / Practical CIE <span class="hint" id="labMaxHint">/50</span></label><input type="number" id="lab" min="0" value="0"></div>
-          <div class="field"><label for="elLab">EL (lab-only) <span class="hint">/10</span></label><input type="number" id="elLab" min="0" max="10" value="0"></div>
+          <div class="field"><label for="lab">Lab (record + test) <span class="hint">/40</span></label><input type="number" id="lab" min="0" max="40" value="0"></div>
+          <div class="field"><label for="elLab">Lab Experiential Learning <span class="hint">/10</span></label><input type="number" id="elLab" min="0" max="10" value="0"></div>
         </div>
+        <div class="callout" style="margin-top:-4px;">Lab CIE + Lab EL combine to 50 marks total for this course.</div>
+      </div>
+      <div id="labFieldsSem23" style="display:none;">
+        <div class="field-row">
+          <div class="field"><label for="pbl">PBL &mdash; Project Based Learning <span class="hint">/40</span></label><input type="number" id="pbl" min="0" max="40" value="0"></div>
+          <div class="field"><label for="labSem23">Lab / Practical CIE <span class="hint">/50</span></label><input type="number" id="labSem23" min="0" max="50" value="0"></div>
+        </div>
+        <div class="callout" style="margin-top:-4px;">This semester's own breakdown &mdash; PBL stands in for Experiential Learning (same 40 marks, same floors), and Lab / Practical CIE stays at 50. The PBL label itself isn't in the published handbook table.</div>
       </div>
 
       <div class="result" id="cieResult"></div>
@@ -89,11 +98,12 @@
   <footer id="site-footer" class="site-footer"></footer>
 </div>
 
-<script src="js/data.js"></script>
-<script src="js/grading.js"></script>
-<script src="js/engine.js"></script>
-<script src="js/course-picker.js"></script>
-<script src="js/site.js"></script>
-<script src="js/pages/cie-see.js"></script>
+<script src="../js/data.js"></script>
+<script src="../js/grading.js"></script>
+<script src="../js/engine.js"></script>
+<script src="../js/course-picker.js"></script>
+<script src="../js/input-guard.js"></script>
+<script src="../js/site.js"></script>
+<script src="../js/pages/cie-see.js"></script>
 </body>
 </html>

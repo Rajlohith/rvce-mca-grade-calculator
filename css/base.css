@@ -24,7 +24,7 @@ input[type=number], input[type=text], select{
   padding: 11px 14px;
   border-radius: var(--radius-sm);
   border: 1.5px solid var(--line-strong);
-  background: #ffffff;
+  background: var(--card);
   color: var(--ink);
   width: 100%;
   transition: box-shadow .15s ease, border-color .15s ease;

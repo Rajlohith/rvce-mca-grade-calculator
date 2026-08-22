@@ -1,7 +1,7 @@
 /* ==========================================================================
    faqContent.js — plain-language explanations of every formula used,
    sourced from the RVCE PG Academic Handbook (2024-25) and the MCA
-   2024 Scheme syllabus.
+   2024 & 2026 Scheme syllabus.
    ========================================================================== */
 window.MCA = window.MCA || {};
 
@@ -12,26 +12,40 @@ window.MCA.FAQ = [
     <ul>
       <li><b>Quizzes</b> — three quizzes are held (Quiz I, II, III), 10 marks each, but only the <b>best two of the three</b> are added (out of 20).</li>
       <li><b>Tests</b> — three tests are held (Test I, II, III), 50 marks each; the <b>best two of the three</b> are added (100 combined), then <b>scaled down to 40</b>: <code>(best two of Test I/II/III) / 100 × 40</code>.</li>
-      <li><b>Experiential Learning (EL)</b> — a single combined mark out of 40, covering case-study teaching, the program-specific requirement and the video seminar together.</li>
+      <li><b>Experiential Learning (EL)</b> — a single combined mark out of 40.</li>
     </ul>
-    Quiz(best 2) + Test(best 2, scaled) + EL = CIE out of 100. For a course with an integrated lab, the lab CIE (out of 50, record + test) is added on top, making CIE out of 150. Lab-only courses use a smaller scheme: Lab (record+test, out of 40) + EL (out of 10) = 50.`
+    Quiz(best 2) + Test(best 2, scaled) + EL = CIE out of 100. That part is the same in every semester. What's added on top for a course with an integrated lab is different depending on the semester:
+    <ul>
+      <li><b>Semester I</b> — Lab (record + test, out of 40) + Lab Experiential Learning (out of 10) = 50 lab marks, on top of the 100 theory marks, for CIE out of <b>150</b>.</li>
+      <li><b>Semester II &amp; III</b> — PBL (Project Based Learning) stands in for the theory-side Experiential Learning mark: same 40 marks, same role in the floor checks, just relabeled. Lab / Practical CIE stays a single 50-mark field. Quiz+Test(60) + PBL(40) = 100 "theory" subtotal + 50 lab = CIE out of <b>150</b> — the same total as Semester I, just with PBL standing in for EL. The PBL label itself isn't in the published handbook table, but the same floor conditions apply as they would for EL.</li>
+    </ul>
+    Lab-only courses (no theory component, in any semester) use the smaller Table 4.2.3 scheme: Lab (record+test, out of 40) + EL (out of 10) = 50.`
   },
   {
     q: "How is SEE (Semester End Examination) structured?",
-    a: `A theory SEE paper is 100 marks across 5 units — each unit has two questions worth 20 marks, and you answer one from each pair (5 questions total). An integrated course also has a separate 50-mark lab exam (viva + prototype/demo), making SEE 150 for that course. A lab-only course's SEE is 50 marks: design & development (20), presentation/demo (20), and viva-voce (10).`
+    a: `A theory SEE paper is 100 marks across 5 units — each unit has two questions worth 20 marks, and you answer one from each pair (5 questions total). An integrated course also has a separate 50-mark lab exam (viva + prototype/demo), making SEE 150 for that course — this stays the same in every semester, even where the CIE-side breakdown differs (see the CIE question above). A lab-only course's SEE is 50 marks: design & development (20), presentation/demo (20), and viva-voce (10).`
   },
   {
     q: "Do CIE and SEE carry equal weight?",
-    a: `Yes — <b>every course is graded 50% CIE and 50% SEE</b>. A theory course is 100 CIE + 100 SEE = 200 total. A theory course with an integrated lab is 150 CIE + 150 SEE = 300 total. A lab-only course is 50 CIE + 50 SEE = 100 total. The final percentage is always <code>(CIE + SEE) / (max CIE + max SEE) × 100</code>.`
+    a: `Yes — <b>every course is graded 50% CIE and 50% SEE</b>, in every semester. A theory course is 100 CIE + 100 SEE = 200 total. A theory course with an integrated lab is 150 CIE + 150 SEE = 300 total — this holds in Semester I <i>and</i> in Semesters II &amp; III, since PBL simply takes the place of Experiential Learning at the same 40-mark size rather than changing the total. A lab-only course is 50 CIE + 50 SEE = 100 total. The final percentage is always <code>(CIE + SEE) / (max CIE + max SEE) × 100</code>.`
   },
   {
     q: "What's the minimum I need to pass — is 50% overall enough?",
     a: `No — a 50% aggregate isn't enough on its own. Each course has its own floor conditions that must <i>all</i> be met. This site checks them at two different levels of detail depending on which tool you're using:
     <ul>
-      <li>The <b>CIE Finalization tool</b> checks the full, granular Table 4.4 conditions while you're still building up your CIE — e.g. for a theory course, Quiz+Test ≥50% of 60 <i>and</i> overall CIE ≥50% of 100.</li>
+      <li>The <b>CIE Finalization tool</b> checks the full, granular Table 4.4 conditions while you're still building up your CIE — e.g. for a theory course, Quiz+Test ≥50% of 60 <i>and</i> overall CIE ≥50% of 100. For Semesters II &amp; III, the same checks apply with PBL standing in for EL: Quiz+Test ≥24/60 and Quiz+Test+PBL ≥40/100, Lab CIE ≥25/50, combined ≥75/150.</li>
       <li>The <b>Final Grade tool</b> works from your finalized CIE and SEE totals only, so it checks the Table 4.4 <i>total-row</i> conditions: Theory only &mdash; CIE ≥50%, SEE ≥40%, aggregate ≥50%. Theory + Lab and Lab-only &mdash; CIE ≥50%, SEE ≥50%, aggregate ≥50%.</li>
     </ul>
     Miss any one of these and the course is recorded as <b>F</b>, even if the raw combined percentage looks like a pass.`
+  },
+  {
+    q: "What's the difference between EL and PBL?",
+    a: `Both are Experiential Learning marks, just organized differently depending on where and when they apply:
+    <ul>
+      <li><b>EL (Experiential Learning)</b> — the 40-mark theory-side component every course has, and (in Semester I only) a separate 10-mark Lab EL alongside the 40-mark Lab CIE.</li>
+      <li><b>PBL (Project Based Learning)</b> — used only for theory+lab courses in Semesters II &amp; III, where it simply stands in for the theory-side EL at the same 40 marks, sitting alongside a 50-mark Lab / Practical CIE (no separate lab EL in these two semesters).</li>
+    </ul>
+    The CIE Finalization tool shows whichever of the two applies automatically, based on the course and semester you pick.`
   },
   {
     q: "How do marks turn into a letter grade?",
@@ -69,7 +83,7 @@ window.MCA.FAQ = [
     q: "How is CGPA calculated?",
     a: `CGPA is the same idea across every semester you've completed:
     <br><code>CGPA = Σ(semester credits × semester SGPA) / Σ(semester credits)</code>
-    <br>MCA needs <b>80 credits across 4 semesters</b> to complete the program (19 + 23 + 20 + 18, per the 2024 scheme).`
+    <br>MCA needs <b>80 credits across 4 semesters</b> to complete the program (19 + 23 + 20 + 18, per the 2024 scheme — 2026 scheme credit structure isn't published yet).`
   },
   {
     q: "What CGPA do I need for First Class / Distinction?",
@@ -94,6 +108,6 @@ window.MCA.FAQ = [
   },
   {
     q: "Is this an official RVCE tool?",
-    a: `No. This is an independent, unofficial calculator built by a student for personal and peer use, based on a careful reading of the published PG Academic Handbook and the MCA 2024 Scheme syllabus. Always cross-check against your official grade card and the Controller of Examinations for anything that matters.`
+    a: `No. This is an independent, unofficial calculator built by a student for personal and peer use, based on a careful reading of the published PG Academic Handbook and the MCA 2024 Scheme syllabus (2026 Scheme support will follow once that syllabus is published). Always cross-check against your official grade card and the Controller of Examinations for anything that matters.`
   }
 ];

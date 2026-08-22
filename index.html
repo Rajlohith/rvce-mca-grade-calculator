@@ -2,8 +2,9 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
+<script>(function(){try{var t=localStorage.getItem('mca-theme');if(t==='dark'){document.documentElement.setAttribute('data-theme','dark');}}catch(e){}})();</script>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>MCA Grade Ledger — RVCE</title>
+<title>RVCE MCA Grade Calculator</title>
 <meta name="description" content="Unofficial CIE, SEE, grade, and GPA calculator for RVCE MCA students, built from the PG Academic Handbook and the 2024 scheme syllabus.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
@@ -18,8 +19,8 @@
 <div class="wrap" id="top">
   <div class="page-hero">
     <div class="eyebrow">RVCE &middot; Master of Computer Applications &middot; 2024 Scheme</div>
-    <h1>MCA Grade Ledger</h1>
-    <p>CIE finalization, SEE requirements, final grades and GPA — worked out exactly the way the RVCE PG Academic Handbook defines it, for every course in the MCA 2024 scheme.</p>
+    <h1>RVCE MCA Grade Calculator</h1>
+    <p>CIE finalization, SEE requirements, final grades and GPA — worked out exactly the way the RVCE PG Academic Handbook defines it, for every course in the MCA 2024 &amp; 2026 scheme.</p>
   </div>
 
   <main id="app">
@@ -27,7 +28,7 @@
       <div class="hero-kicker">Get started</div>
       <h2 style="font-size:26px;margin-bottom:8px;">Pick your scheme, then your semester.</h2>
       <p class="sub" style="max-width:54ch;margin:0 auto 22px;">Every calculator on this site is pre-loaded with the real MCA course list, credit values and CIE/SEE structure for the semester you choose — nothing is left to guesswork.</p>
-      <a class="btn amber" style="padding:13px 26px;font-size:14.5px;" href="scheme.html">Calculate your marks &rarr;</a>
+      <a class="btn amber" style="padding:13px 26px;font-size:14.5px;" href="pages/scheme.html">Calculate your marks &rarr;</a>
     </div>
 
     <div class="disclaimer-banner">
@@ -35,18 +36,19 @@
     </div>
 
     <div class="quick-links">
-      <a class="quick-link" href="faq.html">
+      <a class="quick-link" href="pages/faq.html">
         <div class="ql-title">FAQ</div>
         <div class="ql-sub">How every formula works</div>
       </a>
-      <a class="quick-link" href="cgpa.html">
+      <a class="quick-link" href="pages/cgpa.html">
         <div class="ql-title">CGPA Calculator</div>
         <div class="ql-sub">Across all four semesters</div>
       </a>
-      <a class="quick-link" href="docs/MCA-2024-Scheme-Syllabus.pdf" target="_blank" rel="noopener">
+      <div class="quick-link" style="cursor:default;">
         <div class="ql-title">Syllabus PDF</div>
-        <div class="ql-sub">2024 scheme, Semester I&ndash;IV</div>
-      </a>
+        <div class="ql-sub" style="margin-bottom:10px;">Choose a scheme, Semester I&ndash;IV</div>
+        <div id="homePdfChoice"></div>
+      </div>
     </div>
   </main>
 
@@ -55,9 +57,11 @@
 
 <script src="js/data.js"></script>
 <script src="js/grading.js"></script>
+<script src="js/input-guard.js"></script>
 <script src="js/site.js"></script>
 <script>
   window.MCA.site.mount({ active: 'home' });
+  document.getElementById('homePdfChoice').innerHTML = window.MCA.site.renderPdfChoice();
 </script>
 </body>
 </html>

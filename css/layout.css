@@ -5,7 +5,7 @@
 
 /* ---------- Site header ---------- */
 .site-header{
-  background: rgba(255,255,255,.85);
+  background: var(--header-bg);
   backdrop-filter: blur(8px);
   border-bottom: 1px solid var(--line);
   position: sticky;
@@ -19,7 +19,7 @@
 .brand{ display:flex; align-items:center; gap:10px; text-decoration:none; }
 .brand-mark{
   width:36px; height:36px; border-radius: var(--radius-sm);
-  background: var(--ink); color:#fff;
+  background: var(--ink); color:var(--btn-fg);
   display:flex; align-items:center; justify-content:center; font-weight:700; font-size:15px;
   flex:0 0 auto;
 }
@@ -33,7 +33,7 @@
   border-radius:999px; padding:8px 15px; transition: background .15s ease, color .15s ease;
 }
 .site-nav a:hover{ background: var(--paper); color:var(--ink); }
-.site-nav a.current{ background: var(--ink); color:#fff; font-weight:600; }
+.site-nav a.current{ background: var(--ink); color:var(--btn-fg); font-weight:600; }
 .site-nav a.ext{ display:flex; align-items:center; gap:5px; border:1px solid var(--line-strong); }
 .site-nav a.ext:hover{ border-color: var(--ink); background:transparent; }
 
@@ -74,7 +74,7 @@
   padding:7px 14px; border-radius:999px; background: var(--paper);
 }
 .step-track .step.done{ color:#fff; background: var(--teal); }
-.step-track .step.active{ color:#fff; background: var(--ink); }
+.step-track .step.active{ color:var(--btn-fg); background: var(--ink); }
 
 .foot{
   text-align:center; font-size:12px; color:var(--ink-faint); margin-top:26px; line-height:1.7;

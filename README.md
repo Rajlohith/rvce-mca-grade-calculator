@@ -1,4 +1,4 @@
-# MCA Grade Ledger — RVCE
+# RVCE MCA Grade Calculator
 
 An unofficial CIE, SEE, final-grade and GPA calculator for **RVCE MCA (Master of
 Computer Applications)** students, built directly from the college's own rules:
@@ -21,11 +21,12 @@ courses:
 
 - **CIE Finalization & SEE Marks Required** — enter Quiz I/II/III and Test
   I/II/III as they're actually run; only the best two of each three are
-  counted (Quiz best-2 out of 20, Test best-2 scaled to 40), plus a single
-  combined Experiential Learning mark out of 40. That gets finalized into a
-  CIE out of 100/150/50 depending on the course, and the tool then works out
-  what SEE score is needed to hit a target grade, respecting the 40%/50% SEE
-  floors rather than just the raw aggregate.
+  counted (Quiz best-2 out of 20, Test best-2 scaled to 40), plus an
+  Experiential Learning mark out of 40 (or PBL in Semesters II & III — see
+  below). That gets finalized into a CIE out of 100/150/50 depending on the
+  course, and the tool then works out what SEE score is needed to hit a
+  target grade, respecting the 40%/50% SEE floors rather than just the raw
+  aggregate.
 - **Final Grade Calculator** — enter just the two numbers that actually end
   up on a grade card: finalized CIE total and SEE total. Checked against the
   Table 4.4 *total-row* passing conditions (CIE ≥50%, SEE ≥40% for a
@@ -56,6 +57,12 @@ still selectable by their actual elective title; the underlying CIE/SEE/
 credit structure for the group is fixed regardless of which elective within
 it is chosen.
 
+Every numeric field also has a hard min/max: type a value above a field's
+maximum and it's clamped back down immediately, with an inline warning
+telling you the actual limit. This runs globally through one delegated
+listener (`js/input-guard.js`) rather than being wired up field by field, so
+it automatically covers new fields too.
+
 If a course is missing or a value looks wrong, please open an issue on the
 GitHub repository rather than editing it locally — see [Data accuracy](#data-accuracy).
 
@@ -66,16 +73,16 @@ single-page app, so every step has its own URL and the browser's back/forward
 buttons work as expected:
 
 ```
-index.html        Home
-  -> scheme.html     Step 1: choose the scheme (only 2024 is active)
-  -> year.html       Step 2: choose Year 1 or Year 2
-  -> semester.html   Step 3: choose the semester within that year
-  -> tools.html      Step 4: choose a calculator for that semester
-      -> cie-see.html
-      -> final-grade.html
-      -> final-gpa.html
-cgpa.html          Reachable directly from the header at any time
-faq.html           Reachable directly from the header at any time
+index.html               Home (project root)
+  -> pages/scheme.html      Step 1: choose the scheme (only 2024 is active)
+  -> pages/year.html        Step 2: choose Year 1 or Year 2
+  -> pages/semester.html    Step 3: choose the semester within that year
+  -> pages/tools.html       Step 4: choose a calculator for that semester
+      -> pages/cie-see.html
+      -> pages/final-grade.html
+      -> pages/final-gpa.html
+pages/cgpa.html           Reachable directly from the header at any time
+pages/faq.html            Reachable directly from the header at any time
 ```
 
 State (scheme / year / semester) is carried between pages as query-string
@@ -99,6 +106,33 @@ RVCE grade calculator project — rebuilt here in plain CSS since this project
 intentionally has no build step. No code was copied between the two; only
 the design language was carried over.
 
+A light/dark toggle sits in the header on every page. Dark mode is a soft
+charcoal surface, not pure black, so it stays comfortable during long
+sessions. The choice is remembered (`localStorage`) and applied before the
+page paints, so there's no flash of the wrong theme on reload.
+
+The footer is intentionally minimal: one short paragraph, one row of links,
+the syllabus PDF choice, and a legal line — no repeated column headings or
+dense multi-column grid.
+
+### A note on the CIE breakdown for theory + lab courses
+
+The Quiz/Test split described above is the same in every semester, but what
+sits alongside it for a course with an integrated lab is not:
+
+- **Semester I** follows Table 4.2.2 as published: Experiential Learning
+  (/40) on the theory side, plus Lab (record + test, /40) + Lab
+  Experiential Learning (/10) = 50 lab marks, for CIE out of 150.
+- **Semesters II & III** use this college's own current practice instead:
+  **PBL (Project Based Learning)** stands in for the theory-side
+  Experiential Learning mark — same 40 marks, same role in the floor
+  checks, just relabeled — alongside a single 50-mark Lab / Practical CIE
+  (no separate lab EL here). Quiz+Test(60) + PBL(40) + Lab(50) = CIE out of
+  **150**, the same total as Semester I. The PBL label itself isn't in the
+  published handbook table, but `js/engine.js` applies the same floor
+  conditions to it as it would to EL, and says so explicitly wherever it
+  applies.
+
 ## Tech stack
 
 Deliberately boring: **plain HTML, CSS and JavaScript, no framework, no
@@ -110,37 +144,45 @@ over HTTP.
 
 ```
 rvce-mca-grade-calculator/
-├── index.html              Home
-├── scheme.html              Step 1 — scheme selection
-├── year.html                Step 2 — year selection
-├── semester.html             Step 3 — semester selection
-├── tools.html                Step 4 — calculator picker for a semester
-├── cie-see.html               CIE Finalization & SEE Marks Required
-├── final-grade.html           Final Grade Calculator
-├── final-gpa.html              Final GPA (SGPA) Calculator
-├── cgpa.html                CGPA Calculator (all semesters)
-├── faq.html                 FAQ
+├── index.html                    Home (must stay at the project root)
+├── pages/
+│   ├── scheme.html                 Step 1 — scheme selection
+│   ├── year.html                   Step 2 — year selection
+│   ├── semester.html               Step 3 — semester selection
+│   ├── tools.html                  Step 4 — calculator picker for a semester
+│   ├── cie-see.html                CIE Finalization & SEE Marks Required
+│   ├── final-grade.html            Final Grade Calculator
+│   ├── final-gpa.html              Final GPA (SGPA) Calculator
+│   ├── cgpa.html                   CGPA Calculator (all semesters)
+│   └── faq.html                    FAQ
 ├── css/
-│   ├── variables.css          design tokens (colors, type, radii)
-│   ├── base.css                resets & base typography
-│   ├── layout.css               site header, page hero, breadcrumb, footer
-│   └── components.css           cards, forms, tables, buttons, FAQ, footer grid
+│   ├── variables.css               design tokens (colors, type, radii)
+│   ├── base.css                    resets & base typography
+│   ├── layout.css                  site header, page hero, breadcrumb, footer
+│   └── components.css              cards, forms, tables, buttons, FAQ, footer
 ├── js/
-│   ├── data.js                  MCA course data + grading constants (mirrors data/courses.json)
-│   ├── grading.js                shared grading-table helpers (letter <-> grade point, etc.)
-│   ├── engine.js                  pure calculation functions — CIE, SEE, final grade, SGPA, CGPA
+│   ├── data.js                     MCA course data + grading constants (mirrors data/courses.json)
+│   ├── grading.js                  shared grading-table helpers (letter <-> grade point, etc.)
+│   ├── engine.js                   pure calculation functions — CIE, SEE, final grade, SGPA, CGPA
 │   ├── course-picker.js            restricts every course dropdown to data.js — no manual entry
-│   ├── faqContent.js                FAQ question/answer content
-│   ├── site.js                       shared header, footer, breadcrumb, query-string helpers
-│   └── pages/                         one small script per HTML page, wiring that page only
+│   ├── input-guard.js              clamps every numeric field to its min/max, shows a warning
+│   ├── faqContent.js               FAQ question/answer content
+│   ├── site.js                     shared header, footer, breadcrumb, path & query-string helpers
+│   └── pages/                      one small script per HTML page, wiring that page only
 │       ├── year.js, semester.js, tools.js
 │       ├── cie-see.js, final-grade.js, final-gpa.js
-│       ├── cgpa.js, faq.js
+│       └── cgpa.js, faq.js
 ├── data/
 │   └── courses.json                canonical course data (semester -> courses[], credits, CIE/SEE max, syllabus page)
 └── docs/
     └── MCA-2024-Scheme-Syllabus.pdf   the source syllabus, linked from the app
 ```
+
+`index.html` has to stay at the project root for the site to open correctly
+at its root URL (e.g. on GitHub Pages); every other page lives one level
+down in `pages/`. `js/site.js` works out which of the two contexts it's
+running in and adjusts every link it generates accordingly — nothing else
+needs to know or care where a given page physically lives.
 
 ## Running it
 
@@ -184,6 +226,7 @@ the required attribution notice. In short: you may use, modify and
 redistribute this project, including for commercial purposes, provided you
 retain the copyright and license notices and clearly mark any changes you
 make — just do not present a modified copy as an official RVCE tool.
+
 
 ## Credits
 

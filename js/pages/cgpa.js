@@ -7,7 +7,7 @@
   mount({
     active: 'cgpa',
     trail: [
-      { label:'Home', href:'index.html' },
+      { label:'Home', href:'../index.html' },
       { label:'CGPA' }
     ]
   });

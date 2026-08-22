@@ -24,7 +24,7 @@
   border:1.5px solid var(--line); border-radius:999px; padding:9px 16px;
   font-size:13px; font-weight:600; color:var(--ink-faint); background:var(--paper);
 }
-.type-chip.sel{ border-color:var(--ink); color:#fff; background:var(--ink); }
+.type-chip.sel{ border-color:var(--ink); color:var(--btn-fg); background:var(--ink); }
 
 /* ---------- Result stamp ---------- */
 .result{
@@ -76,15 +76,15 @@ table.ledger input[type=checkbox]{
 /* ---------- Buttons ---------- */
 .btn{
   font-family: var(--font-body); font-weight:600; font-size:14px;
-  background:var(--ink); color:#fff; border:none; border-radius: var(--radius-sm);
+  background:var(--ink); color:var(--btn-fg); border:none; border-radius: var(--radius-sm);
   padding:12px 20px; cursor:pointer; display:inline-flex; align-items:center; gap:8px;
   text-decoration:none; box-shadow: var(--shadow); transition: all .15s ease;
 }
-.btn:hover{ background:#000; box-shadow: var(--shadow-lg); transform: translateY(-1px); }
-.btn.ghost{ background:#fff; color:var(--ink); border:1.5px solid var(--line-strong); box-shadow:none; }
-.btn.ghost:hover{ border-color:var(--ink); background:var(--paper); transform:none; }
-.btn.amber{ background:var(--ink); color:#fff; }
-.btn.amber:hover{ background:#000; }
+.btn:hover{ filter:brightness(1.15); box-shadow: var(--shadow-lg); transform: translateY(-1px); }
+.btn.ghost{ background:var(--card); color:var(--ink); border:1.5px solid var(--line-strong); box-shadow:none; }
+.btn.ghost:hover{ border-color:var(--ink); background:var(--paper); transform:none; filter:none; }
+.btn.amber{ background:var(--ink); color:var(--btn-fg); }
+.btn.amber:hover{ filter:brightness(1.15); }
 .toolbar{ display:flex; gap:10px; margin-top:16px; flex-wrap:wrap; align-items:center; }
 
 /* ---------- Progress ---------- */
@@ -102,14 +102,14 @@ table.ledger input[type=checkbox]{
 /* ---------- FAQ accordion ---------- */
 .faq-item{ border:1px solid var(--line); border-radius: var(--radius-sm); margin-bottom:10px; overflow:hidden; }
 .faq-q{
-  width:100%; text-align:left; background:#fff; border:none; cursor:pointer;
+  width:100%; text-align:left; background:var(--card); border:none; cursor:pointer;
   padding:16px 18px; font-family: var(--font-body); font-weight:600; font-size:14.5px; color:var(--ink);
   display:flex; justify-content:space-between; align-items:center; gap:12px;
 }
 .faq-q:hover{ background:var(--paper); }
 .faq-q .plus{ color:var(--ink-faint); font-size:19px; font-weight:400; transition: transform .2s ease; flex:0 0 auto; }
 .faq-item.open .faq-q .plus{ transform: rotate(45deg); color:var(--ink); }
-.faq-a{ max-height:0; overflow:hidden; transition: max-height .25s ease; background:#fff; }
+.faq-a{ max-height:0; overflow:hidden; transition: max-height .25s ease; background:var(--card); }
 .faq-item.open .faq-a{ max-height:800px; }
 .faq-a-inner{ padding:2px 18px 18px; font-size:13.5px; line-height:1.7; color:var(--ink-soft); }
 .faq-a-inner code{ font-family: var(--font-mono); background:var(--paper); padding:2px 6px; border-radius:6px; color:var(--ink); font-size:12.5px; }
@@ -138,7 +138,7 @@ table.ledger input[type=checkbox]{
 .choice-grid{ display:grid; grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); gap:16px; }
 .choice-grid.three{ grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); }
 .choice-card{
-  border:1.5px solid var(--line); border-radius:var(--radius-md); background:#fff;
+  border:1.5px solid var(--line); border-radius:var(--radius-md); background:var(--card);
   padding:26px 22px; cursor:pointer; transition: all .2s ease; text-decoration:none; display:block;
 }
 .choice-card:hover{ border-color:var(--line-strong); box-shadow:var(--shadow-xl); transform:translateY(-3px); }
@@ -150,31 +150,74 @@ table.ledger input[type=checkbox]{
   background:var(--paper); color:var(--ink-soft); border-radius:999px; padding:3px 10px; margin-top:2px;
 }
 
-/* ---------- Site footer (structure/content unchanged; colors follow the
-   shared tokens above so it stays visually part of the same page) ---------- */
+/* ---------- Syllabus PDF scheme choice ---------- */
+.pdf-choice{ display:inline-flex; gap:8px; flex-wrap:wrap; align-items:center; }
+.pdf-chip{
+  font-size:12.5px; font-weight:600; padding:6px 12px; border-radius:999px;
+  border:1.5px solid var(--line-strong); text-decoration:none; color:var(--ink);
+  display:inline-flex; align-items:center; gap:6px; transition: all .15s ease;
+}
+.pdf-chip:not(.disabled):hover{ border-color:var(--ink); background:var(--paper); }
+.pdf-chip.disabled{ color:var(--ink-faint); cursor:not-allowed; border-style:dashed; }
+.pdf-chip .soon-badge{ margin-top:0; }
+
+/* ---------- Input guard warning (shown when a value is clamped) ---------- */
+.input-warning{
+  display:none; margin-top:8px; padding:10px 14px; border-radius:var(--radius-sm);
+  background:var(--crimson-bg); color:var(--crimson); font-size:13px; font-weight:600;
+  line-height:1.4;
+}
+.input-warning.show{ display:block; }
+
+/* ---------- Theme toggle ---------- */
+.theme-toggle{
+  border:none; background:transparent; padding:2px; cursor:pointer;
+  display:inline-flex; align-items:center; border-radius:999px;
+}
+.theme-toggle .toggle-track{
+  width:42px; height:24px; border-radius:999px; background:var(--line-strong);
+  position:relative; display:inline-block; transition: background .2s ease;
+}
+.theme-toggle .toggle-thumb{
+  position:absolute; top:2px; left:2px; width:20px; height:20px; border-radius:50%;
+  background:#fff; box-shadow: var(--shadow); transition: transform .2s ease, background .2s ease;
+}
+.theme-toggle .toggle-thumb::before{
+  content:''; position:absolute; inset:0; margin:auto; width:11px; height:11px; border-radius:50%;
+  background: linear-gradient(135deg, #fbbf24, #f59e0b);
+}
+.theme-toggle[aria-pressed="true"] .toggle-track{ background: var(--ink); }
+.theme-toggle[aria-pressed="true"] .toggle-thumb{ transform: translateX(18px); background:#1c1f26; }
+.theme-toggle[aria-pressed="true"] .toggle-thumb::before{
+  background: linear-gradient(135deg, #cbd5e1, #94a3b8);
+}
+
+/* ---------- Site footer ----------
+   Kept deliberately quiet: one short paragraph, one row of links, the
+   syllabus PDF choice, then the legal line. No repeated column headings,
+   no dense grid. */
 .site-footer{ margin-top:40px; border-top:1px solid var(--line); padding-top:28px; }
-.footer-grid{
-  display:grid; grid-template-columns:1.3fr 1fr 1fr; gap:24px; margin-bottom:20px;
+.footer-about{
+  font-size:13px; color:var(--ink-soft); line-height:1.65; max-width:70ch;
+  margin:0 0 18px;
 }
-.footer-col h4{
-  font-size:11.5px; font-weight:700; letter-spacing:.06em; text-transform:uppercase;
-  color:var(--ink-faint); margin:0 0 12px;
+.footer-about strong{ color:var(--ink); }
+.footer-links{
+  display:flex; flex-wrap:wrap; gap:8px 22px; margin-bottom:18px;
 }
-.footer-col p{ font-size:12.5px; color:var(--ink-soft); line-height:1.65; margin:0 0 8px; }
-.footer-col a{
-  display:block; font-size:12.5px; color:var(--ink-soft); text-decoration:none; margin-bottom:8px;
-  font-weight:500;
+.footer-links a{
+  font-size:13px; font-weight:600; color:var(--ink-soft); text-decoration:none;
 }
-.footer-col a:hover{ color:var(--link); text-decoration:underline; }
+.footer-links a:hover{ color:var(--link); text-decoration:underline; }
+.footer-pdf{
+  display:flex; align-items:center; gap:12px; flex-wrap:wrap; margin-bottom:22px;
+}
+.footer-pdf-label{ font-size:13px; font-weight:600; color:var(--ink-soft); }
 .site-footer .legal{
   border-top:1px solid var(--line); padding-top:16px; text-align:center;
   font-size:11.5px; color:var(--ink-faint); line-height:1.8;
 }
 
-@media(max-width:700px){
-  .footer-grid{ grid-template-columns:1fr 1fr; }
-}
 @media(max-width:520px){
   .card{ padding:24px 20px; }
-  .footer-grid{ grid-template-columns:1fr; }
 }
