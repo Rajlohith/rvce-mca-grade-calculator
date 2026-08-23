@@ -15,6 +15,7 @@ window.MCA = window.MCA || {};
   const REPO_URL   = 'https://github.com/Rajlohith/rvce-mca-grade-calculator';
   const EMAIL      = 'brlohithraj.mca25@rvce.edu.in';
   const SYLLABUS_URL = 'https://rvce.edu.in/academics_and_examinations/rvce_scheme_syllabus/';
+  const HANDBOOK_URL = 'https://rvce.edu.in/handbook/';
   const THEME_KEY = 'mca-theme';
 
   const IN_PAGES = /\/pages\//.test(window.location.pathname);
@@ -134,6 +135,7 @@ window.MCA = window.MCA || {};
         <a href="${REPO_URL}" target="_blank" rel="noopener">GitHub</a>
         <a href="mailto:${EMAIL}">Contact</a>
         <a href="${SYLLABUS_URL}" target="_blank" rel="noopener">Official Syllabus</a>
+        <a href="${HANDBOOK_URL}" target="_blank" rel="noopener">Official Handbook</a>
         <a href="${PAGES}faq.html">How Calculations Work</a>
       </div>
       <div class="footer-pdf">
@@ -164,6 +166,6 @@ window.MCA = window.MCA || {};
 
   window.MCA.site = {
     mount, qs, withParams, applyTheme, currentTheme, renderPdfChoice,
-    REPO_URL, EMAIL, SYLLABUS_URL, ROOT, PAGES
+    REPO_URL, EMAIL, SYLLABUS_URL, HANDBOOK_URL, ROOT, PAGES
   };
 })();

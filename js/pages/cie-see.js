@@ -34,15 +34,19 @@
 
   function quizTestBlock(){
     return `
-      <div class="field-row">
-        <div class="field"><label>Quiz 1 <span class="hint">/10</span></label><input type="number" class="f-q1" min="0" max="10" value="0"></div>
-        <div class="field"><label>Quiz 2 <span class="hint">/10</span></label><input type="number" class="f-q2" min="0" max="10" value="0"></div>
-        <div class="field"><label>Quiz 3 <span class="hint">/10</span></label><input type="number" class="f-q3" min="0" max="10" value="0"></div>
+      <div class="field-row-2">
+        <div class="field"><label>Quiz 1 <span class="hint">/10</span></label><input type="number" class="f-q1 req" min="0" max="10" value=""></div>
+        <div class="field"><label>Quiz 2 <span class="hint">/10</span></label><input type="number" class="f-q2 req" min="0" max="10" value=""></div>
       </div>
-      <div class="field-row">
-        <div class="field"><label>Test 1 <span class="hint">/50</span></label><input type="number" class="f-t1" min="0" max="50" value="0"></div>
-        <div class="field"><label>Test 2 <span class="hint">/50</span></label><input type="number" class="f-t2" min="0" max="50" value="0"></div>
-        <div class="field"><label>Test 3 <span class="hint">/50</span></label><input type="number" class="f-t3" min="0" max="50" value="0"></div>
+      <div class="field-row-2">
+        <div class="field"><label>Quiz 3 <span class="hint">/10</span></label><input type="number" class="f-q3 req" min="0" max="10" value=""></div>
+      </div>
+      <div class="field-row-2">
+        <div class="field"><label>Test 1 <span class="hint">/50</span></label><input type="number" class="f-t1 req" min="0" max="50" value=""></div>
+        <div class="field"><label>Test 2 <span class="hint">/50</span></label><input type="number" class="f-t2 req" min="0" max="50" value=""></div>
+      </div>
+      <div class="field-row-2">
+        <div class="field"><label>Test 3 <span class="hint">/50</span></label><input type="number" class="f-t3 req" min="0" max="50" value=""></div>
       </div>`;
   }
 
@@ -50,31 +54,30 @@
     if(type==='theory'){
       return quizTestBlock() + `
         <div class="field-row">
-          <div class="field"><label>Experiential Learning <span class="hint">/40</span></label><input type="number" class="f-el" min="0" max="40" value="0"></div>
+          <div class="field"><label>Experiential Learning <span class="hint">/40</span></label><input type="number" class="f-el req" min="0" max="40" value=""></div>
         </div>`;
     }
     if(type==='theory-lab' && labScheme==='sem1'){
       return quizTestBlock() + `
         <div class="field-row">
-          <div class="field"><label>Experiential Learning <span class="hint">/40</span></label><input type="number" class="f-el" min="0" max="40" value="0"></div>
+          <div class="field"><label>Experiential Learning <span class="hint">/40</span></label><input type="number" class="f-el req" min="0" max="40" value=""></div>
         </div>
         <div class="field-row">
-          <div class="field"><label>Lab (record + test) <span class="hint">/40</span></label><input type="number" class="f-lab" min="0" max="40" value="0"></div>
-          <div class="field"><label>Lab EL <span class="hint">/10</span></label><input type="number" class="f-ellab" min="0" max="10" value="0"></div>
+          <div class="field"><label>Lab (record + test) <span class="hint">/50</span></label><input type="number" class="f-lab req" min="0" max="50" value=""></div>
         </div>`;
     }
     if(type==='theory-lab' && labScheme==='sem23'){
       return quizTestBlock() + `
         <div class="field-row">
-          <div class="field"><label>PBL <span class="hint">/40</span></label><input type="number" class="f-pbl" min="0" max="40" value="0"></div>
-          <div class="field"><label>Lab / Practical CIE <span class="hint">/50</span></label><input type="number" class="f-labsem23" min="0" max="50" value="0"></div>
+          <div class="field"><label>PBL <span class="hint">/40</span></label><input type="number" class="f-pbl req" min="0" max="40" value=""></div>
+          <div class="field"><label>Lab / Practical CIE <span class="hint">/50</span></label><input type="number" class="f-labsem23 req" min="0" max="50" value=""></div>
         </div>`;
     }
     if(type==='lab'){
       return `
         <div class="field-row">
-          <div class="field"><label>Lab (record + test) <span class="hint">/40</span></label><input type="number" class="f-lab" min="0" max="40" value="0"></div>
-          <div class="field"><label>Experiential Learning <span class="hint">/10</span></label><input type="number" class="f-ellab" min="0" max="10" value="0"></div>
+          <div class="field"><label>Lab (record + test) <span class="hint">/40</span></label><input type="number" class="f-lab req" min="0" max="40" value=""></div>
+          <div class="field"><label>Experiential Learning <span class="hint">/10</span></label><input type="number" class="f-ellab req" min="0" max="10" value=""></div>
         </div>`;
     }
     return '';
@@ -128,7 +131,23 @@
     return course.title;
   }
 
+  function validateCard(card){
+    const reqInputs = [...card.querySelectorAll('input.req')];
+    const missing = reqInputs.filter(inp => inp.value === '' || inp.value === null);
+    reqInputs.forEach(inp => inp.classList.toggle('error', missing.includes(inp)));
+    return missing;
+  }
+
   function calculateCard(card){
+    const missing = validateCard(card);
+    if(missing.length){
+      card.querySelector('.course-result').innerHTML = `<div class="callout error">Fill in every mark for this course before calculating. ${missing.length} field${missing.length===1?'':'s'} still empty.</div>`;
+      const seeBtn = card.querySelector('.see-btn');
+      seeBtn.disabled = true;
+      seeBtn.classList.remove('ready');
+      missing[0].focus();
+      return;
+    }
     const code = card.dataset.code;
     const type = card.dataset.type;
     const vals = {
@@ -162,8 +181,12 @@
     if(seeBtn && !seeBtn.disabled) openSeeModal(seeBtn.closest('.course-card'));
   });
 
+  grid.addEventListener('input', (e)=>{
+    if(e.target.matches('input.req') && e.target.value !== '') e.target.classList.remove('error');
+  });
+
   document.getElementById('resetAllBtn').addEventListener('click', ()=>{
-    grid.querySelectorAll('input[type=number]').forEach(inp => inp.value = inp.getAttribute('min') || '0');
+    grid.querySelectorAll('input[type=number]').forEach(inp => { inp.value = ''; inp.classList.remove('error'); });
     grid.querySelectorAll('.course-result').forEach(r => r.innerHTML = '');
     grid.querySelectorAll('.see-btn').forEach(b => { b.disabled = true; b.classList.remove('ready'); });
     cardState.clear();

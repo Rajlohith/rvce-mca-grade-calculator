@@ -67,23 +67,19 @@ window.MCA = window.MCA || {};
       const totOk = total>=75;
       note = `Semester II &amp; III use PBL in place of Experiential Learning, not a labeling in the published handbook table, but the same floors apply: Quiz+Test &ge;24/60 &amp; Quiz+Test+PBL &ge;40/100 (${thOk?'met':'not met'}); Lab CIE &ge;25/50 (${labOk?'met':'not met'}); combined CIE &ge;75/150 (${totOk?'met':'not met'}).`;
     } else if(type==='theory-lab'){
-      /* Semester I: Lab / Practical CIE is 40 (record + test), plus its own
-         10-mark Experiential Learning component — 50 combined, matching
-         Table 4.2.2's "Practicals 50" line. (An earlier version of this
-         tool lumped the lab component into a single /50 field; it's split
-         into its real two parts here.) */
+      /* Semester I: Lab / Practical CIE is a single combined 50-mark field
+         (record + test, plus Lab Experiential Learning), matching Table
+         4.2.2's "Practicals 50" line as one number rather than tracking
+         the 40+10 split separately. */
       const theoryCIE = quizTest+el;
-      const labCIE = clampNum(v.lab,0,40);
-      const labEL = clampNum(v.elLab,0,10);
-      const lab = labCIE+labEL;
+      const lab = clampNum(v.lab,0,50);
       total = theoryCIE + lab; max = 150;
       rows = [
         ['Quiz (best 2 of 3)', fmt(quiz)+' / 20'],
         ['Test (best 2 of 3, scaled)', fmt(testScaled)+' / 40'],
         ['Experiential Learning', fmt(el)+' / 40'],
         ['Theory CIE subtotal', fmt(theoryCIE)+' / 100'],
-        ['Lab (record + test)', fmt(labCIE)+' / 40'],
-        ['Lab Experiential Learning', fmt(labEL)+' / 10'],
+        ['Lab (record + test)', fmt(lab)+' / 50'],
       ];
       const thOk = quizTest>=24 && theoryCIE>=40;
       const labOk = lab>=25;

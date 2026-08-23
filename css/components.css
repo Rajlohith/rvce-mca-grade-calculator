@@ -16,6 +16,7 @@
 
 /* ---------- Form fields ---------- */
 .field-row{ display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr)); gap:14px 16px; margin-bottom:16px;}
+.field-row-2{ display:grid; grid-template-columns:1fr 1fr; gap:14px 16px; margin-bottom:16px;}
 .field{ display:flex; flex-direction:column; gap:6px; }
 .field label{ font-size:13px; color:var(--ink); font-weight:600; }
 
@@ -188,6 +189,7 @@ table.ledger input[type=checkbox]{
 .sgpa-row select.sgpa-elective-pick{ margin-top:6px; max-width:260px; }
 .sgpa-row .sgpa-grade-pick{ width:150px; flex:0 0 auto; }
 .sgpa-row select.error{ border-color:var(--crimson); box-shadow:0 0 0 2px rgba(220,38,38,.15); }
+.course-card input.error{ border-color:var(--crimson); box-shadow:0 0 0 2px rgba(220,38,38,.15); }
 
 /* ---------- Icon badges (colored square, line-art icon) ---------- */
 .icon-badge{
@@ -238,6 +240,8 @@ table.ledger input[type=checkbox]{
 }
 .callout b{ color:var(--ink); }
 .callout.locked{ border:1.5px dashed var(--line-strong); background:transparent; }
+.callout.error{ background:var(--crimson-bg); color:var(--crimson); font-weight:600; }
+.callout.error b{ color:var(--crimson); }
 
 /* ---------- FAQ accordion ---------- */
 .faq-item{ border:1px solid var(--line); border-radius: var(--radius-sm); margin-bottom:10px; overflow:hidden; }

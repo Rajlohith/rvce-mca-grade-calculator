@@ -3,10 +3,6 @@
   "version": "2.1.0",
   "private": true,
   "description": "Unofficial CIE, SEE, final-grade and GPA calculator for RVCE MCA students (2024 & 2026 scheme).",
-  "scripts": {
-    "start": "npx --yes serve . -l 5173",
-    "dev": "npx --yes serve . -l 5173"
-  },
   "license": "Apache-2.0",
   "repository": {
     "type": "git",

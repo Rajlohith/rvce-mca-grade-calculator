@@ -58,8 +58,8 @@
     return `<div class="course-card" data-code="${course.code}" data-type="${course.type}">
       ${head}
       <div class="field-row">
-        <div class="field"><label>CIE total <span class="hint">/${cieMax}</span></label><input type="number" class="f-cie" min="0" max="${cieMax}" value="0"></div>
-        <div class="field"><label>SEE total <span class="hint">/${seeMax}</span></label><input type="number" class="f-see" min="0" max="${seeMax}" value="0"></div>
+        <div class="field"><label>CIE total <span class="hint">/${cieMax}</span></label><input type="number" class="f-cie req" min="0" max="${cieMax}" value=""></div>
+        <div class="field"><label>SEE total <span class="hint">/${seeMax}</span></label><input type="number" class="f-see req" min="0" max="${seeMax}" value=""></div>
       </div>
       <div class="toolbar"><button type="button" class="btn amber full calc-btn">Calculate Grade</button></div>
       <div class="course-result"></div>
@@ -69,7 +69,20 @@
   const grid = document.getElementById('courseGrid');
   grid.innerHTML = courses.map(cardHTML).join('');
 
+  function validateCard(card){
+    const reqInputs = [...card.querySelectorAll('input.req')];
+    const missing = reqInputs.filter(inp => inp.value === '' || inp.value === null);
+    reqInputs.forEach(inp => inp.classList.toggle('error', missing.includes(inp)));
+    return missing;
+  }
+
   function calculateCard(card){
+    const missing = validateCard(card);
+    if(missing.length){
+      card.querySelector('.course-result').innerHTML = `<div class="callout error">Fill in both CIE total and SEE total for this course before calculating.</div>`;
+      missing[0].focus();
+      return;
+    }
     const type = card.dataset.type;
     const cie = card.querySelector('.f-cie').value;
     const see = card.querySelector('.f-see').value;
@@ -93,8 +106,12 @@
     if(btn) calculateCard(btn.closest('.course-card'));
   });
 
+  grid.addEventListener('input', (e)=>{
+    if(e.target.matches('input.req') && e.target.value !== '') e.target.classList.remove('error');
+  });
+
   document.getElementById('resetAllBtn').addEventListener('click', ()=>{
-    grid.querySelectorAll('input[type=number]').forEach(inp => inp.value = inp.getAttribute('min') || '0');
+    grid.querySelectorAll('input[type=number]').forEach(inp => { inp.value = ''; inp.classList.remove('error'); });
     grid.querySelectorAll('.course-result').forEach(r => r.innerHTML = '');
   });
 })();
