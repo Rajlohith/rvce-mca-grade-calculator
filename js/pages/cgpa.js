@@ -11,6 +11,7 @@
       { label:'CGPA' }
     ]
   });
+  document.getElementById('cgpaIconBadge').innerHTML = window.MCA.icons.trendingUp;
 
   const body = document.querySelector('#cgTable tbody');
   const totalProgramCredits = DATA.meta.totalProgramCredits;

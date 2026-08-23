@@ -4,8 +4,8 @@
 <meta charset="UTF-8">
 <script>(function(){try{var t=localStorage.getItem('mca-theme');if(t==='dark'){document.documentElement.setAttribute('data-theme','dark');}}catch(e){}})();</script>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>CIE &amp; SEE Calculator — RVCE MCA Grade Calculator</title>
-<meta name="description" content="Finalize your CIE and find the SEE marks needed for a target grade, for RVCE MCA courses.">
+<title>CIE &amp; SEE Calculator - RVCE MCA Grade Calculator</title>
+<meta name="description" content="Finalize your CIE and find the SEE marks needed for every grade, for every course in an RVCE MCA semester at once.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="../css/variables.css">
@@ -20,85 +20,40 @@
   <div class="page-hero">
     <div class="eyebrow" id="toolEyebrow">Semester</div>
     <h1>CIE Finalization &amp; SEE Marks Required</h1>
-    <p>Choose the course you are actually enrolled in — the CIE structure and SEE floors below are fixed by the scheme and applied automatically.</p>
+    <p>Every course in this semester is right here, fill in what you've got, calculate, and check what SEE score each grade needs.</p>
   </div>
 
   <div id="breadcrumb"></div>
 
   <main id="app">
-    <div class="card">
-      <div class="field-row">
-        <div class="field" style="grid-column:1/-1;">
-          <label for="coursePick">Course</label>
-          <select id="coursePick"></select>
-        </div>
-      </div>
-      <div id="nonStdNote"></div>
+    <div class="course-grid" id="courseGrid"></div>
 
-      <div class="type-chip-row" id="typeSel">
-        <div class="type-chip" data-type="theory">Theory only</div>
-        <div class="type-chip" data-type="theory-lab">Theory + Lab</div>
-        <div class="type-chip" data-type="lab">Lab only</div>
-      </div>
-
-      <div id="theoryFields">
-        <div class="field-row">
-          <div class="field"><label for="q1">Quiz I <span class="hint">/10</span></label><input type="number" id="q1" min="0" max="10" value="0"></div>
-          <div class="field"><label for="q2">Quiz II <span class="hint">/10</span></label><input type="number" id="q2" min="0" max="10" value="0"></div>
-          <div class="field"><label for="q3">Quiz III <span class="hint">/10</span></label><input type="number" id="q3" min="0" max="10" value="0"></div>
-        </div>
-        <div class="field-row">
-          <div class="field"><label for="t1">Test I <span class="hint">/50</span></label><input type="number" id="t1" min="0" max="50" value="0"></div>
-          <div class="field"><label for="t2">Test II <span class="hint">/50</span></label><input type="number" id="t2" min="0" max="50" value="0"></div>
-          <div class="field"><label for="t3">Test III <span class="hint">/50</span></label><input type="number" id="t3" min="0" max="50" value="0"></div>
-        </div>
-        <div class="callout" style="margin-top:-4px;margin-bottom:16px;">Only the best two of the three Quiz marks, and the best two of the three Test marks, are counted &mdash; matching how these are actually run.</div>
-        <div class="field-row" id="theoryElRow">
-          <div class="field"><label for="el">Experiential Learning <span class="hint">/40</span></label><input type="number" id="el" min="0" max="40" value="0"></div>
-        </div>
-      </div>
-      <div id="labFieldsSem1" style="display:none;">
-        <div class="field-row">
-          <div class="field"><label for="lab">Lab (record + test) <span class="hint">/40</span></label><input type="number" id="lab" min="0" max="40" value="0"></div>
-          <div class="field"><label for="elLab">Lab Experiential Learning <span class="hint">/10</span></label><input type="number" id="elLab" min="0" max="10" value="0"></div>
-        </div>
-        <div class="callout" style="margin-top:-4px;">Lab CIE + Lab EL combine to 50 marks total for this course.</div>
-      </div>
-      <div id="labFieldsSem23" style="display:none;">
-        <div class="field-row">
-          <div class="field"><label for="pbl">PBL &mdash; Project Based Learning <span class="hint">/40</span></label><input type="number" id="pbl" min="0" max="40" value="0"></div>
-          <div class="field"><label for="labSem23">Lab / Practical CIE <span class="hint">/50</span></label><input type="number" id="labSem23" min="0" max="50" value="0"></div>
-        </div>
-        <div class="callout" style="margin-top:-4px;">This semester's own breakdown &mdash; PBL stands in for Experiential Learning (same 40 marks, same floors), and Lab / Practical CIE stays at 50. The PBL label itself isn't in the published handbook table.</div>
-      </div>
-
-      <div class="result" id="cieResult"></div>
-      <div class="callout" id="cieNote"></div>
-
-      <hr class="rule">
-      <h3 style="font-size:16px;margin-bottom:10px;">SEE marks required</h3>
-      <div class="field-row">
-        <div class="field">
-          <label for="target">Target grade</label>
-          <select id="target">
-            <option value="50">C — Pass (&ge;50%)</option>
-            <option value="55">B (&ge;55%)</option>
-            <option value="60">B+ (&ge;60%)</option>
-            <option value="70">A (&ge;70%)</option>
-            <option value="80">A+ (&ge;80%)</option>
-            <option value="90">O (&ge;90%)</option>
-          </select>
-        </div>
-      </div>
-      <div class="result" id="seeResult"></div>
-      <div class="callout">SEE has its own floor too &mdash; <b>&ge;40%</b> for a theory paper, <b>&ge;50%</b> for a lab/practice component &mdash; applied automatically here even if the aggregate needs less.</div>
+    <div class="toolbar" style="margin-top:22px;">
+      <button type="button" class="btn ghost full" id="resetAllBtn">Reset All Marks</button>
     </div>
+
+    <div id="gradeScaleStrip" style="margin-top:20px;"></div>
   </main>
 
   <footer id="site-footer" class="site-footer"></footer>
 </div>
 
+<!-- Shared SEE Requirements modal, populated per course on demand -->
+<div class="modal-overlay hidden" id="seeModalOverlay">
+  <div class="modal" id="seeModal">
+    <button type="button" class="modal-close" id="seeModalClose" aria-label="Close">&times;</button>
+    <h3>SEE Requirements</h3>
+    <div class="modal-row">Subject: <b id="seeModalSubject"></b></div>
+    <div class="modal-row">CIE Score: <b id="seeModalCie"></b></div>
+    <div class="modal-see-of" id="seeModalSeeOf"></div>
+    <div id="seeModalLabBox"></div>
+    <div id="seeModalRows"></div>
+    <button type="button" class="btn amber full" id="copyAllBtn">Copy All Requirements</button>
+  </div>
+</div>
+
 <script src="../js/data.js"></script>
+<script src="../js/icons.js"></script>
 <script src="../js/grading.js"></script>
 <script src="../js/engine.js"></script>
 <script src="../js/course-picker.js"></script>

@@ -1,8 +1,8 @@
 (function(){
   const { qs, withParams, mount } = window.MCA.site;
-  const { YEAR_SEMS, populateSelect, findEntry } = window.MCA.courses;
+  const { YEAR_SEMS, coursesFor } = window.MCA.courses;
   const { computeFinalGrade } = window.MCA.engine;
-  const { fmt } = window.MCA.grading;
+  const { fmt, renderGradeScale } = window.MCA.grading;
   const DATA = window.MCA.DATA;
 
   const scheme = qs('scheme'), year = qs('year'), semester = qs('semester');
@@ -21,10 +21,7 @@
     ]
   });
   document.getElementById('toolEyebrow').textContent = `Semester ${semester} \u00b7 2024 Scheme`;
-
-  const $ = id => document.getElementById(id);
-  const coursePick = $('coursePick');
-  populateSelect(coursePick, semester);
+  document.getElementById('gradeScaleStrip').innerHTML = renderGradeScale();
 
   const NON_STANDARD_NAMES = { project:'Project', internship:'Internship', nptel:'NPTEL / online course' };
   const MAX_BY_TYPE = {
@@ -32,55 +29,72 @@
     'theory-lab':{ cieMax:150, seeMax:150 },
     lab:         { cieMax:50,  seeMax:50 }
   };
-  let currentType = 'theory';
+  const courses = coursesFor(semester);
 
-  function setTypeDisplay(type){
-    document.querySelectorAll('#typeSel .type-chip').forEach(chip=>{
-      chip.classList.toggle('sel', chip.dataset.type === type);
-    });
+  function cardTitleHTML(course){
+    if(course.electives && course.electives.length){
+      const opts = course.electives.map(e=>`<option value="${e.code}">${e.code} \u2014 ${e.title}</option>`).join('');
+      return `<h3>${course.title}</h3><select class="course-elective-pick">${opts}</select>`;
+    }
+    return `<h3>${course.title}</h3><span class="hint">${course.code}</span>`;
   }
 
-  function setStandardUI(type){
-    currentType = type;
-    const { cieMax, seeMax } = MAX_BY_TYPE[type];
-    $('cie').max = cieMax; $('see').max = seeMax;
-    $('cieHint').textContent = `/${cieMax}`;
-    $('seeHint').textContent = `/${seeMax}`;
-    setTypeDisplay(type);
-  }
-
-  function showNonStandard(type){
-    $('nonStdNote').innerHTML = `<div class="callout locked"><b>${NON_STANDARD_NAMES[type] || 'This course'}</b> does not follow the standard CIE/SEE quiz-test-EL split, so it isn't modeled by this calculator. Check the syllabus PDF or your course coordinator for how it's actually evaluated.</div>`;
-    $('gradeResult').innerHTML = '';
-    document.querySelectorAll('#typeSel .type-chip').forEach(c=>c.classList.remove('sel'));
-  }
-
-  function recompute(){
-    const entry = findEntry(semester, coursePick.value);
-    if(!entry) return;
-    const isNonStandard = ['project','internship','nptel'].includes(entry.type);
-    $('nonStdNote').innerHTML = '';
+  function cardHTML(course){
+    const isNonStandard = ['project','internship','nptel'].includes(course.type);
+    const head = `
+      <div class="course-card-head">
+        <div>${cardTitleHTML(course)}</div>
+        <span class="credit-badge">${course.credits} Credit</span>
+      </div>`;
 
     if(isNonStandard){
-      showNonStandard(entry.type);
-      return;
+      return `<div class="course-card" data-code="${course.code}" data-type="${course.type}">
+        ${head}
+        <div class="callout locked">${NON_STANDARD_NAMES[course.type] || 'This course'} doesn't follow the standard CIE/SEE split, so it isn't modeled here. Check the syllabus or your course coordinator for how it's evaluated.</div>
+      </div>`;
     }
-    setStandardUI(entry.type);
 
-    const r = computeFinalGrade(currentType, { cie: $('cie').value, see: $('see').value });
-    $('gradeResult').innerHTML = `
-      <div class="stamp ${r.isPass?'pass':'fail'}"><span class="g">${r.letter}</span><span class="t">${r.isPass?'PASS':'FAIL'}</span></div>
-      <div class="result-detail">
-        <div class="big">${fmt(r.total)} / ${r.max} &middot; ${fmt(r.pct)}% &middot; Grade point ${r.gp}</div>
-        <div class="note">${r.isPass ? `Meets every passing condition &mdash; grade ${r.letter} stands.` : `A passing condition from Table 4.4 isn't met, so this is recorded as F regardless of the raw percentage.`}</div>
-        <div class="badge-list">
-          ${r.badges.map(b=>`<span class="badge ${b[1]?'ok':'no'}">${b[1]?'\u2713':'\u2715'} ${b[0]}</span>`).join('')}
+    const { cieMax, seeMax } = MAX_BY_TYPE[course.type];
+    return `<div class="course-card" data-code="${course.code}" data-type="${course.type}">
+      ${head}
+      <div class="field-row">
+        <div class="field"><label>CIE total <span class="hint">/${cieMax}</span></label><input type="number" class="f-cie" min="0" max="${cieMax}" value="0"></div>
+        <div class="field"><label>SEE total <span class="hint">/${seeMax}</span></label><input type="number" class="f-see" min="0" max="${seeMax}" value="0"></div>
+      </div>
+      <div class="toolbar"><button type="button" class="btn amber full calc-btn">Calculate Grade</button></div>
+      <div class="course-result"></div>
+    </div>`;
+  }
+
+  const grid = document.getElementById('courseGrid');
+  grid.innerHTML = courses.map(cardHTML).join('');
+
+  function calculateCard(card){
+    const type = card.dataset.type;
+    const cie = card.querySelector('.f-cie').value;
+    const see = card.querySelector('.f-see').value;
+    const r = computeFinalGrade(type, { cie, see });
+
+    card.querySelector('.course-result').innerHTML = `
+      <div class="result" style="margin-top:0;">
+        <div class="stamp ${r.isPass?'pass':'fail'}"><span class="g">${r.letter}</span><span class="t">${r.isPass?'PASS':'FAIL'}</span></div>
+        <div class="result-detail">
+          <div class="big">${fmt(r.total)} / ${r.max} &middot; ${fmt(r.pct)}% &middot; Grade point ${r.gp}</div>
+          <div class="note">${r.isPass ? `Meets every passing condition &mdash; grade ${r.letter} stands.` : `A passing condition from Table 4.4 isn't met, so this is recorded as F regardless of the raw percentage.`}</div>
+          <div class="badge-list">
+            ${r.badges.map(b=>`<span class="badge ${b[1]?'ok':'no'}">${b[1]?'\u2713':'\u2715'} ${b[0]}</span>`).join('')}
+          </div>
         </div>
       </div>`;
   }
 
-  coursePick.addEventListener('change', recompute);
-  ['cie','see'].forEach(id => $(id).addEventListener('input', recompute));
+  grid.addEventListener('click', (e)=>{
+    const btn = e.target.closest('.calc-btn');
+    if(btn) calculateCard(btn.closest('.course-card'));
+  });
 
-  recompute();
+  document.getElementById('resetAllBtn').addEventListener('click', ()=>{
+    grid.querySelectorAll('input[type=number]').forEach(inp => inp.value = inp.getAttribute('min') || '0');
+    grid.querySelectorAll('.course-result').forEach(r => r.innerHTML = '');
+  });
 })();

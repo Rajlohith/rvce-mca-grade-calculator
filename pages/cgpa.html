@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <script>(function(){try{var t=localStorage.getItem('mca-theme');if(t==='dark'){document.documentElement.setAttribute('data-theme','dark');}}catch(e){}})();</script>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>CGPA Calculator — RVCE MCA Grade Calculator</title>
+<title>CGPA Calculator - RVCE MCA Grade Calculator</title>
 <meta name="description" content="Compute CGPA across all four semesters of the RVCE MCA 2024 scheme.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
@@ -27,6 +27,9 @@
 
   <main id="app">
     <div class="card">
+      <div class="course-card-head">
+        <h2 id="cgpaPageIcon" style="font-size:17px;display:flex;align-items:center;gap:12px;"><span class="icon-badge soft green" style="width:38px;height:38px;" id="cgpaIconBadge"></span>All Semesters</h2>
+      </div>
       <table class="ledger" id="cgTable">
         <thead><tr><th class="check-col">Done</th><th>Semester</th><th>Credits</th><th>SGPA</th></tr></thead>
         <tbody></tbody>
@@ -46,6 +49,7 @@
 </div>
 
 <script src="../js/data.js"></script>
+<script src="../js/icons.js"></script>
 <script src="../js/grading.js"></script>
 <script src="../js/engine.js"></script>
 <script src="../js/course-picker.js"></script>

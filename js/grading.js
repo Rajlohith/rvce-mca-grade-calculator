@@ -30,10 +30,26 @@ window.MCA = window.MCA || {};
     return 'Not yet eligible';
   }
 
+  /* Reusable "Grade Scale Reference" strip — CIE and Final Grade pages both
+     show this, built from the real grading table rather than duplicated
+     markup, so it can never drift out of sync with the actual bands. */
+  function renderGradeScale(){
+    const cells = G.bands.map(b=>`
+      <div class="gs-cell">
+        <div class="gs-point">${b.gp}</div>
+        <div class="gs-letter">${b.grade}</div>
+      </div>`).join('');
+    return `
+      <div class="card">
+        <h2 style="font-size:15px;">Grade Scale Reference</h2>
+        <div class="grade-scale">${cells}</div>
+      </div>`;
+  }
+
   window.MCA.grading = {
     bands: G.bands,
     transitional: G.transitionalGrades,
     standards: G.passingStandards,
-    gradeFromPct, gpFromLetter, isTransitional, clampNum, fmt, degreeClass
+    gradeFromPct, gpFromLetter, isTransitional, clampNum, fmt, degreeClass, renderGradeScale
   };
 })();

@@ -19,49 +19,61 @@
 <div class="wrap" id="top">
   <div class="page-hero">
     <div class="eyebrow">RVCE &middot; Master of Computer Applications &middot; 2024 Scheme</div>
-    <h1>RVCE MCA Grade Calculator</h1>
-    <p>CIE finalization, SEE requirements, final grades and GPA — worked out exactly the way the RVCE PG Academic Handbook defines it, for every course in the MCA 2024 &amp; 2026 scheme.</p>
+    <h1>RVCE MCA <span class="accent-word">Grade</span> Calculator</h1>
+    <p>CIE finalization, SEE requirements, final grades and GPA, worked out exactly the way the RVCE PG Academic Handbook defines it, for every course in the MCA 2024 &amp; 2026 scheme.</p>
   </div>
 
   <main id="app">
     <div class="card" style="text-align:center;padding:40px 24px;">
       <div class="hero-kicker">Get started</div>
       <h2 style="font-size:26px;margin-bottom:8px;">Pick your scheme, then your semester.</h2>
-      <p class="sub" style="max-width:54ch;margin:0 auto 22px;">Every calculator on this site is pre-loaded with the real MCA course list, credit values and CIE/SEE structure for the semester you choose — nothing is left to guesswork.</p>
+      <p class="sub" style="max-width:54ch;margin:0 auto 22px;">Every calculator on this site is pre-loaded with the real MCA course list, credit values and CIE/SEE structure for the semester you choose, so nothing is left to guesswork.</p>
       <a class="btn amber" style="padding:13px 26px;font-size:14.5px;" href="pages/scheme.html">Calculate your marks &rarr;</a>
     </div>
 
     <div class="disclaimer-banner">
-      <b>Disclaimer:</b> Not an official RVCE tool. No responsibility is taken for discrepancies — always confirm against your official grade card.
+      <b>Disclaimer:</b> Not an official RVCE tool. No responsibility is taken for discrepancies. Always confirm against your official grade card.
     </div>
 
-    <div class="quick-links">
-      <a class="quick-link" href="pages/faq.html">
-        <div class="ql-title">FAQ</div>
-        <div class="ql-sub">How every formula works</div>
-      </a>
-      <a class="quick-link" href="pages/cgpa.html">
-        <div class="ql-title">CGPA Calculator</div>
-        <div class="ql-sub">Across all four semesters</div>
-      </a>
-      <div class="quick-link" style="cursor:default;">
-        <div class="ql-title">Syllabus PDF</div>
-        <div class="ql-sub" style="margin-bottom:10px;">Choose a scheme, Semester I&ndash;IV</div>
-        <div id="homePdfChoice"></div>
-      </div>
-    </div>
+    <div class="quick-links" id="quickLinks"></div>
   </main>
 
   <footer id="site-footer" class="site-footer"></footer>
 </div>
 
 <script src="js/data.js"></script>
+<script src="js/icons.js"></script>
 <script src="js/grading.js"></script>
 <script src="js/input-guard.js"></script>
 <script src="js/site.js"></script>
 <script>
   window.MCA.site.mount({ active: 'home' });
-  document.getElementById('homePdfChoice').innerHTML = window.MCA.site.renderPdfChoice();
+  const { helpCircle, trendingUp, fileText, arrowRight } = window.MCA.icons;
+  document.getElementById('quickLinks').innerHTML = `
+    <a class="list-card" href="pages/faq.html">
+      <div class="icon-badge solid purple">${helpCircle}</div>
+      <div class="list-card-body">
+        <div class="list-card-title">FAQ</div>
+        <div class="list-card-sub">How every formula works</div>
+      </div>
+      <div class="list-card-arrow">${arrowRight}</div>
+    </a>
+    <a class="list-card" href="pages/cgpa.html">
+      <div class="icon-badge solid green">${trendingUp}</div>
+      <div class="list-card-body">
+        <div class="list-card-title">CGPA Calculator</div>
+        <div class="list-card-sub">Across all four semesters</div>
+      </div>
+      <div class="list-card-arrow">${arrowRight}</div>
+    </a>
+    <div class="list-card" style="cursor:default;">
+      <div class="icon-badge solid orange">${fileText}</div>
+      <div class="list-card-body">
+        <div class="list-card-title">Syllabus PDF</div>
+        <div class="list-card-sub" style="margin-bottom:8px;">Choose a scheme, Semester I&ndash;IV</div>
+        ${window.MCA.site.renderPdfChoice()}
+      </div>
+    </div>`;
 </script>
 </body>
 </html>

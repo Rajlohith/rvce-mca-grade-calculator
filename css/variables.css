@@ -22,10 +22,17 @@
   --btn-fg:     #ffffff;   /* text color on the primary (--ink) button */
   --focus:      #3b82f6;   /* blue-500 — focus rings */
   --link:       #2563eb;   /* blue-600 — links */
+  --accent:      #2563eb;  /* blue-600 — secondary actions (Compute SGPA/CGPA), credit badges */
+  --accent-deep: #1d4ed8;
+  --accent-bg:   #eff6ff;  /* blue-50 — credit pill background */
   --teal:       #16a34a;   /* green-600 — pass / success */
   --teal-bg:    #f0fdf4;   /* green-50 */
   --crimson:    #dc2626;   /* red-600 — fail / error */
   --crimson-bg: #fef2f2;   /* red-50 */
+  --purple:     #7c3aed;   /* violet-600 — icon accent (Final Grade, etc.) */
+  --purple-bg:  #f5f3ff;   /* violet-50 */
+  --orange:     #ea580c;   /* orange-600 — icon accent (Syllabus/reference) */
+  --orange-bg:  #fff7ed;   /* orange-50 */
   --header-bg:  rgba(255,255,255,.85);
 
   --radius-lg: 24px;   /* rounded-3xl */
@@ -65,9 +72,16 @@ html[data-theme="dark"]{
   --btn-fg:     #14161b;   /* dark text on the (now light) primary button */
   --focus:      #60a5fa;
   --link:       #7fb0fb;
+  --accent:      #60a5fa;
+  --accent-deep: #93c5fd;
+  --accent-bg:   #1c2a3d;
   --teal:       #34d399;
   --teal-bg:    #16302a;
   --crimson:    #f87171;
   --crimson-bg: #3a2323;
+  --purple:     #a78bfa;
+  --purple-bg:  #2a2440;
+  --orange:     #fb923c;
+  --orange-bg:  #3a2716;
   --header-bg:  rgba(35,38,46,.85);
 }

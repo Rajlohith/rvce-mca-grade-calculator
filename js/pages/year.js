@@ -18,12 +18,14 @@
   });
 
   const years = [
-    { year:'1', title:'Year 1', sub:'Semesters I &amp; II' },
-    { year:'2', title:'Year 2', sub:'Semesters III &amp; IV' }
+    { year:'1', title:'Year 1', sub:'Semesters I &amp; II', color:'blue' },
+    { year:'2', title:'Year 2', sub:'Semesters III &amp; IV', color:'purple' }
   ];
+  const cap = window.MCA.icons.graduationCap;
 
   document.getElementById('yearGrid').innerHTML = years.map(y=>`
-    <a class="choice-card" href="${withParams('semester.html', { scheme, year:y.year })}">
+    <a class="choice-card iconed" href="${withParams('semester.html', { scheme, year:y.year })}">
+      <div class="icon-badge soft ${y.color}">${cap}</div>
       <div class="choice-title">${y.title}</div>
       <div class="choice-sub">${y.sub}</div>
     </a>`).join('');

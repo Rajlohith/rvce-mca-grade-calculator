@@ -8,48 +8,48 @@ window.MCA = window.MCA || {};
 window.MCA.FAQ = [
   {
     q: "How is CIE (Continuous Internal Evaluation) calculated?",
-    a: `For a theory course, CIE is out of 100 and made of three parts:
+    a: `For a theory course, CIE is out of 100 and has three parts:
     <ul>
-      <li><b>Quizzes</b> — three quizzes are held (Quiz I, II, III), 10 marks each, but only the <b>best two of the three</b> are added (out of 20).</li>
-      <li><b>Tests</b> — three tests are held (Test I, II, III), 50 marks each; the <b>best two of the three</b> are added (100 combined), then <b>scaled down to 40</b>: <code>(best two of Test I/II/III) / 100 × 40</code>.</li>
-      <li><b>Experiential Learning (EL)</b> — a single combined mark out of 40.</li>
+      <li><b>Quizzes</b> - You have three quizzes (Quiz I, II, III) worth 10 marks each, but only your <b>best two</b> count (out of 20).</li>
+      <li><b>Tests</b> - You take three tests (Test I, II, III) for 50 marks each. The <b>best two</b> are added together (out of 100) and then <b>scaled down to 40</b>: <code>(best two of Test I/II/III) / 100 × 40</code>.</li>
+      <li><b>Experiential Learning (EL)</b> - Just one combined score out of 40.</li>
     </ul>
-    Quiz(best 2) + Test(best 2, scaled) + EL = CIE out of 100. That part is the same in every semester. What's added on top for a course with an integrated lab is different depending on the semester:
+    Quiz(best 2) + Test(best 2, scaled) + EL = CIE out of 100. That part is exactly the same every semester. But if you have an integrated lab, the extra marks depend on the semester:
     <ul>
-      <li><b>Semester I</b> — Lab (record + test, out of 40) + Lab Experiential Learning (out of 10) = 50 lab marks, on top of the 100 theory marks, for CIE out of <b>150</b>.</li>
-      <li><b>Semester II &amp; III</b> — PBL (Project Based Learning) stands in for the theory-side Experiential Learning mark: same 40 marks, same role in the floor checks, just relabeled. Lab / Practical CIE stays a single 50-mark field. Quiz+Test(60) + PBL(40) = 100 "theory" subtotal + 50 lab = CIE out of <b>150</b> — the same total as Semester I, just with PBL standing in for EL. The PBL label itself isn't in the published handbook table, but the same floor conditions apply as they would for EL.</li>
+      <li><b>Semester I</b> - Lab (record + test, out of 40) + Lab Experiential Learning (out of 10) = 50 lab marks. Add that to your 100 theory marks, and your CIE is out of <b>150</b>.</li>
+      <li><b>Semester II &amp; III</b> - PBL (Project Based Learning) replaces the theory EL mark. It's still 40 marks and has the same minimum requirements, just a different name. The Lab/Practical CIE is still a single 50-mark field. Quiz+Test(60) + PBL(40) = 100 "theory" total + 50 lab = CIE out of <b>150</b> (same as Sem I, just with PBL instead of EL). You won't see the PBL label in the handbook table, but the standard EL rules still apply.</li>
     </ul>
-    Lab-only courses (no theory component, in any semester) use the smaller Table 4.2.3 scheme: Lab (record+test, out of 40) + EL (out of 10) = 50.`
+    For lab-only courses (no theory, any semester), it follows the smaller Table 4.2.3 scheme: Lab (record+test, out of 40) + EL (out of 10) = 50.`
   },
   {
     q: "How is SEE (Semester End Examination) structured?",
-    a: `A theory SEE paper is 100 marks across 5 units — each unit has two questions worth 20 marks, and you answer one from each pair (5 questions total). An integrated course also has a separate 50-mark lab exam (viva + prototype/demo), making SEE 150 for that course — this stays the same in every semester, even where the CIE-side breakdown differs (see the CIE question above). A lab-only course's SEE is 50 marks: design & development (20), presentation/demo (20), and viva-voce (10).`
+    a: `A theory SEE paper is 100 marks covering 5 units. Each unit gives you two 20-mark questions, and you have to answer one from each pair (5 questions total). If it's an integrated course, there's also a separate 50-mark lab exam (viva + prototype/demo), which pushes the SEE up to 150. This setup stays exactly the same every semester, even if the CIE breakdown changes (check the CIE question above). For lab-only courses, the SEE is just 50 marks: design & development (20), presentation/demo (20), and viva-voce (10).`
   },
   {
     q: "Do CIE and SEE carry equal weight?",
-    a: `Yes — <b>every course is graded 50% CIE and 50% SEE</b>, in every semester. A theory course is 100 CIE + 100 SEE = 200 total. A theory course with an integrated lab is 150 CIE + 150 SEE = 300 total — this holds in Semester I <i>and</i> in Semesters II &amp; III, since PBL simply takes the place of Experiential Learning at the same 40-mark size rather than changing the total. A lab-only course is 50 CIE + 50 SEE = 100 total. The final percentage is always <code>(CIE + SEE) / (max CIE + max SEE) × 100</code>.`
+    a: `Yep! <b>Every course is graded 50% CIE and 50% SEE</b> across all semesters. A standard theory course is 100 CIE + 100 SEE = 200 total. A theory course with an integrated lab is 150 CIE + 150 SEE = 300 total. This applies to Semester I <i>and</i> Semesters II &amp; III because PBL just swaps in for Experiential Learning at the same 40-mark weight without changing the total. A lab-only course is 50 CIE + 50 SEE = 100 total. Your final percentage is always calculated as <code>(CIE + SEE) / (max CIE + max SEE) × 100</code>.`
   },
   {
-    q: "What's the minimum I need to pass — is 50% overall enough?",
-    a: `No — a 50% aggregate isn't enough on its own. Each course has its own floor conditions that must <i>all</i> be met. This site checks them at two different levels of detail depending on which tool you're using:
+    q: "What's the minimum I need to pass? Is 50% overall enough?",
+    a: `No, just getting a 50% aggregate isn't enough. You have to meet specific floor conditions for each course. The site checks these at two different levels depending on the tool you use:
     <ul>
-      <li>The <b>CIE Finalization tool</b> checks the full, granular Table 4.4 conditions while you're still building up your CIE — e.g. for a theory course, Quiz+Test ≥50% of 60 <i>and</i> overall CIE ≥50% of 100. For Semesters II &amp; III, the same checks apply with PBL standing in for EL: Quiz+Test ≥24/60 and Quiz+Test+PBL ≥40/100, Lab CIE ≥25/50, combined ≥75/150.</li>
-      <li>The <b>Final Grade tool</b> works from your finalized CIE and SEE totals only, so it checks the Table 4.4 <i>total-row</i> conditions: Theory only &mdash; CIE ≥50%, SEE ≥40%, aggregate ≥50%. Theory + Lab and Lab-only &mdash; CIE ≥50%, SEE ≥50%, aggregate ≥50%.</li>
+      <li>The <b>CIE Finalization tool</b> checks the detailed Table 4.4 rules while you're still building your CIE score. For example, in a theory course, your Quiz+Test must be &ge;50% of 60 <i>and</i> your overall CIE must be &ge;50% of 100. In Semesters II &amp; III, the same logic applies with PBL instead of EL: Quiz+Test &ge;24/60 and Quiz+Test+PBL &ge;40/100, Lab CIE &ge;25/50, and combined &ge;75/150.</li>
+      <li>The <b>Final Grade tool</b> only looks at your finalized CIE and SEE totals. It runs the Table 4.4 <i>total-row</i> checks: For theory only, you need CIE &ge;50%, SEE &ge;40%, and an aggregate &ge;50%. For theory+lab or lab-only courses, it's CIE &ge;50%, SEE &ge;50%, and aggregate &ge;50%.</li>
     </ul>
-    Miss any one of these and the course is recorded as <b>F</b>, even if the raw combined percentage looks like a pass.`
+    If you miss even one of these cutoffs, the course is marked as an <b>F</b>, even if your raw percentage looks like a passing grade.`
   },
   {
     q: "What's the difference between EL and PBL?",
-    a: `Both are Experiential Learning marks, just organized differently depending on where and when they apply:
+    a: `They're both Experiential Learning marks, just set up differently depending on the semester and course:
     <ul>
-      <li><b>EL (Experiential Learning)</b> — the 40-mark theory-side component every course has, and (in Semester I only) a separate 10-mark Lab EL alongside the 40-mark Lab CIE.</li>
-      <li><b>PBL (Project Based Learning)</b> — used only for theory+lab courses in Semesters II &amp; III, where it simply stands in for the theory-side EL at the same 40 marks, sitting alongside a 50-mark Lab / Practical CIE (no separate lab EL in these two semesters).</li>
+      <li><b>EL (Experiential Learning)</b> - This is the standard 40-mark theory component every course has. In Semester I only, there's also a separate 10-mark Lab EL right next to the 40-mark Lab CIE.</li>
+      <li><b>PBL (Project Based Learning)</b> - This is only used for theory+lab courses in Semesters II &amp; III. It basically replaces the theory-side EL with the exact same 40 marks, sitting next to a 50-mark Lab/Practical CIE (there's no separate lab EL in these semesters).</li>
     </ul>
-    The CIE Finalization tool shows whichever of the two applies automatically, based on the course and semester you pick.`
+    The CIE Finalization tool will automatically show you the right one based on the course and semester you select.`
   },
   {
     q: "How do marks turn into a letter grade?",
-    a: `RVCE uses an absolute 10-point scale (Table 4.3):
+    a: `RVCE grades on an absolute 10-point scale (Table 4.3):
     <table style="width:100%;border-collapse:collapse;margin-top:8px;font-family:var(--font-mono);font-size:12.5px;">
       <tr style="border-bottom:1.5px solid var(--ink);"><th style="text-align:left;padding:4px 6px;">Grade</th><th style="text-align:left;padding:4px 6px;">Points</th><th style="text-align:left;padding:4px 6px;">% Range</th></tr>
       <tr style="border-bottom:1px solid var(--line);"><td style="padding:4px 6px;">O</td><td style="padding:4px 6px;">10</td><td style="padding:4px 6px;">90–100</td></tr>
@@ -63,51 +63,52 @@ window.MCA.FAQ = [
   },
   {
     q: "What are W, I, X, DX and AB grades?",
-    a: `These are <i>transitional</i> markers, not final grades — they get resolved into O–F once you clear the course:
+    a: `Think of these as temporary placeholders, not your actual final grades. They eventually turn into standard grades (O to F) once the course is fully cleared:
     <ul>
-      <li><b>DX</b> — you didn't meet the minimum CIE floor, so you're not allowed to sit the SEE for that course yet.</li>
-      <li><b>I</b> — you met CIE, but missed the SEE for a valid, documented reason (illness, calamity, representing the college). Cleared via a makeup exam.</li>
-      <li><b>W</b> — you formally withdrew from the course before the cutoff date, with counselor/HoD approval.</li>
-      <li><b>X</b> — you had ≥85% attendance and ≥90% CIE, but still scored an F in SEE. Eligible for a makeup exam.</li>
-      <li><b>AB</b> — you met CIE and attendance, but were simply absent for SEE without a pre-approved reason.</li>
+      <li><b>DX</b> - You didn't hit the minimum CIE cutoff, so you're not allowed to write the SEE for that course yet.</li>
+      <li><b>I</b> - You met the CIE requirements but missed the SEE for a valid, documented reason (like being sick, a family emergency, or representing the college). You clear this by taking a makeup exam.</li>
+      <li><b>W</b> - You officially dropped the course before the deadline with approval from your counselor or HoD.</li>
+      <li><b>X</b> - You had &ge;85% attendance and &ge;90% in CIE, but still failed the SEE. You're allowed to take a makeup exam.</li>
+      <li><b>AB</b> - You had the required CIE and attendance, but you just didn't show up for the SEE and didn't get prior approval.</li>
     </ul>
-    None of these count toward SGPA/CGPA until they resolve into a real letter grade.`
+    None of these will affect your SGPA or CGPA until they get updated to a real letter grade.`
   },
   {
     q: "How is SGPA calculated?",
-    a: `SGPA is a credit-weighted average of the grade points you earned that semester:
+    a: `SGPA is basically the credit-weighted average of your grade points for a specific semester:
     <br><code>SGPA = Σ(course credits × grade points) / Σ(course credits)</code>
-    <br>Only courses with a final letter grade (O–F) count — W, I, X, DX and AB are excluded from both the top and bottom of the fraction until they resolve. An <b>F</b> still counts its credits (dragging SGPA down with 0 grade points) — it isn't excluded like the transitional grades.`
+    <br>Only courses with a final letter grade (O to F) are included. Temporary grades like W, I, X, DX, and AB are totally ignored in the math until they get resolved. But watch out: an <b>F</b> grade still counts your credits! It gives you 0 grade points, which drags down your SGPA. It's not ignored like the temporary grades.`
   },
   {
     q: "How is CGPA calculated?",
-    a: `CGPA is the same idea across every semester you've completed:
+    a: `CGPA works the exact same way, just spread across all the semesters you've finished:
     <br><code>CGPA = Σ(semester credits × semester SGPA) / Σ(semester credits)</code>
-    <br>MCA needs <b>80 credits across 4 semesters</b> to complete the program (19 + 23 + 20 + 18, per the 2024 scheme — 2026 scheme credit structure isn't published yet).`
+    <br>For MCA, you need 80 credits over 4 semesters to graduate (19 + 23 + 20 + 18 under the 2024 scheme; the 2026 scheme isn't out yet).
+    <br><br>This site gives you two ways to calculate it. The <b>Final SGPA Calculator</b> lets you do a quick mix: just plug in your current CGPA and total credits up to your last semester, and it merges that with your new SGPA so you don't have to type everything in again. If you want to see all the math laid out, the <b>detailed CGPA Calculator</b> runs the formula the long way, semester by semester.`
   },
   {
     q: "What CGPA do I need for First Class / Distinction?",
-    a: `Applied only once every semester is cleared with no F grade outstanding (Section 4.12d):
+    a: `This only kicks in once you've cleared every semester without any pending F grades (based on Section 4.12d):
     <ul>
-      <li><b>First Class with Distinction</b> — CGPA ≥ 7.0</li>
-      <li><b>First Class</b> — CGPA ≥ 6.0 and &lt; 7.0</li>
-      <li><b>Second Class</b> — CGPA ≥ 5.0 and &lt; 6.0</li>
+      <li><b>First Class with Distinction</b> - CGPA &ge; 7.0</li>
+      <li><b>First Class</b> - CGPA &ge; 6.0 and &lt; 7.0</li>
+      <li><b>Second Class</b> - CGPA &ge; 5.0 and &lt; 6.0</li>
     </ul>`
   },
   {
     q: "Does this calculator work for Internship, Project, or NPTEL courses?",
-    a: `Not the CIE/SEE/Grade calculators — those three follow the standard theory/lab scheme only. Internship, Minor/Major Project, and NPTEL courses (like Research Methodology) are evaluated differently — projects go through guide + external panel evaluation and a viva-voce, and NPTEL is graded entirely online with no local CIE component. You can still enter their final letter grade directly into the SGPA/CGPA calculators once it's out.`
+    a: `Not for the CIE/SEE/Grade tools. Those three are built specifically for the standard theory and lab structures. Internships, Major/Minor Projects, and NPTEL courses (like Research Methodology) follow their own rules. For example, projects are graded by a guide, an external panel, and a viva-voce, while NPTEL happens completely online without standard CIE marks. Once you actually get your final letter grade for those, you can just drop it directly into the SGPA/CGPA calculators.`
   },
   {
     q: "Why can't I add a custom or manual course?",
-    a: `On purpose. Every course list on this site — in the CIE/SEE tool, the Final Grade tool and the Final GPA table — is pulled directly from the 2024 scheme syllabus, and only those exact courses can be selected. Letting anyone type in an arbitrary course name, credit value or CIE/SEE split would make it easy to end up with numbers that don't correspond to anything RVCE actually offers. If a course is genuinely missing or a credit value looks wrong, please open an issue on the GitHub repository (link in the footer) rather than editing it locally.`
+    a: `That's actually by design! Every course list you see here (in the CIE/SEE tool, Final Grade tool, and Final SGPA table) is pulled straight from the official 2024 scheme syllabus. You can only pick the exact courses offered. If we let people type in random course names, credit values, or CIE/SEE splits, it would be way too easy to get results that don't match how RVCE actually grades. If you notice a course is missing or a credit value seems off, just open an issue on the GitHub repo (link at the bottom) instead of trying to force it locally.`
   },
   {
     q: "How does the Scheme &rarr; Year &rarr; Semester navigation work?",
-    a: `Scheme comes first because it is the thing that actually determines everything else — course list, credit structure and CIE/SEE weightage are all fixed once for the whole four-semester program by the scheme you were admitted under. Only the <b>2024 Scheme</b> is implemented right now; a 2026 Scheme option is visible but disabled until that syllabus is published. After the scheme, you pick your year (Year 1 = Semesters I &amp; II, Year 2 = Semesters III &amp; IV) and then the semester itself, which opens the CIE/SEE, Final Grade and Final GPA tools pre-loaded with that semester's real courses.`
+    a: `You select the Scheme first because it literally controls everything else. Your course list, credit structure, and how CIE/SEE are weighted are permanently set for your entire four-semester run based on the scheme you joined under. Right now, only the <b>2024 Scheme</b> is active. You'll see a 2026 Scheme option, but it's locked until that syllabus actually gets published. Once you pick the scheme, you select your year (Year 1 is Semesters I &amp; II, Year 2 is Semesters III &amp; IV) and then the specific semester. That automatically loads up the CIE/SEE, Final Grade, and Final SGPA tools with the correct courses for that term.`
   },
   {
     q: "Is this an official RVCE tool?",
-    a: `No. This is an independent, unofficial calculator built by a student for personal and peer use, based on a careful reading of the published PG Academic Handbook and the MCA 2024 Scheme syllabus (2026 Scheme support will follow once that syllabus is published). Always cross-check against your official grade card and the Controller of Examinations for anything that matters.`
+    a: `Nope! This is just an independent, unofficial tool made by a student for everyone to use. It's built entirely by reading through the PG Academic Handbook and the MCA 2024 Scheme syllabus (we'll add 2026 once the college publishes it). While it's pretty accurate, always double-check your official grade card and with the Controller of Examinations for anything important.`
   }
 ];

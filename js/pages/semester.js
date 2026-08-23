@@ -25,10 +25,13 @@
   document.getElementById('semSub').textContent = `2024 Scheme \u00b7 Year ${year}`;
 
   const sems = YEAR_SEMS[year];
-  document.getElementById('semGrid').innerHTML = sems.map(s=>{
+  const colors = ['blue','green'];
+  const cap = window.MCA.icons.graduationCap;
+  document.getElementById('semGrid').innerHTML = sems.map((s,i)=>{
     const d = DATA.semesters[s];
     const courseCount = coursesFor(s).length;
-    return `<a class="choice-card" href="${withParams('tools.html', { scheme, year, semester:s })}">
+    return `<a class="choice-card iconed" href="${withParams('tools.html', { scheme, year, semester:s })}">
+      <div class="icon-badge soft ${colors[i % colors.length]}">${cap}</div>
       <div class="choice-title">Semester ${s}</div>
       <div class="choice-sub">${d.totalCredits} credits &middot; ${courseCount} courses</div>
     </a>`;

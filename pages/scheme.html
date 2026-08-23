@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <script>(function(){try{var t=localStorage.getItem('mca-theme');if(t==='dark'){document.documentElement.setAttribute('data-theme','dark');}}catch(e){}})();</script>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Choose your scheme — RVCE MCA Grade Calculator</title>
+<title>Choose your scheme - RVCE MCA Grade Calculator</title>
 <meta name="description" content="Choose the RVCE MCA scheme you were admitted under.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
@@ -34,11 +34,13 @@
         <span class="step">4 &middot; Tool</span>
       </div>
       <div class="choice-grid">
-        <a class="choice-card" href="year.html?scheme=2024">
+        <a class="choice-card iconed" href="year.html?scheme=2024">
+          <div class="icon-badge soft blue" id="schemeIcon2024"></div>
           <div class="choice-title">2024 Scheme</div>
           <div class="choice-sub">2024&ndash;25 &amp; 2025&ndash;26 intake &middot; 80 credits &middot; 4 semesters</div>
         </a>
-        <div class="choice-card disabled">
+        <div class="choice-card iconed disabled">
+          <div class="icon-badge soft orange" id="schemeIcon2026"></div>
           <div class="choice-title">2026 Scheme</div>
           <div class="choice-sub"><span class="soon-badge">Coming soon</span></div>
         </div>
@@ -50,6 +52,7 @@
 </div>
 
 <script src="../js/data.js"></script>
+<script src="../js/icons.js"></script>
 <script src="../js/grading.js"></script>
 <script src="../js/input-guard.js"></script>
 <script src="../js/site.js"></script>
@@ -61,6 +64,8 @@
       { label:'Scheme' }
     ]
   });
+  document.getElementById('schemeIcon2024').innerHTML = window.MCA.icons.layers;
+  document.getElementById('schemeIcon2026').innerHTML = window.MCA.icons.layers;
 </script>
 </body>
 </html>

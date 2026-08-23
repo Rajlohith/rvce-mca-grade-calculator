@@ -53,6 +53,7 @@
   letter-spacing: -.02em;
   color: var(--ink);
 }
+.page-hero h1 .accent-word{ color: var(--accent); }
 .page-hero p{
   margin:0; color:var(--ink-soft); font-size:15.5px; max-width:64ch; line-height:1.6;
 }

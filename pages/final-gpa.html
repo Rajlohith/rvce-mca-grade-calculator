@@ -4,8 +4,8 @@
 <meta charset="UTF-8">
 <script>(function(){try{var t=localStorage.getItem('mca-theme');if(t==='dark'){document.documentElement.setAttribute('data-theme','dark');}}catch(e){}})();</script>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Final GPA Calculator — RVCE MCA Grade Calculator</title>
-<meta name="description" content="Compute SGPA for an RVCE MCA semester using its real course list and credits.">
+<title>Final SGPA Calculator - RVCE MCA Grade Calculator</title>
+<meta name="description" content="Compute SGPA for an RVCE MCA semester using its real course list and credits, then roll it into your CGPA.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="../css/variables.css">
@@ -19,22 +19,41 @@
 <div class="wrap">
   <div class="page-hero">
     <div class="eyebrow" id="toolEyebrow">Semester</div>
-    <h1>Final GPA Calculator</h1>
-    <p>Every row is a real course from this semester's scheme — course names and credits are fixed; only the grade you enter is yours to set.</p>
+    <h1>Final SGPA Calculator</h1>
+    <p>Every row is a real course from this semester's scheme, names and credits are fixed; only the grade you enter is yours to set.</p>
   </div>
 
   <div id="breadcrumb"></div>
 
   <main id="app">
     <div class="card">
-      <table class="ledger" id="gpaTable">
-        <thead><tr><th>Course</th><th>Credits</th><th>Grade</th></tr></thead>
-        <tbody></tbody>
-      </table>
-
-      <hr class="rule">
-      <div class="result" id="gpaResult"></div>
+      <div class="course-card-head">
+        <h2 id="sgpaCardTitle" style="font-size:17px;">Semester SGPA</h2>
+        <span class="credit-badge" id="sgpaCreditBadge"></span>
+      </div>
+      <div id="sgpaRows"></div>
+      <div class="toolbar">
+        <button type="button" class="btn accent full" id="computeSgpaBtn">Compute SGPA</button>
+      </div>
+      <div class="result" id="gpaResult" style="display:none;"></div>
       <div class="callout">SGPA excludes transitional grades (<b>W, I, X, DX, AB</b>). An <b>F</b> still counts its credits, weighted at 0 grade points.</div>
+    </div>
+
+    <div class="card" id="cgpaBlendCard">
+      <div class="course-card-head">
+        <h2 id="cgpaCardTitle" style="font-size:17px;"></h2>
+        <span class="credit-badge" id="cgpaCreditBadge"></span>
+      </div>
+      <div id="cgpaBlendBody"></div>
+      <div class="toolbar">
+        <button type="button" class="btn accent full" id="computeCgpaBtn">Compute CGPA</button>
+      </div>
+      <div class="result" id="cgpaResult" style="display:none;"></div>
+        <div class="callout">Want the full semester-by-semester breakdown instead of a quick blend? Use the <a href="cgpa.html">detailed CGPA Calculator</a>, it's still here, untouched.</div>
+      </div>
+
+    <div class="toolbar">
+      <button type="button" class="btn ghost full" id="resetAllBtn">Reset All Grades</button>
     </div>
   </main>
 
@@ -42,6 +61,7 @@
 </div>
 
 <script src="../js/data.js"></script>
+<script src="../js/icons.js"></script>
 <script src="../js/grading.js"></script>
 <script src="../js/engine.js"></script>
 <script src="../js/course-picker.js"></script>

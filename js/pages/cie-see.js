@@ -1,8 +1,8 @@
 (function(){
   const { qs, withParams, mount } = window.MCA.site;
-  const { YEAR_SEMS, populateSelect, findEntry } = window.MCA.courses;
-  const { computeCIE, estimateSEE } = window.MCA.engine;
-  const { fmt } = window.MCA.grading;
+  const { YEAR_SEMS, coursesFor } = window.MCA.courses;
+  const { computeCIE, allGradeRequirements } = window.MCA.engine;
+  const { fmt, renderGradeScale } = window.MCA.grading;
   const DATA = window.MCA.DATA;
 
   const scheme = qs('scheme'), year = qs('year'), semester = qs('semester');
@@ -21,115 +21,232 @@
     ]
   });
   document.getElementById('toolEyebrow').textContent = `Semester ${semester} \u00b7 2024 Scheme`;
-
-  const $ = id => document.getElementById(id);
-  const coursePick = $('coursePick');
-  populateSelect(coursePick, semester);
+  document.getElementById('gradeScaleStrip').innerHTML = renderGradeScale();
 
   // Semester I keeps the original Lab(/40)+Lab EL(/10) split. Semester II
-  // and III use this college's PBL-merged breakdown instead. Semester IV
-  // has no theory+lab courses, so it never reaches the 'sem23' branch for
-  // real data, but is included for completeness if that ever changes.
+  // and III use the PBL-merged breakdown instead.
   const labScheme = (semester === 'II' || semester === 'III') ? 'sem23' : 'sem1';
-
   const NON_STANDARD_NAMES = { project:'Project', internship:'Internship', nptel:'NPTEL / online course' };
-  const theoryInputs = ['q1','q2','q3','t1','t2','t3','el'];
-  const labSem1Inputs = ['lab','elLab'];
-  const labSem23Inputs = ['pbl','labSem23'];
-  let currentType = 'theory';
+  const courses = coursesFor(semester);
+  const cardState = new Map(); // course code -> { total, max, type }
 
-  function setTypeDisplay(type){
-    document.querySelectorAll('#typeSel .type-chip').forEach(chip=>{
-      chip.classList.toggle('sel', chip.dataset.type === type);
-    });
+  const COPY_SVG = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>`;
+
+  function quizTestBlock(){
+    return `
+      <div class="field-row">
+        <div class="field"><label>Quiz 1 <span class="hint">/10</span></label><input type="number" class="f-q1" min="0" max="10" value="0"></div>
+        <div class="field"><label>Quiz 2 <span class="hint">/10</span></label><input type="number" class="f-q2" min="0" max="10" value="0"></div>
+        <div class="field"><label>Quiz 3 <span class="hint">/10</span></label><input type="number" class="f-q3" min="0" max="10" value="0"></div>
+      </div>
+      <div class="field-row">
+        <div class="field"><label>Test 1 <span class="hint">/50</span></label><input type="number" class="f-t1" min="0" max="50" value="0"></div>
+        <div class="field"><label>Test 2 <span class="hint">/50</span></label><input type="number" class="f-t2" min="0" max="50" value="0"></div>
+        <div class="field"><label>Test 3 <span class="hint">/50</span></label><input type="number" class="f-t3" min="0" max="50" value="0"></div>
+      </div>`;
   }
 
-  function setStandardUI(type){
-    currentType = type;
-    $('theoryFields').style.display = (type==='theory'||type==='theory-lab') ? '' : 'none';
-    // Semester II/III theory+lab courses fold theory EL into PBL, so the
-    // standalone EL field would just sit there doing nothing — hide it.
-    const isSem23TheoryLab = type==='theory-lab' && labScheme==='sem23';
-    $('theoryElRow').style.display = isSem23TheoryLab ? 'none' : '';
-    const showSem1Lab = type==='lab' || (type==='theory-lab' && labScheme==='sem1');
-    const showSem23Lab = isSem23TheoryLab;
-    $('labFieldsSem1').style.display = showSem1Lab ? '' : 'none';
-    $('labFieldsSem23').style.display = showSem23Lab ? '' : 'none';
-    setTypeDisplay(type);
+  function fieldsHTML(type){
+    if(type==='theory'){
+      return quizTestBlock() + `
+        <div class="field-row">
+          <div class="field"><label>Experiential Learning <span class="hint">/40</span></label><input type="number" class="f-el" min="0" max="40" value="0"></div>
+        </div>`;
+    }
+    if(type==='theory-lab' && labScheme==='sem1'){
+      return quizTestBlock() + `
+        <div class="field-row">
+          <div class="field"><label>Experiential Learning <span class="hint">/40</span></label><input type="number" class="f-el" min="0" max="40" value="0"></div>
+        </div>
+        <div class="field-row">
+          <div class="field"><label>Lab (record + test) <span class="hint">/40</span></label><input type="number" class="f-lab" min="0" max="40" value="0"></div>
+          <div class="field"><label>Lab EL <span class="hint">/10</span></label><input type="number" class="f-ellab" min="0" max="10" value="0"></div>
+        </div>`;
+    }
+    if(type==='theory-lab' && labScheme==='sem23'){
+      return quizTestBlock() + `
+        <div class="field-row">
+          <div class="field"><label>PBL <span class="hint">/40</span></label><input type="number" class="f-pbl" min="0" max="40" value="0"></div>
+          <div class="field"><label>Lab / Practical CIE <span class="hint">/50</span></label><input type="number" class="f-labsem23" min="0" max="50" value="0"></div>
+        </div>`;
+    }
+    if(type==='lab'){
+      return `
+        <div class="field-row">
+          <div class="field"><label>Lab (record + test) <span class="hint">/40</span></label><input type="number" class="f-lab" min="0" max="40" value="0"></div>
+          <div class="field"><label>Experiential Learning <span class="hint">/10</span></label><input type="number" class="f-ellab" min="0" max="10" value="0"></div>
+        </div>`;
+    }
+    return '';
   }
 
-  function showNonStandard(type){
-    $('nonStdNote').innerHTML = `<div class="callout locked"><b>${NON_STANDARD_NAMES[type] || 'This course'}</b> does not follow the standard CIE/SEE quiz-test-EL split, so it isn't modeled by this calculator. Check the syllabus PDF or your course coordinator for how it's actually evaluated.</div>`;
-    $('theoryFields').style.display = 'none';
-    $('labFieldsSem1').style.display = 'none';
-    $('labFieldsSem23').style.display = 'none';
-    $('cieResult').innerHTML = '';
-    $('cieNote').innerHTML = '';
-    $('seeResult').innerHTML = '';
-    document.querySelectorAll('#typeSel .type-chip').forEach(c=>c.classList.remove('sel'));
+  function cardTitleHTML(course){
+    if(course.electives && course.electives.length){
+      const opts = course.electives.map(e=>`<option value="${e.code}">${e.code} \u2014 ${e.title}</option>`).join('');
+      return `<h3>${course.title}</h3><select class="course-elective-pick">${opts}</select>`;
+    }
+    return `<h3>${course.title}</h3><span class="hint">${course.code}</span>`;
   }
 
-  function activeInputs(){
-    if(currentType==='theory') return theoryInputs;
-    if(currentType==='lab') return labSem1Inputs;
-    if(currentType==='theory-lab') return theoryInputs.concat(labScheme==='sem23' ? labSem23Inputs : labSem1Inputs);
-    return [];
-  }
-
-  function recompute(){
-    const entry = findEntry(semester, coursePick.value);
-    if(!entry) return;
-    const isNonStandard = ['project','internship','nptel'].includes(entry.type);
-    $('nonStdNote').innerHTML = '';
+  function cardHTML(course){
+    const isNonStandard = ['project','internship','nptel'].includes(course.type);
+    const head = `
+      <div class="course-card-head">
+        <div>${cardTitleHTML(course)}</div>
+        <span class="credit-badge">${course.credits} Credit</span>
+      </div>`;
 
     if(isNonStandard){
-      showNonStandard(entry.type);
-      return;
-    }
-    setStandardUI(entry.type);
-
-    const vals = {};
-    theoryInputs.forEach(id => vals[id] = $(id).value);
-    if(currentType==='lab' || (currentType==='theory-lab' && labScheme==='sem1')){
-      vals.lab = $('lab').value;
-      vals.elLab = $('elLab').value;
-    } else if(currentType==='theory-lab' && labScheme==='sem23'){
-      vals.pbl = $('pbl').value;
-      vals.lab = $('labSem23').value; // engine expects the lab-CIE value under `lab` regardless of scheme
+      return `<div class="course-card" data-code="${course.code}" data-type="${course.type}">
+        ${head}
+        <div class="callout locked">${NON_STANDARD_NAMES[course.type] || 'This course'} doesn't follow the standard CIE/SEE split, so it isn't modeled here. Check the syllabus or your course coordinator for how it's evaluated.</div>
+      </div>`;
     }
 
-    const cieLabScheme = currentType==='theory-lab' ? labScheme : undefined;
-    const r = computeCIE(currentType, vals, cieLabScheme);
-    $('cieResult').innerHTML = `
-      <div style="flex:1;">
-        <div class="breakdown">
-          ${r.rows.map(row=>`<div class="row"><span>${row[0]}</span><span>${row[1]}</span></div>`).join('')}
-          <div class="row total"><span>Finalized CIE</span><span>${fmt(r.total)} / ${r.max} &middot; ${fmt(r.pct)}%</span></div>
-        </div>
-      </div>`;
-    $('cieNote').innerHTML = r.note;
-
-    const target = parseFloat($('target').value);
-    const s = estimateSEE(currentType, r.total, r.max, target);
-    const stampClass = s.achievable ? 'pass' : 'fail';
-    // Always show the actual computed number, even when it's beyond what's
-    // achievable — a bare "not reachable" symbol with no figure looked like
-    // the tool had simply stopped working for every target except a Pass.
-    const neededDisplay = Math.ceil(Math.max(s.neededSEE,0));
-    $('seeResult').innerHTML = `
-      <div class="stamp ${stampClass}"><span class="g">${neededDisplay}</span><span class="t">${s.achievable ? 'SEE NEEDED' : 'NOT REACHABLE'}</span></div>
-      <div class="result-detail">
-        <div class="big">${s.cieLabel}: ${fmt(s.cie)} / ${s.cieMax}</div>
-        <div class="note">${s.achievable ? s.message : `That needs ${neededDisplay} / ${s.seeMax} in SEE, which is above the maximum &mdash; even a full ${s.seeMax}/${s.seeMax} won't reach this target. Aim lower, or raise CIE first.`}</div>
-      </div>`;
+    return `<div class="course-card" data-code="${course.code}" data-type="${course.type}">
+      ${head}
+      ${fieldsHTML(course.type)}
+      <div class="toolbar">
+        <button type="button" class="btn amber full calc-btn">Calculate CIE</button>
+      </div>
+      <div class="course-result"></div>
+      <button type="button" class="locked-btn see-btn" disabled>SEE Marks Required</button>
+    </div>`;
   }
 
-  coursePick.addEventListener('change', recompute);
-  ['q1','q2','q3','t1','t2','t3','el','lab','elLab','pbl','labSem23'].forEach(id => {
-    const el = $(id);
-    if(el) el.addEventListener('input', recompute);
-  });
-  $('target').addEventListener('change', recompute);
+  const grid = document.getElementById('courseGrid');
+  grid.innerHTML = courses.map(cardHTML).join('');
 
-  recompute();
+  function readVal(card, cls){
+    const el = card.querySelector('.'+cls);
+    return el ? el.value : 0;
+  }
+
+  function courseDisplayTitle(card, course){
+    const pick = card.querySelector('.course-elective-pick');
+    if(pick) return pick.options[pick.selectedIndex].textContent;
+    return course.title;
+  }
+
+  function calculateCard(card){
+    const code = card.dataset.code;
+    const type = card.dataset.type;
+    const vals = {
+      q1: readVal(card,'f-q1'), q2: readVal(card,'f-q2'), q3: readVal(card,'f-q3'),
+      t1: readVal(card,'f-t1'), t2: readVal(card,'f-t2'), t3: readVal(card,'f-t3'),
+      el: readVal(card,'f-el'),
+      elLab: readVal(card,'f-ellab'),
+      lab: (type==='theory-lab' && labScheme==='sem23') ? readVal(card,'f-labsem23') : readVal(card,'f-lab'),
+      pbl: readVal(card,'f-pbl')
+    };
+    const cieLabScheme = type==='theory-lab' ? labScheme : undefined;
+    const r = computeCIE(type, vals, cieLabScheme);
+    cardState.set(code, { total: r.total, max: r.max, type });
+
+    card.querySelector('.course-result').innerHTML = `
+      <div class="breakdown">
+        ${r.rows.map(row=>`<div class="row"><span>${row[0]}</span><span>${row[1]}</span></div>`).join('')}
+        <div class="row total"><span>Finalized CIE</span><span>${fmt(r.total)} / ${r.max} &middot; ${fmt(r.pct)}%</span></div>
+      </div>
+      <div class="callout" style="margin-top:10px;">${r.note}</div>`;
+
+    const seeBtn = card.querySelector('.see-btn');
+    seeBtn.disabled = false;
+    seeBtn.classList.add('ready');
+  }
+
+  grid.addEventListener('click', (e)=>{
+    const calcBtn = e.target.closest('.calc-btn');
+    if(calcBtn){ calculateCard(calcBtn.closest('.course-card')); return; }
+    const seeBtn = e.target.closest('.see-btn');
+    if(seeBtn && !seeBtn.disabled) openSeeModal(seeBtn.closest('.course-card'));
+  });
+
+  document.getElementById('resetAllBtn').addEventListener('click', ()=>{
+    grid.querySelectorAll('input[type=number]').forEach(inp => inp.value = inp.getAttribute('min') || '0');
+    grid.querySelectorAll('.course-result').forEach(r => r.innerHTML = '');
+    grid.querySelectorAll('.see-btn').forEach(b => { b.disabled = true; b.classList.remove('ready'); });
+    cardState.clear();
+  });
+
+  /* ---------- SEE Requirements modal ---------- */
+  let currentModalCode = null;
+
+  const overlay = document.getElementById('seeModalOverlay');
+  const modalSubject = document.getElementById('seeModalSubject');
+  const modalCie = document.getElementById('seeModalCie');
+  const modalSeeOf = document.getElementById('seeModalSeeOf');
+  const modalLabBox = document.getElementById('seeModalLabBox');
+  const modalRows = document.getElementById('seeModalRows');
+
+  function openSeeModal(card){
+    const code = card.dataset.code;
+    const state = cardState.get(code);
+    if(!state) return;
+    currentModalCode = code;
+
+    const course = courses.find(c => c.code === code);
+    modalSubject.textContent = courseDisplayTitle(card, course);
+    modalCie.textContent = `${fmt(state.total)} / ${state.max}`;
+
+    const seeMax = state.type==='theory' ? 100 : state.type==='theory-lab' ? 150 : 50;
+    modalSeeOf.textContent = `SEE marks out of ${seeMax}`;
+
+    if(state.type==='theory-lab'){
+      modalLabBox.innerHTML = `
+        <div class="lab-see-box">
+          <label for="labSeeFixedInput">Set Lab SEE Marks (Optional)</label>
+          <input type="number" id="labSeeFixedInput" min="0" max="50" placeholder="0">
+          <span class="hint">Max 50 marks. Enter to see the adjusted theory SEE requirement.</span>
+        </div>`;
+      document.getElementById('labSeeFixedInput').addEventListener('input', renderModalRows);
+    } else {
+      modalLabBox.innerHTML = '';
+    }
+
+    renderModalRows();
+    overlay.classList.remove('hidden');
+  }
+
+  function renderModalRows(){
+    const state = cardState.get(currentModalCode);
+    if(!state) return;
+    const labInput = document.getElementById('labSeeFixedInput');
+    const labSeeFixed = (labInput && labInput.value !== '') ? parseFloat(labInput.value) : null;
+    const reqs = allGradeRequirements(state.type, state.total, state.max, labSeeFixed);
+    modalRows.innerHTML = reqs.map(r => `
+      <div class="grade-req-row ${r.achievable ? '' : 'unreachable'}">
+        <div class="gp-circle">${r.gp}</div>
+        <div class="gr-body">
+          <div class="gr-name">Grade ${r.grade}</div>
+          <div class="gr-marks">${r.label}${r.achievable ? '' : ' &mdash; not reachable'}</div>
+        </div>
+        <button type="button" class="gr-copy" title="Copy" data-copy="Grade ${r.grade}: ${r.label}">${COPY_SVG}</button>
+      </div>`).join('');
+  }
+
+  modalRows.addEventListener('click', (e)=>{
+    const btn = e.target.closest('.gr-copy');
+    if(!btn) return;
+    if(navigator.clipboard) navigator.clipboard.writeText(btn.dataset.copy).catch(()=>{});
+  });
+
+  document.getElementById('copyAllBtn').addEventListener('click', (e)=>{
+    const state = cardState.get(currentModalCode);
+    if(!state) return;
+    const labInput = document.getElementById('labSeeFixedInput');
+    const labSeeFixed = (labInput && labInput.value !== '') ? parseFloat(labInput.value) : null;
+    const reqs = allGradeRequirements(state.type, state.total, state.max, labSeeFixed);
+    const text = `${modalSubject.textContent} \u2014 CIE ${modalCie.textContent}\n` +
+      reqs.map(r => `Grade ${r.grade} (${r.gp}): ${r.label}${r.achievable ? '' : ' - not reachable'}`).join('\n');
+    if(navigator.clipboard) navigator.clipboard.writeText(text).catch(()=>{});
+    const btn = e.currentTarget;
+    const original = btn.textContent;
+    btn.textContent = 'Copied';
+    setTimeout(()=>{ btn.textContent = original; }, 1500);
+  });
+
+  function closeModal(){ overlay.classList.add('hidden'); currentModalCode = null; }
+  document.getElementById('seeModalClose').addEventListener('click', closeModal);
+  overlay.addEventListener('click', (e)=>{ if(e.target === overlay) closeModal(); });
 })();

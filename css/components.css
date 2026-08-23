@@ -85,11 +85,151 @@ table.ledger input[type=checkbox]{
 .btn.ghost:hover{ border-color:var(--ink); background:var(--paper); transform:none; filter:none; }
 .btn.amber{ background:var(--ink); color:var(--btn-fg); }
 .btn.amber:hover{ filter:brightness(1.15); }
+.btn.accent{ background:var(--accent); color:#fff; }
+.btn.accent:hover{ background:var(--accent-deep); filter:none; }
+.btn:disabled, .btn.disabled{
+  background:var(--paper); color:var(--ink-faint); box-shadow:none; cursor:not-allowed;
+  pointer-events:none;
+}
+.btn:disabled:hover, .btn.disabled:hover{ transform:none; box-shadow:none; }
+.btn.full{ width:100%; justify-content:center; }
 .toolbar{ display:flex; gap:10px; margin-top:16px; flex-wrap:wrap; align-items:center; }
+
+/* ---------- Credit badge (small blue pill, top-right of a course card) ---------- */
+.credit-badge{
+  font-size:11.5px; font-weight:700; color:var(--accent); background:var(--accent-bg);
+  border-radius:999px; padding:3px 10px; white-space:nowrap;
+}
+
+/* ---------- Grade scale reference strip ---------- */
+.grade-scale{ display:grid; grid-template-columns:repeat(8,1fr); gap:8px; margin-top:10px; }
+.grade-scale .gs-cell{
+  text-align:center; border:1px solid var(--line); border-radius:var(--radius-sm);
+  padding:10px 4px; background:var(--paper);
+}
+.grade-scale .gs-cell .gs-point{ font-size:16px; font-weight:800; color:var(--ink); }
+.grade-scale .gs-cell .gs-letter{ font-size:11.5px; color:var(--ink-soft); margin-top:2px; }
+@media(max-width:700px){
+  .grade-scale{ grid-template-columns:repeat(4,1fr); }
+}
+
+/* ---------- Per-semester course grid (CIE / Final Grade pages) ---------- */
+.course-grid{ display:grid; grid-template-columns:repeat(auto-fit,minmax(300px,1fr)); gap:18px; align-items:start; }
+.course-card{
+  background:var(--card); border:1px solid var(--line); border-radius:var(--radius-lg);
+  box-shadow:var(--shadow-sm); padding:22px;
+}
+.course-card-head{ display:flex; justify-content:space-between; align-items:flex-start; gap:10px; margin-bottom:16px; }
+.course-card-head h3{ font-size:16px; font-weight:700; line-height:1.35; }
+.course-card-head .course-elective-pick{ margin-top:6px; font-size:12px; }
+.course-card .callout{ margin-top:10px; margin-bottom:0; }
+
+.locked-btn{
+  width:100%; text-align:center; padding:10px; border-radius:var(--radius-sm); font-size:13px; font-weight:600;
+  border:1px solid var(--line); color:var(--ink-faint); background:var(--paper); cursor:not-allowed;
+  margin-top:10px; display:flex; align-items:center; justify-content:center; gap:6px;
+}
+.locked-btn.ready{ background:var(--accent-bg); color:var(--accent); border-color:transparent; cursor:pointer; }
+.locked-btn.ready:hover{ background:var(--accent); color:#fff; }
+.course-result{ margin-top:14px; }
+
+/* ---------- SEE Requirements modal ---------- */
+.modal-overlay{
+  position:fixed; inset:0; background:rgba(15,23,42,.45);
+  display:flex; align-items:flex-start; justify-content:center; padding:48px 16px;
+  z-index:100; overflow-y:auto;
+}
+.modal-overlay.hidden{ display:none; }
+.modal{
+  background:var(--card); border-radius:var(--radius-lg); box-shadow:var(--shadow-xl);
+  max-width:380px; width:100%; padding:24px; position:relative;
+}
+.modal-close{
+  position:absolute; top:18px; right:18px; background:none; border:none; cursor:pointer;
+  color:var(--ink-faint); font-size:20px; line-height:1; padding:4px;
+}
+.modal-close:hover{ color:var(--ink); }
+.modal h3{ font-size:19px; font-weight:700; margin:0 0 10px; padding-right:24px; }
+.modal .modal-row{ font-size:13px; color:var(--ink-soft); margin-bottom:3px; }
+.modal .modal-row b{ color:var(--ink); }
+.modal .modal-see-of{ font-size:12.5px; color:var(--accent); font-weight:600; margin-bottom:16px; }
+.lab-see-box{
+  background:var(--accent-bg); border-radius:var(--radius-sm); padding:12px 14px; margin-bottom:18px;
+}
+.lab-see-box label{ font-size:12.5px; font-weight:700; color:var(--accent-deep); display:block; margin-bottom:6px; }
+.lab-see-box input{ background:var(--card); }
+.lab-see-box .hint{ display:block; margin-top:7px; color:var(--accent-deep); opacity:.85; font-size:11.5px; }
+.grade-req-row{
+  display:flex; align-items:center; gap:12px; background:var(--teal-bg); border-radius:var(--radius-sm);
+  padding:10px 12px; margin-bottom:8px;
+}
+.grade-req-row.unreachable{ background:var(--paper); }
+.grade-req-row .gp-circle{
+  width:30px; height:30px; border-radius:50%; background:var(--teal); color:#fff;
+  display:flex; align-items:center; justify-content:center; font-weight:800; font-size:13.5px; flex:0 0 auto;
+}
+.grade-req-row.unreachable .gp-circle{ background:var(--ink-faint); }
+.grade-req-row .gr-body{ flex:1; }
+.grade-req-row .gr-name{ font-weight:700; font-size:13.5px; color:var(--ink); }
+.grade-req-row .gr-marks{ font-size:12px; color:var(--ink-soft); margin-top:1px; }
+.grade-req-row .gr-copy{
+  background:none; border:none; cursor:pointer; color:var(--ink-faint); padding:4px; flex:0 0 auto;
+}
+.grade-req-row .gr-copy:hover{ color:var(--ink); }
+
+/* ---------- SGPA subject row ---------- */
+.sgpa-row{
+  display:flex; align-items:center; gap:14px; background:var(--paper); border-radius:var(--radius-sm);
+  padding:12px 14px; margin-bottom:10px; flex-wrap:wrap;
+}
+.sgpa-row .sgpa-info{ flex:1; min-width:160px; }
+.sgpa-row .sgpa-title{ font-weight:600; font-size:14px; color:var(--ink); }
+.sgpa-row .sgpa-code{ font-size:11.5px; color:var(--ink-faint); margin-top:1px; }
+.sgpa-row select.sgpa-elective-pick{ margin-top:6px; max-width:260px; }
+.sgpa-row .sgpa-grade-pick{ width:150px; flex:0 0 auto; }
+.sgpa-row select.error{ border-color:var(--crimson); box-shadow:0 0 0 2px rgba(220,38,38,.15); }
+
+/* ---------- Icon badges (colored square, line-art icon) ---------- */
+.icon-badge{
+  width:52px; height:52px; border-radius:16px; display:flex; align-items:center; justify-content:center;
+  flex:0 0 auto;
+}
+.icon-badge svg{ width:24px; height:24px; }
+.icon-badge.soft.blue{   background:var(--accent-bg); color:var(--accent); }
+.icon-badge.soft.purple{ background:var(--purple-bg);  color:var(--purple); }
+.icon-badge.soft.green{  background:var(--teal-bg);    color:var(--teal); }
+.icon-badge.soft.orange{ background:var(--orange-bg);  color:var(--orange); }
+.icon-badge.solid{ color:#fff; }
+.icon-badge.solid.blue{   background:var(--accent); }
+.icon-badge.solid.purple{ background:var(--purple); }
+.icon-badge.solid.green{  background:var(--teal); }
+.icon-badge.solid.orange{ background:var(--orange); }
+
+/* ---------- Iconed choice card (centered icon + title, e.g. year/semester picker) ---------- */
+.choice-card.iconed{ text-align:center; padding:34px 22px; }
+.choice-card.iconed .icon-badge{ margin:0 auto 18px; }
+.choice-card.iconed .choice-title{ font-size:18px; }
+
+/* ---------- List card (icon left, title, arrow-circle right) ---------- */
+.list-card{
+  display:flex; align-items:center; gap:18px; background:var(--card); border:1px solid var(--line);
+  border-radius:var(--radius-lg); padding:18px 20px; text-decoration:none; transition:all .2s ease;
+  margin-bottom:14px;
+}
+.list-card:hover{ box-shadow:var(--shadow-lg); transform:translateY(-2px); border-color:var(--line-strong); }
+.list-card .list-card-body{ flex:1; min-width:0; }
+.list-card .list-card-title{ font-weight:700; font-size:16px; color:var(--ink); line-height:1.3; }
+.list-card .list-card-sub{ font-size:12.5px; color:var(--ink-soft); margin-top:3px; }
+.list-card .list-card-arrow{
+  width:38px; height:38px; border-radius:50%; background:var(--paper); display:flex; align-items:center; justify-content:center;
+  color:var(--ink-soft); flex:0 0 auto; transition: background .2s ease, color .2s ease;
+}
+.list-card .list-card-arrow svg{ width:18px; height:18px; }
+.list-card:hover .list-card-arrow{ background:var(--ink); color:var(--btn-fg); }
 
 /* ---------- Progress ---------- */
 .progress-track{ background:var(--paper); border-radius:999px; height:10px; overflow:hidden; margin-top:10px; }
-.progress-fill{ background: linear-gradient(90deg, var(--ink), #374151); height:100%; border-radius:999px; transition:width .3s ease; }
+.progress-fill{ background: linear-gradient(90deg, var(--accent), var(--purple)); height:100%; border-radius:999px; transition:width .3s ease; }
 
 /* ---------- Callout ---------- */
 .callout{
@@ -125,14 +265,7 @@ table.ledger input[type=checkbox]{
   padding:14px 18px; font-size:13px; font-weight:600; text-align:center;
   margin-bottom:20px;
 }
-.quick-links{ display:grid; grid-template-columns:repeat(auto-fit,minmax(190px,1fr)); gap:14px; }
-.quick-link{
-  display:block; text-decoration:none; background:var(--card); border:1px solid var(--line);
-  border-radius:var(--radius-md); padding:20px; cursor:pointer; transition: all .2s ease;
-}
-.quick-link:hover{ border-color: var(--line-strong); box-shadow: var(--shadow-lg); transform:translateY(-3px); }
-.quick-link .ql-title{ font-weight:700; font-size:16px; color:var(--ink); }
-.quick-link .ql-sub{ font-size:12.5px; color:var(--ink-soft); margin-top:4px; }
+.quick-links{ display:flex; flex-direction:column; }
 
 /* ---------- Choice cards (year / scheme / semester / tool) ---------- */
 .choice-grid{ display:grid; grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); gap:16px; }

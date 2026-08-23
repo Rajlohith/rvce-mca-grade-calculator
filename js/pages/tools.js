@@ -31,27 +31,35 @@
   document.getElementById('toolSub').textContent = `${d.totalCredits} credits across ${courseCount} courses \u00b7 what do you need?`;
 
   const params = { scheme, year, semester };
+  const { calculator, bookOpen, award, arrowRight } = window.MCA.icons;
   const tools = [
     {
       page:'cie-see.html',
       title:'CIE Finalization &amp; SEE Marks Required',
-      sub:'Tally your CIE, then see what SEE score hits your target grade'
+      sub:'Tally your CIE, then see what SEE score hits your target grade',
+      icon: calculator, color:'blue'
     },
     {
       page:'final-grade.html',
       title:'Final Grade Calculator',
-      sub:'Plug in what you actually scored, get the letter grade'
+      sub:'Plug in what you actually scored, get the letter grade',
+      icon: bookOpen, color:'purple'
     },
     {
       page:'final-gpa.html',
-      title:'Final GPA Calculator',
-      sub:'SGPA for this semester, using its real courses only'
+      title:'Final SGPA Calculator',
+      sub:'SGPA for this semester, plus your running CGPA',
+      icon: award, color:'green'
     }
   ];
 
   document.getElementById('toolGrid').innerHTML = tools.map(t=>`
-    <a class="choice-card" href="${withParams(t.page, params)}">
-      <div class="choice-title">${t.title}</div>
-      <div class="choice-sub">${t.sub}</div>
+    <a class="list-card" href="${withParams(t.page, params)}">
+      <div class="icon-badge solid ${t.color}">${t.icon}</div>
+      <div class="list-card-body">
+        <div class="list-card-title">${t.title}</div>
+        <div class="list-card-sub">${t.sub}</div>
+      </div>
+      <div class="list-card-arrow">${arrowRight}</div>
     </a>`).join('');
 })();

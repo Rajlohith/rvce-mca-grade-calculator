@@ -19,21 +19,32 @@ The site walks a student through **Scheme → Year → Semester → Tool**, then
 opens the requested calculator pre-loaded with that semester's real MCA
 courses:
 
+Every course in a chosen semester is shown as its own card, side by side, on
+both the CIE Finalization page and the Final Grade Calculator — nothing is
+hidden behind a single dropdown. Filling in one course's marks and hitting
+its "Calculate" button has no effect on any other card.
+
 - **CIE Finalization & SEE Marks Required** — enter Quiz I/II/III and Test
   I/II/III as they're actually run; only the best two of each three are
   counted (Quiz best-2 out of 20, Test best-2 scaled to 40), plus an
   Experiential Learning mark out of 40 (or PBL in Semesters II & III — see
   below). That gets finalized into a CIE out of 100/150/50 depending on the
-  course, and the tool then works out what SEE score is needed to hit a
-  target grade, respecting the 40%/50% SEE floors rather than just the raw
-  aggregate.
+  course. Once a course's CIE is calculated, its "SEE Marks Required" button
+  unlocks and opens a popup listing the SEE needed for every passing grade
+  at once (O down to C) — not just one target at a time — including, for a
+  course with a lab component, an optional field to fix the Lab SEE and see
+  the exact Theory SEE that's needed around it.
 - **Final Grade Calculator** — enter just the two numbers that actually end
   up on a grade card: finalized CIE total and SEE total. Checked against the
   Table 4.4 *total-row* passing conditions (CIE ≥50%, SEE ≥40% for a
   theory-only course or ≥50% for a course with a lab component, aggregate
   ≥50%) — no quiz/test/lab sub-breakdown required at this stage.
-- **Final GPA Calculator** — SGPA for a single semester, using that
-  semester's real courses and credits.
+- **Final SGPA Calculator** — SGPA for a single semester, shown as one row
+  per real course with its own grade dropdown, plus a CGPA blend right below
+  it — enter your CGPA and credits through the previous semester and it
+  combines that with the SGPA you just computed. The full, detailed
+  semester-by-semester CGPA Calculator is still there too, unchanged, for
+  anyone who wants that instead.
 - **CGPA Calculator** — weighted across all four semesters, with a live
   progress bar toward the MCA program's 80-credit total and a projected
   degree class (First Class with Distinction / First Class / Second Class).
@@ -46,7 +57,7 @@ published and added.
 ### Course data is fixed, not freehand
 
 Every course list in this app — in the CIE/SEE tool, the Final Grade tool and
-the Final GPA table — is read directly from `data/courses.json` for the
+the Final SGPA table — is read directly from `data/courses.json` for the
 semester selected, and that is the only source a calculator will ever use.
 There is no "manual" or "custom course" entry point anywhere in the
 interface: course names, credit values and CIE/SEE structure cannot be typed
@@ -106,6 +117,11 @@ RVCE grade calculator project — rebuilt here in plain CSS since this project
 intentionally has no build step. No code was copied between the two; only
 the design language was carried over.
 
+Course-picker, tool-picker and semester-picker cards use small colored icon
+badges (blue, purple, green, orange) built from inline SVG — not emoji — so
+the wizard reads as a set of distinct destinations rather than a wall of
+identical white boxes. `js/icons.js` holds the shared icon set.
+
 A light/dark toggle sits in the header on every page. Dark mode is a soft
 charcoal surface, not pure black, so it stays comfortable during long
 sessions. The choice is remembered (`localStorage`) and applied before the
@@ -152,7 +168,7 @@ rvce-mca-grade-calculator/
 │   ├── tools.html                  Step 4 — calculator picker for a semester
 │   ├── cie-see.html                CIE Finalization & SEE Marks Required
 │   ├── final-grade.html            Final Grade Calculator
-│   ├── final-gpa.html              Final GPA (SGPA) Calculator
+│   ├── final-gpa.html              Final SGPA Calculator (+ CGPA blend)
 │   ├── cgpa.html                   CGPA Calculator (all semesters)
 │   └── faq.html                    FAQ
 ├── css/
@@ -166,6 +182,7 @@ rvce-mca-grade-calculator/
 │   ├── engine.js                   pure calculation functions — CIE, SEE, final grade, SGPA, CGPA
 │   ├── course-picker.js            restricts every course dropdown to data.js — no manual entry
 │   ├── input-guard.js              clamps every numeric field to its min/max, shows a warning
+│   ├── icons.js                    shared inline-SVG icon set for the colored badges
 │   ├── faqContent.js               FAQ question/answer content
 │   ├── site.js                     shared header, footer, breadcrumb, path & query-string helpers
 │   └── pages/                      one small script per HTML page, wiring that page only

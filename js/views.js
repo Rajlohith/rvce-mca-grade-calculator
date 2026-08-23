@@ -14,16 +14,16 @@ window.MCA = window.MCA || {};
 
   function courseOptionsHTML(semesterKey){
     const courses = DATA.semesters[semesterKey].courses.filter(c => c.creditBearing !== false);
-    let html = `<option value="__manual">— manual / custom course —</option>`;
+    let html = `<option value="__manual">- manual / custom course -</option>`;
     courses.forEach(c=>{
-      html += `<option value="${c.code}" data-type="${c.type}">${c.code} — ${c.title}</option>`;
+      html += `<option value="${c.code}" data-type="${c.type}">${c.code} - ${c.title}</option>`;
     });
     return html;
   }
 
   function nonStandardNote(type){
     const names = { project:'Project', internship:'Internship', nptel:'NPTEL / online course' };
-    return `<div class="callout"><b>${names[type] || 'This course'}</b> doesn't follow the standard CIE/SEE split — see the FAQ for how it's actually evaluated. Switch the type below to Theory / Theory+Lab / Lab if you want to model it anyway.</div>`;
+      return `<div class="callout"><b>${names[type] || 'This course'}</b> doesn't follow the standard CIE/SEE split, see the FAQ for how it's actually evaluated. Switch the type below to Theory / Theory+Lab / Lab if you want to model it anyway.</div>`;
   }
 
   /* ============================== HOME ============================== */
@@ -33,7 +33,7 @@ window.MCA = window.MCA || {};
         <div class="card" style="text-align:center;padding:40px 24px;">
           <div class="hero-kicker">RVCE · Master of Computer Applications</div>
           <h2 style="font-size:28px;margin-bottom:8px;">Pick your semester, get your numbers.</h2>
-          <p class="sub" style="max-width:52ch;margin:0 auto 22px;">CIE finalization, SEE requirements, final grades, and GPA — worked out exactly the way the PG Academic Handbook defines them, for every MCA course in the 2024 scheme.</p>
+            <p class="sub" style="max-width:52ch;margin:0 auto 22px;">CIE finalization, SEE requirements, final grades, and GPA, worked out exactly the way the PG Academic Handbook defines them, for every MCA course in the 2024 scheme.</p>
           <button class="btn amber" id="startBtn" style="padding:13px 26px;font-size:14.5px;">Choose your semester →</button>
         </div>
 
@@ -202,9 +202,9 @@ window.MCA = window.MCA || {};
               <div class="field"><label>Test II <span class="hint">/50</span></label><input type="number" id="t2" min="0" max="50" value="0"></div>
             </div>
             <div class="field-row">
-              <div class="field"><label>EL — Case study <span class="hint">/10</span></label><input type="number" id="el1" min="0" max="10" value="0"></div>
-              <div class="field"><label>EL — Program specific <span class="hint">/20</span></label><input type="number" id="el2" min="0" max="20" value="0"></div>
-              <div class="field"><label>EL — Video seminar <span class="hint">/10</span></label><input type="number" id="el3" min="0" max="10" value="0"></div>
+              <div class="field"><label>EL - Case study <span class="hint">/10</span></label><input type="number" id="el1" min="0" max="10" value="0"></div>
+              <div class="field"><label>EL - Program specific <span class="hint">/20</span></label><input type="number" id="el2" min="0" max="20" value="0"></div>
+              <div class="field"><label>EL - Video seminar <span class="hint">/10</span></label><input type="number" id="el3" min="0" max="10" value="0"></div>
             </div>
           </div>
           <div id="labFields" style="display:none;">
@@ -223,7 +223,7 @@ window.MCA = window.MCA || {};
             <div class="field">
               <label>Target grade</label>
               <select id="target">
-                <option value="50">C — Pass (≥50%)</option>
+                <option value="50">C - Pass (≥50%)</option>
                 <option value="55">B (≥55%)</option>
                 <option value="60">B+ (≥60%)</option>
                 <option value="70">A (≥70%)</option>
@@ -233,7 +233,7 @@ window.MCA = window.MCA || {};
             </div>
           </div>
           <div class="result" id="seeResult"></div>
-          <div class="callout">SEE has its own floor too — <b>≥40%</b> for a theory paper, <b>≥50%</b> for a lab/practice component — applied automatically here even if the aggregate needs less.</div>
+          <div class="callout">SEE has its own floor too, <b>≥40%</b> for a theory paper, <b>≥50%</b> for a lab/practice component, applied automatically here even if the aggregate needs less.</div>
         </div>`;
     },
     wire(state, nav){
@@ -331,14 +331,14 @@ window.MCA = window.MCA || {};
 
           <div id="theoryFields">
             <div class="field-row">
-              <div class="field"><label>CIE — Quiz+Test subtotal <span class="hint">/60</span></label><input type="number" id="qt" min="0" max="60" value="0"></div>
+              <div class="field"><label>CIE - Quiz+Test subtotal <span class="hint">/60</span></label><input type="number" id="qt" min="0" max="60" value="0"></div>
               <div class="field"><label>CIE total <span class="hint">/100</span></label><input type="number" id="cie" min="0" max="100" value="0"></div>
               <div class="field"><label>SEE <span class="hint">/100</span></label><input type="number" id="see" min="0" max="100" value="0"></div>
             </div>
           </div>
           <div id="labMixFields" style="display:none;">
             <div class="field-row">
-              <div class="field"><label>Theory CIE — Quiz+Test <span class="hint">/60</span></label><input type="number" id="qtL" min="0" max="60" value="0"></div>
+              <div class="field"><label>Theory CIE - Quiz+Test <span class="hint">/60</span></label><input type="number" id="qtL" min="0" max="60" value="0"></div>
               <div class="field"><label>Theory CIE total <span class="hint">/100</span></label><input type="number" id="cieT" min="0" max="100" value="0"></div>
               <div class="field"><label>Lab CIE <span class="hint">/50</span></label><input type="number" id="cieL" min="0" max="50" value="0"></div>
             </div>
@@ -406,8 +406,7 @@ window.MCA = window.MCA || {};
       return `
         <div class="card">
           <h2>Final GPA Calculator</h2>
-          <p class="sub">Semester ${state.semesterKey} · pre-loaded with its real courses — edit freely.</p>
-
+          <p class="sub">Semester ${state.semesterKey} · pre-loaded with its real courses, edit freely.</p>
           <table class="ledger" id="gpaTable">
             <thead><tr><th>Course</th><th>Credits</th><th>Grade</th><th></th></tr></thead>
             <tbody></tbody>
@@ -546,7 +545,7 @@ window.MCA = window.MCA || {};
         </div>`).join('');
       return `
         <div class="card">
-          <h2>FAQ — how the grading works</h2>
+          <h2>FAQ - how the grading works</h2>
           <p class="sub">Every formula this tool uses, explained in one place.</p>
           <div class="faq-search">
             <input type="text" id="faqSearch" placeholder="Search the FAQ…">

@@ -73,6 +73,15 @@ window.MCA = window.MCA || {};
       </div>`;
   }
 
+  function renderHandbookChoice(){
+    return `
+      <div class="pdf-choice" role="group" aria-label="Handbook PDF scheme">
+        <!-- Make sure the filename matches your actual handbook PDF in the docs folder -->
+        <a class="pdf-chip" href="${ROOT}docs/PG-2024-Scheme-Handbook.pdf" target="_blank" rel="noopener">2024 Handbook</a>
+        <span class="pdf-chip disabled" aria-disabled="true">2026 Handbook <span class="soon-badge">Coming soon</span></span>
+      </div>`;
+  }
+
   function renderHeader(activeId){
     const nav = navLinks().map(l=>{
       const cls = l.id === activeId ? 'current' : '';
@@ -116,17 +125,25 @@ window.MCA = window.MCA || {};
     const year = new Date().getFullYear();
     return `
       <p class="footer-about">
-        <strong>RVCE MCA Grade Calculator</strong> is an independent, unofficial grades and GPA calculator for RVCE MCA students, built using the published PG Academic Handbook and the syllabus scheme. Not affiliated with or endorsed by R V College of Engineering.
+        <strong>RVCE MCA Grade Calculator</strong> is an independent, unofficial grades and GPA calculator for RVCE MCA students, built using the published PG Academic Handbook and the syllabus scheme.
+      </p>
+      <p class="footer-about">
+         Not affiliated with or endorsed by R V College of Engineering.
       </p>
       <div class="footer-links">
         <a href="${REPO_URL}" target="_blank" rel="noopener">GitHub</a>
-        <a href="mailto:${EMAIL}">${EMAIL}</a>
+        <a href="mailto:${EMAIL}">Contact</a>
         <a href="${SYLLABUS_URL}" target="_blank" rel="noopener">Official Syllabus</a>
         <a href="${PAGES}faq.html">How Calculations Work</a>
       </div>
       <div class="footer-pdf">
         <span class="footer-pdf-label">Syllabus PDF</span>
         ${renderPdfChoice()}
+      </div>
+      <!-- Handbook PDF Section -->
+      <div class="footer-pdf">
+        <span class="footer-pdf-label">Handbook PDF</span>
+        ${renderHandbookChoice()}
       </div>
       <div class="legal">
         &copy; ${year} B R Lohith Raj<br>

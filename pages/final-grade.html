@@ -4,8 +4,8 @@
 <meta charset="UTF-8">
 <script>(function(){try{var t=localStorage.getItem('mca-theme');if(t==='dark'){document.documentElement.setAttribute('data-theme','dark');}}catch(e){}})();</script>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Final Grade Calculator — RVCE MCA Grade Calculator</title>
-<meta name="description" content="Compute the final letter grade for an RVCE MCA course from CIE and SEE marks.">
+<title>Final Grade Calculator - RVCE MCA Grade Calculator</title>
+<meta name="description" content="Compute the final letter grade for every course in an RVCE MCA semester at once.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="../css/variables.css">
@@ -20,40 +20,26 @@
   <div class="page-hero">
     <div class="eyebrow" id="toolEyebrow">Semester</div>
     <h1>Final Grade Calculator</h1>
-    <p>Enter what you actually scored — checked against every passing condition in Table 4.4, not just the raw aggregate.</p>
+    <p>Enter what you actually scored for every course in this semester, checked against every passing condition in Table 4.4, not just the raw aggregate.</p>
   </div>
 
   <div id="breadcrumb"></div>
 
   <main id="app">
-    <div class="card">
-      <div class="field-row">
-        <div class="field" style="grid-column:1/-1;">
-          <label for="coursePick">Course</label>
-          <select id="coursePick"></select>
-        </div>
-      </div>
-      <div id="nonStdNote"></div>
+    <div class="course-grid" id="courseGrid"></div>
 
-      <div class="type-chip-row" id="typeSel">
-        <div class="type-chip" data-type="theory">Theory only</div>
-        <div class="type-chip" data-type="theory-lab">Theory + Lab</div>
-        <div class="type-chip" data-type="lab">Lab only</div>
-      </div>
-
-      <div class="field-row">
-        <div class="field"><label for="cie">CIE total <span class="hint" id="cieHint">/100</span></label><input type="number" id="cie" min="0" value="0"></div>
-        <div class="field"><label for="see">SEE total <span class="hint" id="seeHint">/100</span></label><input type="number" id="see" min="0" value="0"></div>
-      </div>
-
-      <div class="result" id="gradeResult"></div>
+    <div class="toolbar" style="margin-top:22px;">
+      <button type="button" class="btn ghost full" id="resetAllBtn">Reset All Marks</button>
     </div>
+
+    <div id="gradeScaleStrip" style="margin-top:20px;"></div>
   </main>
 
   <footer id="site-footer" class="site-footer"></footer>
 </div>
 
 <script src="../js/data.js"></script>
+<script src="../js/icons.js"></script>
 <script src="../js/grading.js"></script>
 <script src="../js/engine.js"></script>
 <script src="../js/course-picker.js"></script>

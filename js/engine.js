@@ -65,7 +65,7 @@ window.MCA = window.MCA || {};
       const thOk = quizTest>=24 && theoryEquiv>=40;
       const labOk = labCIE>=25;
       const totOk = total>=75;
-      note = `Semester II &amp; III use PBL in place of Experiential Learning — not a labeling in the published handbook table, but the same floors apply: Quiz+Test &ge;24/60 &amp; Quiz+Test+PBL &ge;40/100 (${thOk?'met':'not met'}); Lab CIE &ge;25/50 (${labOk?'met':'not met'}); combined CIE &ge;75/150 (${totOk?'met':'not met'}).`;
+      note = `Semester II &amp; III use PBL in place of Experiential Learning, not a labeling in the published handbook table, but the same floors apply: Quiz+Test &ge;24/60 &amp; Quiz+Test+PBL &ge;40/100 (${thOk?'met':'not met'}); Lab CIE &ge;25/50 (${labOk?'met':'not met'}); combined CIE &ge;75/150 (${totOk?'met':'not met'}).`;
     } else if(type==='theory-lab'){
       /* Semester I: Lab / Practical CIE is 40 (record + test), plus its own
          10-mark Experiential Learning component — 50 combined, matching
@@ -122,6 +122,38 @@ window.MCA = window.MCA || {};
         ? `Need ${fmt(Math.max(neededSEE,0))} / 100 in the theory SEE.`
         : `Need ${fmt(Math.max(neededSEE,0))} / 50 in the lab SEE.`;
     return { cie, cieMax, cieLabel, seeMax, neededSEE, achievable, message };
+  }
+
+  /* ---------- All-grade SEE requirements (for the SEE Requirements popup) ----------
+     Given a finalized CIE and, for a theory+lab course, an optional fixed
+     Lab SEE contribution, returns what's needed in SEE for every passing
+     grade band at once, instead of checking one target at a time. */
+  function allGradeRequirements(type, cie, cieMax, labSeeFixed){
+    const bands = window.MCA.DATA.grading.bands.filter(b => b.grade !== 'F');
+    const seeMax = type==='theory' ? 100 : type==='theory-lab' ? 150 : 50;
+    const combinedFloor = type==='theory' ? 40 : type==='theory-lab' ? 65 : 25;
+    const maxTotal = cieMax+seeMax;
+    const hasLabSplit = type==='theory-lab' && labSeeFixed !== null && labSeeFixed !== undefined && !isNaN(labSeeFixed);
+
+    return bands.map(b=>{
+      const neededAgg = b.min/100*maxTotal;
+      const neededSEETotal = Math.max(neededAgg - cie, combinedFloor);
+      if(hasLabSplit){
+        const theorySEE = Math.max(neededSEETotal - labSeeFixed, 40);
+        return {
+          grade: b.grade, gp: b.gp,
+          neededSEE: theorySEE, seeMax: 100,
+          achievable: theorySEE<=100 && labSeeFixed<=50,
+          label: `Theory SEE ${fmt(Math.max(theorySEE,0))}/100 (Lab fixed at ${fmt(labSeeFixed)}/50)`
+        };
+      }
+      return {
+        grade: b.grade, gp: b.gp,
+        neededSEE: neededSEETotal, seeMax,
+        achievable: neededSEETotal<=seeMax,
+        label: `SEE ${fmt(Math.max(neededSEETotal,0))}/${seeMax}`
+      };
+    });
   }
 
   /* ---------- Final Grade Calculator (Table 4.3 + 4.4) ----------
@@ -190,5 +222,17 @@ window.MCA = window.MCA || {};
     return { totalCredits, cgpa, cls: degreeClass(cgpa) };
   }
 
-  window.MCA.engine = { computeCIE, estimateSEE, computeFinalGrade, computeSGPA, computeCGPA };
+  /* ---------- CGPA blend (prior CGPA + current semester, without
+     re-entering every past semester individually) ---------- */
+  function blendCGPA(priorCgpa, priorCredits, currentSgpa, currentCredits){
+    priorCgpa = clampNum(priorCgpa,0,10);
+    priorCredits = clampNum(priorCredits,0,200);
+    currentSgpa = clampNum(currentSgpa,0,10);
+    currentCredits = clampNum(currentCredits,0,60);
+    const totalCredits = priorCredits+currentCredits;
+    const cgpa = totalCredits ? (priorCgpa*priorCredits + currentSgpa*currentCredits)/totalCredits : 0;
+    return { cgpa, totalCredits, degreeClass: window.MCA.grading.degreeClass(cgpa) };
+  }
+
+  window.MCA.engine = { computeCIE, estimateSEE, allGradeRequirements, computeFinalGrade, computeSGPA, computeCGPA, blendCGPA };
 })();
