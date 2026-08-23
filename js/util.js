@@ -1,0 +1,133 @@
+/* ==========================================================================
+   util.js — shared, dependency-free helpers used across the site.
+   Loaded before every other MCA script (except data.js) on every page.
+   ========================================================================== */
+window.MCA = window.MCA || {};
+
+(function(){
+  /* ---------- HTML escaping ----------
+     Used any time text that isn't a hardcoded string literal in our own
+     source gets dropped into innerHTML. Nothing on this site currently
+     accepts free-text user input that reaches innerHTML (course names,
+     grades, etc. all come from data.js or fixed <select> options), but
+     this exists as defense-in-depth for breadcrumbs / dynamic labels and
+     for any future field that does take free text (e.g. course search). */
+  function escapeHTML(str){
+    if(str === null || str === undefined) return '';
+    return String(str).replace(/[&<>"']/g, function(ch){
+      switch(ch){
+        case '&': return '&amp;';
+        case '<': return '&lt;';
+        case '>': return '&gt;';
+        case '"': return '&quot;';
+        case "'": return '&#39;';
+      }
+    });
+  }
+
+  /* Wrapper that escapes a value before assigning it as the sole content
+     of an element — a slightly safer default than calling .innerHTML with
+     a hand-built string when the value itself isn't already trusted markup. */
+  function safeInnerHTML(el, text){
+    if(!el) return;
+    el.innerHTML = escapeHTML(text);
+  }
+
+  /* ---------- Epsilon-safe rounding ----------
+     Plain `Math.round(n*100)/100` can occasionally read the wrong way when
+     a chain of floating point additions/divisions lands a fraction of a
+     cent below or above the "true" value (e.g. 135.2 arriving internally as
+     135.19999999999998 or 135.20000000000002 after Quiz+Test+EL+Lab are
+     summed). Adding a tiny epsilon before rounding corrects for that
+     without ever rounding a value UP past where it actually is — this is
+     ordinary round-half-up to 2 decimal places, never a ceiling. */
+  const EPS = 1e-9;
+  function round2(n){
+    n = Number(n);
+    if(!isFinite(n)) return 0;
+    return Math.round((n + (n >= 0 ? EPS : -EPS)) * 100) / 100;
+  }
+
+  /* ---------- Toast ---------- */
+  let toastTimer = null;
+  function toast(message, tone){
+    let el = document.getElementById('mca-toast');
+    if(!el){
+      el = document.createElement('div');
+      el.id = 'mca-toast';
+      el.setAttribute('role', 'status');
+      el.setAttribute('aria-live', 'polite');
+      document.body.appendChild(el);
+    }
+    el.textContent = message;
+    el.className = 'mca-toast show' + (tone ? ' ' + tone : '');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(()=>{ el.className = 'mca-toast'; }, 2200);
+  }
+
+  /* ---------- Clipboard with feedback ----------
+     Wraps navigator.clipboard.writeText and always surfaces a toast, so a
+     silent failure (e.g. clipboard permission denied, insecure context)
+     is never mistaken for a successful copy. */
+  function copyWithFeedback(text, successMsg, failMsg){
+    successMsg = successMsg || 'Copied to clipboard';
+    failMsg = failMsg || 'Could not copy — copy it manually instead';
+    if(!navigator.clipboard || !navigator.clipboard.writeText){
+      toast(failMsg, 'error');
+      return Promise.resolve(false);
+    }
+    return navigator.clipboard.writeText(text).then(()=>{
+      toast(successMsg, 'ok');
+      return true;
+    }).catch(()=>{
+      toast(failMsg, 'error');
+      return false;
+    });
+  }
+
+  /* ---------- Numeric-only input hardening ----------
+     Every marks/credit/SGPA/CGPA field on the site is <input type="number">
+     with min/max, and input-guard.js already clamps out-of-range values.
+     This adds a second layer at the keystroke/paste level so letters,
+     scientific notation ("e"), and extra signs/decimals never make it into
+     the field in the first place, rather than being entered and then
+     silently clamped.  Digits, one decimal point, and normal editing keys
+     (backspace, delete, arrows, tab, home/end, ctrl/cmd shortcuts) are
+     allowed; "-" is allowed only for fields whose min is negative. */
+  const ALLOWED_KEYS = new Set([
+    'Backspace','Delete','Tab','ArrowLeft','ArrowRight','ArrowUp','ArrowDown',
+    'Home','End','Enter','Escape'
+  ]);
+
+  function isNumericField(el){
+    return el && el.tagName === 'INPUT' && el.type === 'number';
+  }
+
+  function onKeydown(e){
+    const el = e.target;
+    if(!isNumericField(el)) return;
+    if(e.ctrlKey || e.metaKey || e.altKey) return; // allow copy/paste/select-all etc.
+    if(ALLOWED_KEYS.has(e.key)) return;
+
+    const allowMinus = parseFloat(el.getAttribute('min')) < 0;
+    const isDigit = /^[0-9]$/.test(e.key);
+    const isDot = e.key === '.' && el.value.indexOf('.') === -1;
+    const isMinus = e.key === '-' && allowMinus && el.selectionStart === 0 && el.value.indexOf('-') === -1;
+
+    if(!(isDigit || isDot || isMinus)) e.preventDefault();
+  }
+
+  function onPaste(e){
+    const el = e.target;
+    if(!isNumericField(el)) return;
+    const text = (e.clipboardData || window.clipboardData).getData('text');
+    const allowMinus = parseFloat(el.getAttribute('min')) < 0;
+    const pattern = allowMinus ? /^-?\d*\.?\d*$/ : /^\d*\.?\d*$/;
+    if(!pattern.test(text)) e.preventDefault();
+  }
+
+  document.addEventListener('keydown', onKeydown, true);
+  document.addEventListener('paste', onPaste, true);
+
+  window.MCA.util = { escapeHTML, safeInnerHTML, round2, toast, copyWithFeedback };
+})();

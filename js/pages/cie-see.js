@@ -160,18 +160,33 @@
     };
     const cieLabScheme = type==='theory-lab' ? labScheme : undefined;
     const r = computeCIE(type, vals, cieLabScheme);
-    cardState.set(code, { total: r.total, max: r.max, type });
+    cardState.set(code, { total: r.total, max: r.max, type, dx: r.dx });
+
+    const roundingNote = `<div class="rounding-note">Marks are rounded to 2 decimal places using standard rounding (nearest hundredth) &mdash; never rounded up beyond that.</div>`;
 
     card.querySelector('.course-result').innerHTML = `
       <div class="breakdown">
         ${r.rows.map(row=>`<div class="row"><span>${row[0]}</span><span>${row[1]}</span></div>`).join('')}
         <div class="row total"><span>Finalized CIE</span><span>${fmt(r.total)} / ${r.max} &middot; ${fmt(r.pct)}%</span></div>
       </div>
-      <div class="callout" style="margin-top:10px;">${r.note}</div>`;
+      <div class="callout${r.dx ? ' dx' : ''}" style="margin-top:10px;">${r.note}</div>
+      ${roundingNote}`;
 
     const seeBtn = card.querySelector('.see-btn');
-    seeBtn.disabled = false;
-    seeBtn.classList.add('ready');
+    if(r.dx){
+      // Section 4.2: falling short of the CIE floor means the course is
+      // marked 'DX' — the student isn't eligible to sit the SEE for it at
+      // all, so the SEE Marks Required tool would be showing a meaningless
+      // "what SEE do I need" projection. Keep the button disabled and say
+      // why, instead of letting them proceed. See Bug #3.
+      seeBtn.disabled = true;
+      seeBtn.classList.remove('ready');
+      seeBtn.textContent = 'Not Eligible for SEE (DX)';
+    } else {
+      seeBtn.disabled = false;
+      seeBtn.classList.add('ready');
+      seeBtn.textContent = 'SEE Marks Required';
+    }
   }
 
   grid.addEventListener('click', (e)=>{
@@ -188,7 +203,7 @@
   document.getElementById('resetAllBtn').addEventListener('click', ()=>{
     grid.querySelectorAll('input[type=number]').forEach(inp => { inp.value = ''; inp.classList.remove('error'); });
     grid.querySelectorAll('.course-result').forEach(r => r.innerHTML = '');
-    grid.querySelectorAll('.see-btn').forEach(b => { b.disabled = true; b.classList.remove('ready'); });
+    grid.querySelectorAll('.see-btn').forEach(b => { b.disabled = true; b.classList.remove('ready'); b.textContent = 'SEE Marks Required'; });
     cardState.clear();
   });
 
@@ -245,13 +260,14 @@
           <div class="gr-marks">${r.label}${r.achievable ? '' : ' &mdash; not reachable'}</div>
         </div>
         <button type="button" class="gr-copy" title="Copy" data-copy="Grade ${r.grade}: ${r.label}">${COPY_SVG}</button>
-      </div>`).join('');
+      </div>`).join('') +
+      `<div class="rounding-note">SEE figures are rounded to 2 decimal places using standard rounding (nearest hundredth) &mdash; never rounded up beyond that.</div>`;
   }
 
   modalRows.addEventListener('click', (e)=>{
     const btn = e.target.closest('.gr-copy');
     if(!btn) return;
-    if(navigator.clipboard) navigator.clipboard.writeText(btn.dataset.copy).catch(()=>{});
+    window.MCA.util.copyWithFeedback(btn.dataset.copy, 'Requirement copied', 'Could not copy — copy it manually');
   });
 
   document.getElementById('copyAllBtn').addEventListener('click', (e)=>{
@@ -262,14 +278,22 @@
     const reqs = allGradeRequirements(state.type, state.total, state.max, labSeeFixed);
     const text = `${modalSubject.textContent} \u2014 CIE ${modalCie.textContent}\n` +
       reqs.map(r => `Grade ${r.grade} (${r.gp}): ${r.label}${r.achievable ? '' : ' - not reachable'}`).join('\n');
-    if(navigator.clipboard) navigator.clipboard.writeText(text).catch(()=>{});
     const btn = e.currentTarget;
-    const original = btn.textContent;
-    btn.textContent = 'Copied';
-    setTimeout(()=>{ btn.textContent = original; }, 1500);
+    window.MCA.util.copyWithFeedback(text, 'All requirements copied', 'Could not copy — copy them manually').then(ok=>{
+      if(!ok) return;
+      const original = btn.textContent;
+      btn.textContent = 'Copied';
+      setTimeout(()=>{ btn.textContent = original; }, 1500);
+    });
   });
 
   function closeModal(){ overlay.classList.add('hidden'); currentModalCode = null; }
   document.getElementById('seeModalClose').addEventListener('click', closeModal);
   overlay.addEventListener('click', (e)=>{ if(e.target === overlay) closeModal(); });
+  // Escape key closes the modal from anywhere on the page, matching
+  // standard modal behaviour (previously only the × button and backdrop
+  // click worked).
+  document.addEventListener('keydown', (e)=>{
+    if(e.key === 'Escape' && !overlay.classList.contains('hidden')) closeModal();
+  });
 })();

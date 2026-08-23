@@ -3,6 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <script>(function(){try{var t=localStorage.getItem('mca-theme');if(t==='dark'){document.documentElement.setAttribute('data-theme','dark');}}catch(e){}})();</script>
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-qlmtBACaL5yO2przW9aRA79fJYme7UqSjVFLsmIlb/8='; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data:; connect-src 'self'; object-src 'none'; base-uri 'self'; frame-ancestors 'none'">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>CGPA Calculator - RVCE MCA Grade Calculator</title>
 <meta name="description" content="Compute CGPA across all four semesters of the RVCE MCA 2024 scheme.">
@@ -42,12 +43,14 @@
         <div class="progress-track"><div class="progress-fill" id="cgProgFill" style="width:0%"></div></div>
       </div>
       <div class="callout">Degree class applies only once every semester clears with no F grade outstanding (Section 4.12d).</div>
+      <div class="callout">This calculator blends whole-semester SGPA figures, so it assumes every course in a completed semester ended with a real letter grade (no outstanding F). The official CGPA formula excludes F-grade course credits entirely from both sides of the average &mdash; if you have a backlog, treat the number here as an estimate and check your official grade card / CoE for the exact figure.</div>
     </div>
   </main>
 
   <footer id="site-footer" class="site-footer"></footer>
 </div>
 
+<script src="../js/util.js"></script>
 <script src="../js/data.js"></script>
 <script src="../js/icons.js"></script>
 <script src="../js/grading.js"></script>

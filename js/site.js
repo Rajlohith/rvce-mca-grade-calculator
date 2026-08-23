@@ -13,10 +13,17 @@ window.MCA = window.MCA || {};
 
 (function(){
   const REPO_URL   = 'https://github.com/Rajlohith/rvce-mca-grade-calculator';
-  const EMAIL      = 'brlohithraj.mca25@rvce.edu.in';
+  // Obfuscated so plain-text scrapers/bots that scan page source for
+  // "mailto:" or "@" patterns don't harvest the address directly; anyone
+  // reading it in a rendered browser still sees and can click a normal
+  // mailto link. Not a security boundary — just cuts down on spam bots.
+  const EMAIL_USER = 'brlohithraj.mca25';
+  const EMAIL_HOST = 'rvce.edu.in';
+  const EMAIL = `${EMAIL_USER}@${EMAIL_HOST}`;
   const SYLLABUS_URL = 'https://rvce.edu.in/academics_and_examinations/rvce_scheme_syllabus/';
   const HANDBOOK_URL = 'https://rvce.edu.in/handbook/';
   const THEME_KEY = 'mca-theme';
+  const { escapeHTML } = window.MCA.util;
 
   const IN_PAGES = /\/pages\//.test(window.location.pathname);
   const ROOT  = IN_PAGES ? '../' : '';       // prefix to reach the project root
@@ -30,6 +37,14 @@ window.MCA = window.MCA || {};
       { id:'faq',   label:'FAQ',       href: PAGES + 'faq.html' }
     ];
   }
+
+  // Every nav/breadcrumb label used on this site today is a hardcoded
+  // string literal, so this isn't reachable by anything a visitor can
+  // control. It's still escaped before going into innerHTML as
+  // defense-in-depth, so a future label built from dynamic data (e.g. a
+  // course name or query param) can't become a markup-injection point
+  // just because nobody remembered to escape it there too.
+  function escapeLabel(label){ return escapeHTML(label); }
 
   function qs(name, fallback){
     const v = new URLSearchParams(window.location.search).get(name);
@@ -69,7 +84,7 @@ window.MCA = window.MCA || {};
   function renderPdfChoice(){
     return `
       <div class="pdf-choice" role="group" aria-label="Syllabus PDF scheme">
-        <a class="pdf-chip" href="${ROOT}docs/MCA-2024-Scheme-Syllabus.pdf" target="_blank" rel="noopener">2024 Scheme</a>
+        <a class="pdf-chip" href="${ROOT}docs/MCA-2024-Scheme-Syllabus.pdf" target="_blank" rel="noopener noreferrer">2024 Scheme</a>
         <span class="pdf-chip disabled" aria-disabled="true">2026 Scheme <span class="soon-badge">Coming soon</span></span>
       </div>`;
   }
@@ -78,7 +93,7 @@ window.MCA = window.MCA || {};
     return `
       <div class="pdf-choice" role="group" aria-label="Handbook PDF scheme">
         <!-- Make sure the filename matches your actual handbook PDF in the docs folder -->
-        <a class="pdf-chip" href="${ROOT}docs/PG-2024-Scheme-Handbook.pdf" target="_blank" rel="noopener">2024 Handbook</a>
+        <a class="pdf-chip" href="${ROOT}docs/PG-2024-Scheme-Handbook.pdf" target="_blank" rel="noopener noreferrer">2024 Handbook</a>
         <span class="pdf-chip disabled" aria-disabled="true">2026 Handbook <span class="soon-badge">Coming soon</span></span>
       </div>`;
   }
@@ -86,7 +101,7 @@ window.MCA = window.MCA || {};
   function renderHeader(activeId){
     const nav = navLinks().map(l=>{
       const cls = l.id === activeId ? 'current' : '';
-      return `<a href="${l.href}" class="${cls}">${l.label}</a>`;
+      return `<a href="${escapeHTML(l.href)}" class="${cls}">${escapeLabel(l.label)}</a>`;
     }).join('');
     return `
       <div class="site-header-inner">
@@ -99,7 +114,7 @@ window.MCA = window.MCA || {};
         </a>
         <div class="site-nav">
           ${nav}
-          <a class="ext" href="${REPO_URL}" target="_blank" rel="noopener">GitHub</a>
+          <a class="ext" href="${REPO_URL}" target="_blank" rel="noopener noreferrer">GitHub</a>
           <button type="button" id="themeToggle" class="theme-toggle" aria-pressed="false" aria-label="Toggle dark mode">
             <span class="toggle-track"><span class="toggle-thumb"></span></span>
           </button>
@@ -111,8 +126,8 @@ window.MCA = window.MCA || {};
     if(!trail || !trail.length) return '';
     const parts = trail.map((c,i)=>{
       const isLast = i === trail.length - 1;
-      if(isLast || !c.href) return `<span class="current">${c.label}</span>`;
-      return `<a href="${c.href}">${c.label}</a>`;
+      if(isLast || !c.href) return `<span class="current">${escapeLabel(c.label)}</span>`;
+      return `<a href="${escapeHTML(c.href)}">${escapeLabel(c.label)}</a>`;
     });
     return `<nav class="breadcrumb" aria-label="Breadcrumb">` +
       parts.join(`<span class="sep">&rsaquo;</span>`) +
@@ -132,10 +147,10 @@ window.MCA = window.MCA || {};
          Not affiliated with or endorsed by R V College of Engineering.
       </p>
       <div class="footer-links">
-        <a href="${REPO_URL}" target="_blank" rel="noopener">GitHub</a>
+        <a href="${REPO_URL}" target="_blank" rel="noopener noreferrer">GitHub</a>
         <a href="mailto:${EMAIL}">Contact</a>
-        <a href="${SYLLABUS_URL}" target="_blank" rel="noopener">Official Syllabus</a>
-        <a href="${HANDBOOK_URL}" target="_blank" rel="noopener">Official Handbook</a>
+        <a href="${SYLLABUS_URL}" target="_blank" rel="noopener noreferrer">Official Syllabus</a>
+        <a href="${HANDBOOK_URL}" target="_blank" rel="noopener noreferrer">Official Handbook</a>
         <a href="${PAGES}faq.html">How Calculations Work</a>
       </div>
       <div class="footer-pdf">

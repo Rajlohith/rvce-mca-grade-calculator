@@ -1,3 +1,21 @@
+# OS / editor cruft
 .DS_Store
+Thumbs.db
 *.log
 .vscode/
+
+# Dependencies / build output
+node_modules/
+dist/
+
+# Environment & secrets
+.env
+.env.*
+serviceAccountKey.json
+
+# Firebase
+.firebase/
+firebase-debug.log
+firestore-debug.log
+ui-debug.log
+.firebaserc

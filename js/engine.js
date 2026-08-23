@@ -30,7 +30,7 @@ window.MCA = window.MCA || {};
     const testScaled = testRaw/100*40;                 // scaled down to /40
     const quizTest = quiz+testScaled;
 
-    let rows=[], total=0, max=0, note='';
+    let rows=[], total=0, max=0, note='', passesFloor=false;
     if(type==='theory'){
       const theoryCIE = quizTest+el;
       total = theoryCIE; max = 100;
@@ -40,6 +40,7 @@ window.MCA = window.MCA || {};
         ['Experiential Learning', fmt(el)+' / 40'],
       ];
       const ok = quizTest>=30 && total>=50;
+      passesFloor = ok;
       note = `Passing floor: Quiz+Test &ge;30/60 <b>and</b> overall CIE &ge;50/100. Currently Quiz+Test ${fmt(quizTest)}/60, CIE ${fmt(total)}/100 &mdash; <b style="color:${ok?'#16a34a':'#dc2626'}">${ok?'meets the CIE floor':'below the CIE floor'}</b>.`;
     } else if(type==='theory-lab' && labScheme==='sem23'){
       /* Semester II & III: PBL (Project Based Learning) stands in for the
@@ -65,6 +66,7 @@ window.MCA = window.MCA || {};
       const thOk = quizTest>=24 && theoryEquiv>=40;
       const labOk = labCIE>=25;
       const totOk = total>=75;
+      passesFloor = thOk && labOk && totOk;
       note = `Semester II &amp; III use PBL in place of Experiential Learning, not a labeling in the published handbook table, but the same floors apply: Quiz+Test &ge;24/60 &amp; Quiz+Test+PBL &ge;40/100 (${thOk?'met':'not met'}); Lab CIE &ge;25/50 (${labOk?'met':'not met'}); combined CIE &ge;75/150 (${totOk?'met':'not met'}).`;
     } else if(type==='theory-lab'){
       /* Semester I: Lab / Practical CIE is a single combined 50-mark field
@@ -84,6 +86,7 @@ window.MCA = window.MCA || {};
       const thOk = quizTest>=24 && theoryCIE>=40;
       const labOk = lab>=25;
       const totOk = total>=75;
+      passesFloor = thOk && labOk && totOk;
       note = `Theory Quiz+Test &ge;24/60 &amp; Theory CIE &ge;40/100 (${thOk?'met':'not met'}); Lab (CIE+EL) &ge;25/50 (${labOk?'met':'not met'}); combined CIE &ge;75/150 (${totOk?'met':'not met'}).`;
     } else {
       const lab=clampNum(v.lab,0,40);
@@ -94,10 +97,14 @@ window.MCA = window.MCA || {};
         ['Experiential Learning', fmt(elLab)+' / 10'],
       ];
       const ok = total>=25;
+      passesFloor = ok;
       note = `Passing floor: CIE &ge;25/50 &mdash; currently <b style="color:${ok?'#16a34a':'#dc2626'}">${fmt(total)}/50 ${ok?'(met)':'(not met)'}</b>.`;
     }
     const pct = max ? total/max*100 : 0;
-    return { rows, total, max, pct, note };
+    /* If the CIE floor isn't met, Section 4.2 marks the course 'DX' — the
+       student isn't eligible to sit the SEE for it at all until they
+       re-register and clear the CIE requirement in a later semester. */
+    return { rows, total, max, pct, note, passesFloor, dx: !passesFloor };
   }
 
   /* ---------- SEE Requirement Estimator ----------
@@ -130,17 +137,34 @@ window.MCA = window.MCA || {};
     const combinedFloor = type==='theory' ? 40 : type==='theory-lab' ? 65 : 25;
     const maxTotal = cieMax+seeMax;
     const hasLabSplit = type==='theory-lab' && labSeeFixed !== null && labSeeFixed !== undefined && !isNaN(labSeeFixed);
+    // Table 4.4: Practice component of SEE must independently be >=50% of
+    // its own 50 marks (>=25/50), regardless of how the theory side lands.
+    // A fixed Lab SEE entry below this floor makes the course unpassable
+    // no matter what the theory SEE is, so it must never be reported as
+    // achievable (this was previously missed — see Bug #4).
+    const labSeeMeetsFloor = !hasLabSplit || (labSeeFixed >= 25 && labSeeFixed <= 50);
 
     return bands.map(b=>{
       const neededAgg = b.min/100*maxTotal;
       const neededSEETotal = Math.max(neededAgg - cie, combinedFloor);
       if(hasLabSplit){
         const theorySEE = Math.max(neededSEETotal - labSeeFixed, 40);
+        const labLabel = `Lab fixed at ${fmt(labSeeFixed)}/50`;
+        if(!labSeeMeetsFloor){
+          return {
+            grade: b.grade, gp: b.gp,
+            neededSEE: theorySEE, seeMax: 100,
+            achievable: false,
+            label: labSeeFixed > 50
+              ? `Lab SEE can't exceed 50/50`
+              : `Lab SEE must be &ge;25/50 to pass at all (${labLabel} is below the floor)`
+          };
+        }
         return {
           grade: b.grade, gp: b.gp,
           neededSEE: theorySEE, seeMax: 100,
-          achievable: theorySEE<=100 && labSeeFixed<=50,
-          label: `Theory SEE ${fmt(Math.max(theorySEE,0))}/100 (Lab fixed at ${fmt(labSeeFixed)}/50)`
+          achievable: theorySEE<=100 && labSeeMeetsFloor,
+          label: `Theory SEE ${fmt(Math.max(theorySEE,0))}/100 (${labLabel})`
         };
       }
       return {
@@ -153,14 +177,21 @@ window.MCA = window.MCA || {};
   }
 
   /* ---------- Final Grade Calculator (Table 4.3 + 4.4) ----------
-     Takes only the finalized CIE total and SEE total for the course — no
-     quiz/test/lab sub-breakdown. The pass/fail floors applied here are the
-     TOTAL-row conditions from Table 4.4 (the row that already speaks in
-     terms of overall CIE and overall SEE, not the individual Theory/Practice
-     sub-components), so nothing is lost by only asking for the two totals:
-       Theory only        CIE ≥50%, SEE ≥40%, Aggregate ≥50%
-       Theory + Practice   CIE ≥50%, SEE ≥50%, Aggregate ≥50%   (Table 4.4 TOTAL row)
-       Practice only        CIE ≥50%, SEE ≥50%, Aggregate ≥50% */
+     Theory-only and Practice-only courses have a single CIE and a single
+     SEE floor, so the finalized totals are all Table 4.4 needs:
+       Theory only    CIE ≥50%, SEE ≥40%, Aggregate ≥50%
+       Practice only  CIE ≥50%, SEE ≥50%, Aggregate ≥50%
+
+     Theory+Practice courses are different: Table 4.4 sets floors on the
+     Theory and Practice *components* of SEE separately (Theory SEE ≥40%
+     of 100, Practice/Lab SEE ≥50% of 50) in addition to the combined
+     TOTAL row (CIE ≥50%, SEE ≥50%, Aggregate ≥50%). A single combined SEE
+     number can satisfy the TOTAL row while one component is actually
+     failing — e.g. Theory SEE 35/100 (fails the 40% floor) plus Lab SEE
+     50/50 (max) sums to 85/150 = 56.7%, which clears TOTAL SEE ≥50% even
+     though the course should be an F. So theory-lab final grades are
+     computed from the four separate components (Theory CIE/SEE, Lab
+     CIE/SEE) rather than two combined totals — see Bug #2 / B1. */
   function finalGradeMax(type){
     if(type==='theory') return { cieMax:100, seeMax:100 };
     if(type==='theory-lab') return { cieMax:150, seeMax:150 };
@@ -168,6 +199,8 @@ window.MCA = window.MCA || {};
   }
 
   function computeFinalGrade(type, v){
+    if(type==='theory-lab') return computeFinalGradeTheoryLab(v);
+
     const { cieMax, seeMax } = finalGradeMax(type);
     const cie = clampNum(v.cie,0,cieMax);
     const see = clampNum(v.see,0,seeMax);
@@ -184,6 +217,39 @@ window.MCA = window.MCA || {};
     const band = gradeFromPct(pct);
     const isPass = allOk && band.grade!=='F';
     return { total, max, pct, cie, cieMax, see, seeMax, badges, isPass, letter: allOk?band.grade:'F', gp: allOk?band.gp:0 };
+  }
+
+  /* Theory+Practice final grade: four inputs, per-component floors on both
+     CIE and SEE, plus the combined TOTAL row — matching Table 4.4 in full. */
+  function computeFinalGradeTheoryLab(v){
+    const theoryCie = clampNum(v.theoryCie,0,100);
+    const theorySee = clampNum(v.theorySee,0,100);
+    const labCie = clampNum(v.labCie,0,50);
+    const labSee = clampNum(v.labSee,0,50);
+
+    const cie = theoryCie+labCie, cieMax = 150;
+    const see = theorySee+labSee, seeMax = 150;
+    const total = cie+see, max = cieMax+seeMax;
+
+    const badges = [
+      [`Theory CIE ≥40% (40/100)`, theoryCie>=40],
+      [`Theory SEE ≥40% (40/100)`, theorySee>=40],
+      [`Lab CIE ≥50% (25/50)`, labCie>=25],
+      [`Lab SEE ≥50% (25/50)`, labSee>=25],
+      [`Overall CIE ≥50% (75/150)`, cie>=75],
+      [`Overall SEE ≥50% (75/150)`, see>=75],
+      [`Aggregate ≥50%`, total/max*100 >= 50],
+    ];
+    const allOk = badges.every(b=>b[1]);
+
+    const pct = total/max*100;
+    const band = gradeFromPct(pct);
+    const isPass = allOk && band.grade!=='F';
+    return {
+      total, max, pct, cie, cieMax, see, seeMax, badges, isPass,
+      letter: allOk?band.grade:'F', gp: allOk?band.gp:0,
+      theoryCie, theorySee, labCie, labSee
+    };
   }
 
   /* ---------- SGPA ---------- */

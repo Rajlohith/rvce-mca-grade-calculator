@@ -3,6 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <script>(function(){try{var t=localStorage.getItem('mca-theme');if(t==='dark'){document.documentElement.setAttribute('data-theme','dark');}}catch(e){}})();</script>
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-qlmtBACaL5yO2przW9aRA79fJYme7UqSjVFLsmIlb/8='; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data:; connect-src 'self'; object-src 'none'; base-uri 'self'; frame-ancestors 'none'">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>RVCE MCA Grade Calculator</title>
 <meta name="description" content="Unofficial CIE, SEE, grade, and GPA calculator for RVCE MCA students, built from the PG Academic Handbook and the 2024 scheme syllabus.">
@@ -41,39 +42,12 @@
   <footer id="site-footer" class="site-footer"></footer>
 </div>
 
+<script src="js/util.js"></script>
 <script src="js/data.js"></script>
 <script src="js/icons.js"></script>
 <script src="js/grading.js"></script>
 <script src="js/input-guard.js"></script>
 <script src="js/site.js"></script>
-<script>
-  window.MCA.site.mount({ active: 'home' });
-  const { helpCircle, trendingUp, fileText, arrowRight } = window.MCA.icons;
-  document.getElementById('quickLinks').innerHTML = `
-    <a class="list-card" href="pages/faq.html">
-      <div class="icon-badge solid purple">${helpCircle}</div>
-      <div class="list-card-body">
-        <div class="list-card-title">FAQ</div>
-        <div class="list-card-sub">How every formula works</div>
-      </div>
-      <div class="list-card-arrow">${arrowRight}</div>
-    </a>
-    <a class="list-card" href="pages/cgpa.html">
-      <div class="icon-badge solid green">${trendingUp}</div>
-      <div class="list-card-body">
-        <div class="list-card-title">CGPA Calculator</div>
-        <div class="list-card-sub">Across all four semesters</div>
-      </div>
-      <div class="list-card-arrow">${arrowRight}</div>
-    </a>
-    <div class="list-card" style="cursor:default;">
-      <div class="icon-badge solid orange">${fileText}</div>
-      <div class="list-card-body">
-        <div class="list-card-title">Syllabus PDF</div>
-        <div class="list-card-sub" style="margin-bottom:8px;">Choose a scheme, Semester I&ndash;IV</div>
-        ${window.MCA.site.renderPdfChoice()}
-      </div>
-    </div>`;
-</script>
+<script src="js/pages/home.js"></script>
 </body>
 </html>
