@@ -1,12 +1,12 @@
 (function(){
   const { qs, withParams, mount } = window.MCA.site;
-  const { YEAR_SEMS, coursesFor } = window.MCA.courses;
+  const { coursesFor } = window.MCA.courses;
   const { computeFinalGrade } = window.MCA.engine;
   const { fmt, renderGradeScale } = window.MCA.grading;
   const DATA = window.MCA.DATA;
 
-  const scheme = qs('scheme'), year = qs('year'), semester = qs('semester');
-  const validSem = semester && DATA.semesters[semester] && YEAR_SEMS[year] && YEAR_SEMS[year].includes(semester);
+  const scheme = qs('scheme'), semester = qs('semester');
+  const validSem = semester && DATA.semesters[semester];
   if(scheme !== '2024' || !validSem){ window.location.replace('scheme.html'); return; }
 
   mount({
@@ -14,9 +14,8 @@
     trail: [
       { label:'Home', href:'../index.html' },
       { label:'Scheme', href:'scheme.html' },
-      { label:'2024 Scheme', href: withParams('year.html', { scheme }) },
-      { label:`Year ${year}`, href: withParams('semester.html', { scheme, year }) },
-      { label:`Semester ${semester}`, href: withParams('tools.html', { scheme, year, semester }) },
+      { label:'2024 Scheme', href: withParams('semester.html', { scheme }) },
+      { label:`Semester ${semester}`, href: withParams('tools.html', { scheme, semester }) },
       { label:'Final Grade' }
     ]
   });
@@ -58,8 +57,8 @@
     return `<div class="course-card" data-code="${course.code}" data-type="${course.type}">
       ${head}
       <div class="field-row">
-        <div class="field"><label>CIE total <span class="hint">/${cieMax}</span></label><input type="number" class="f-cie req" min="0" max="${cieMax}" step="1" value=""></div>
-        <div class="field"><label>SEE total <span class="hint">/${seeMax}</span></label><input type="number" class="f-see req" min="0" max="${seeMax}" step="1" value=""></div>
+        <div class="field"><label>CIE total <span class="hint">/${cieMax}</span></label><input type="number" class="f-cie req" min="0" max="${cieMax}" value=""></div>
+        <div class="field"><label>SEE total <span class="hint">/${seeMax}</span></label><input type="number" class="f-see req" min="0" max="${seeMax}" value=""></div>
       </div>
       <div class="toolbar"><button type="button" class="btn amber full calc-btn">Calculate Grade</button></div>
       <div class="course-result"></div>
@@ -109,10 +108,7 @@
   });
 
   grid.addEventListener('input', (e)=>{
-  if(e.target.matches('input.req')){
-    e.target.value = e.target.value.replace(/\D/g, '');
-    if(e.target.value !== '') e.target.classList.remove('error');
-  }
+    if(e.target.matches('input.req') && e.target.value !== '') e.target.classList.remove('error');
   });
 
   document.getElementById('resetAllBtn').addEventListener('click', ()=>{

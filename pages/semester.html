@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <script>(function(){try{var t=localStorage.getItem('mca-theme');if(t!=='light'){document.documentElement.setAttribute('data-theme','dark');}}catch(e){}})();</script>
 <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-o/+GXyt6byeaf7tb18ij7cN6UOI+QKMRnpkf0vF0viY='; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data:; connect-src 'self'; object-src 'none'; base-uri 'self'; frame-ancestors 'none'">
+<meta name="robots" content="noindex">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Choose your semester - RVCE MCA Grade Calculator</title>
 <meta name="description" content="Choose a semester of the RVCE MCA 2024 scheme.">
@@ -19,9 +20,9 @@
 
 <div class="wrap">
   <div class="page-hero">
-    <div class="eyebrow">Step 3 of 4</div>
+    <div class="eyebrow">Step 2 of 3</div>
     <h1 id="semTitle">Which semester?</h1>
-    <p id="semSub">&nbsp;</p>
+    <p id="semSub">2024 Scheme &middot; pick any of the four semesters</p>
   </div>
 
   <div id="breadcrumb"></div>
@@ -30,11 +31,10 @@
     <div class="card">
       <div class="step-track">
         <span class="step done">1 &middot; Scheme</span>
-        <span class="step done">2 &middot; Year</span>
-        <span class="step active">3 &middot; Semester</span>
-        <span class="step">4 &middot; Tool</span>
+        <span class="step active">2 &middot; Semester</span>
+        <span class="step">3 &middot; Tool</span>
       </div>
-      <div class="choice-grid" id="semGrid"></div>
+      <div id="semGroups"></div>
     </div>
   </main>
 

@@ -51,7 +51,7 @@
 
 .breakdown{ font-size:13.5px; display:flex; flex-direction:column; gap:6px; margin-top:8px; }
 .breakdown .row{ display:flex; justify-content:space-between; gap:12px; }
-.breakdown .row.total{ border-top:1px solid var(--line-strong); padding-top:8px; margin-top:4px; font-weight:700; font-size:15px; white-space:nowrap; }
+.breakdown .row.total{ border-top:1px solid var(--line-strong); padding-top:8px; margin-top:4px; font-weight:700; font-size:15px; }
 .breakdown .row span:first-child{ color:var(--ink-soft); font-weight:500; }
 
 /* ---------- Tables (SGPA / CGPA) ---------- */
@@ -427,6 +427,17 @@ table.ledger input[type=checkbox]{
 /* ---------- Choice cards (year / scheme / semester / tool) ---------- */
 .choice-grid{ display:grid; grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); gap:16px; }
 .choice-grid.three{ grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); }
+
+/* ---------- Semester group (scheme -> semester page) ----------
+   Two named sections — Year 1 / Year 2 — each holding their own
+   choice-grid, so all four semesters are reachable in one click from the
+   scheme page without a separate year-selection step. */
+.semester-group{ margin-bottom:26px; }
+.semester-group:last-child{ margin-bottom:0; }
+.semester-group-label{
+  font-size:12.5px; font-weight:700; letter-spacing:.04em; text-transform:uppercase;
+  color:var(--ink-faint); margin-bottom:12px;
+}
 .choice-card{
   border:1.5px solid var(--line); border-radius:var(--radius-md); background:var(--card);
   padding:26px 22px; cursor:pointer; transition: all .2s ease; text-decoration:none; display:block;
@@ -504,29 +515,49 @@ table.ledger input[type=checkbox]{
 }
 
 /* ---------- Site footer ----------
-   Kept deliberately quiet: one short paragraph, one row of links, the
-   syllabus PDF choice, then the legal line. No repeated column headings,
-   no dense grid. */
+   Top row: brand/about copy on the left, the two PDF choosers right-
+   aligned on the right (mirroring the left block on wide screens).
+   Below that, the link row spans the full width and sits centered on its
+   own line, then the legal line, centered, at the very bottom. */
 .site-footer{ margin-top:40px; border-top:1px solid var(--line); padding-top:28px; }
+.footer-top{
+  display:flex; justify-content:space-between; align-items:flex-start;
+  gap:20px 48px; flex-wrap:wrap; margin-bottom:22px;
+}
+.footer-brand{ flex:1 1 320px; max-width:480px; }
+.footer-meta{
+  flex:1 1 260px; max-width:360px;
+  display:flex; flex-direction:column; gap:14px; align-items:flex-end;
+}
 .footer-about{
   font-size:13px; color:var(--ink-soft); line-height:1.65; max-width:70ch;
-  margin:0 0 18px;
+  margin:0 0 10px;
 }
+.footer-about:last-child{ margin-bottom:0; }
 .footer-about strong{ color:var(--ink); }
 .footer-links{
-  display:flex; flex-wrap:wrap; gap:8px 22px; margin-bottom:18px;
+  display:flex; flex-wrap:wrap; justify-content:center; gap:8px 22px;
+  text-align:center; padding-top:18px; margin-bottom:22px;
+  border-top:1px solid var(--line);
 }
 .footer-links a{
   font-size:13px; font-weight:600; color:var(--ink-soft); text-decoration:none;
 }
 .footer-links a:hover{ color:var(--link); text-decoration:underline; }
 .footer-pdf{
-  display:flex; align-items:center; gap:12px; flex-wrap:wrap; margin-bottom:22px;
+  display:flex; align-items:center; justify-content:flex-end; gap:12px; flex-wrap:wrap;
 }
 .footer-pdf-label{ font-size:13px; font-weight:600; color:var(--ink-soft); }
 .site-footer .legal{
   border-top:1px solid var(--line); padding-top:16px; text-align:center;
   font-size:11.5px; color:var(--ink-faint); line-height:1.8;
+}
+
+@media(max-width:640px){
+  .footer-top{ flex-direction:column; align-items:center; text-align:center; }
+  .footer-brand{ max-width:100%; }
+  .footer-meta{ align-items:center; max-width:100%; }
+  .footer-pdf{ justify-content:center; }
 }
 
 @media(max-width:520px){

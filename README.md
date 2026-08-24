@@ -9,7 +9,7 @@
 
 > An unofficial CIE, SEE, final-grade and GPA calculator for RVCE MCA (Master of Computer Applications) students, built directly from the college's own published rules rather than guesswork.
 
-This project walks a student through their scheme, year and semester, then opens a calculator that is already pre-loaded with that semester's real courses, credit values and CIE/SEE structure. Every course sits on its own card so multiple subjects can be worked through side by side, and nothing is calculated, finalized or shown as a passing grade until every field that matters for that subject has actually been filled in.
+This project walks a student through their scheme and semester, then opens a calculator that is already pre-loaded with that semester's real courses, credit values and CIE/SEE structure. Every course sits on its own card so multiple subjects can be worked through side by side, and nothing is calculated, finalized or shown as a passing grade until every field that matters for that subject has actually been filled in.
 
 The two documents this app is built from:
 
@@ -43,7 +43,7 @@ The two documents this app is built from:
 
 RVCE revises the MCA scheme roughly every two academic years, and every revision changes course codes, credit weights, and sometimes the CIE breakdown itself. Rather than a single generic "enter your marks" form, this project encodes the actual current scheme as structured data, and every calculator reads from that data instead of asking the student to remember or retype it.
 
-The site is a plain set of statically linked HTML pages: `index.html` at the project root, and everything else one level down in `pages/`. There is no single-page app router and no client-side framework. Query-string parameters (`?scheme=2024&year=1&semester=I`) carry the student's place in the wizard from page to page, so a bookmarked or shared link resolves correctly on its own, and the browser's back and forward buttons behave exactly as expected.
+The site is a plain set of statically linked HTML pages: `index.html` at the project root, and everything else one level down in `pages/`. There is no single-page app router and no client-side framework. Query-string parameters (`?scheme=2024&semester=I`) carry the student's place in the wizard from page to page, so a bookmarked or shared link resolves correctly on its own, and the browser's back and forward buttons behave exactly as expected.
 
 ## Key Features
 
@@ -96,9 +96,8 @@ Only the 2024 scheme is implemented today. A 2026 scheme option is visible on th
 ```mermaid
 flowchart TD
     A["index.html<br/>Home"] --> B["pages/scheme.html<br/>Step 1: Scheme"]
-    B --> C["pages/year.html<br/>Step 2: Year"]
-    C --> D["pages/semester.html<br/>Step 3: Semester"]
-    D --> E["pages/tools.html<br/>Step 4: Tool picker"]
+    B --> C["pages/semester.html<br/>Step 2: Semester"]
+    C --> E["pages/tools.html<br/>Step 3: Tool picker"]
     E --> F["pages/cie-see.html<br/>CIE Finalization & SEE Marks Required"]
     E --> G["pages/final-grade.html<br/>Final Grade Calculator"]
     E --> H["pages/final-gpa.html<br/>Final SGPA Calculator"]
@@ -108,7 +107,7 @@ flowchart TD
     A -.reachable anytime.-> J
 ```
 
-Scheme is chosen before year and semester because it is what actually determines everything downstream. The course list, credit structure and CIE/SEE weightage for all four semesters are fixed once per scheme, not once per year, so locking that choice in first keeps the rest of the wizard consistent.
+Scheme is chosen before semester because it is what actually determines everything downstream. The course list, credit structure and CIE/SEE weightage for all four semesters are fixed once per scheme, so locking that choice in first keeps the rest of the wizard consistent. Semester selection groups the four semesters under Year 1 / Year 2 headings on one page, rather than a separate year-selection step, since knowing the semester number is all any calculator downstream actually needs.
 
 ### Course Data Flow
 
@@ -176,9 +175,8 @@ rvce-mca-grade-calculator/
 ├── index.html                    Home (must stay at the project root)
 ├── pages/
 │   ├── scheme.html                 Step 1: scheme selection
-│   ├── year.html                   Step 2: year selection
-│   ├── semester.html               Step 3: semester selection
-│   ├── tools.html                  Step 4: calculator picker for a semester
+│   ├── semester.html               Step 2: semester selection (Year 1 / Year 2 grouped)
+│   ├── tools.html                  Step 3: calculator picker for a semester
 │   ├── cie-see.html                CIE Finalization & SEE Marks Required
 │   ├── final-grade.html            Final Grade Calculator
 │   ├── final-gpa.html              Final SGPA Calculator (+ CGPA blend)

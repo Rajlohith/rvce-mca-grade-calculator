@@ -140,27 +140,32 @@ window.MCA = window.MCA || {};
   function renderFooter(){
     const year = new Date().getFullYear();
     return `
-      <p class="footer-about">
-        <strong>RVCE MCA Grade Calculator</strong> is an independent, unofficial grades and GPA calculator for RVCE MCA students, built using the published PG Academic Handbook and the syllabus scheme.
-      </p>
-      <p class="footer-about">
-         Not affiliated with or endorsed by R V College of Engineering.
-      </p>
+      <div class="footer-top">
+        <div class="footer-brand">
+          <p class="footer-about">
+            <strong>RVCE MCA Grade Calculator</strong> is an independent, unofficial grades and GPA calculator for RVCE MCA students, built using the published PG Academic Handbook and the syllabus scheme.
+          </p>
+          <p class="footer-about">
+             Not affiliated with or endorsed by R V College of Engineering.
+          </p>
+        </div>
+        <div class="footer-meta">
+          <div class="footer-pdf">
+            <span class="footer-pdf-label">Syllabus PDF</span>
+            ${renderPdfChoice()}
+          </div>
+          <div class="footer-pdf">
+            <span class="footer-pdf-label">Handbook PDF</span>
+            ${renderHandbookChoice()}
+          </div>
+        </div>
+      </div>
       <div class="footer-links">
         <a href="${REPO_URL}" target="_blank" rel="noopener noreferrer">GitHub</a>
         <a href="mailto:${EMAIL}">Contact</a>
         <a href="${SYLLABUS_URL}" target="_blank" rel="noopener noreferrer">Official Syllabus</a>
         <a href="${HANDBOOK_URL}" target="_blank" rel="noopener noreferrer">Official Handbook</a>
         <a href="${PAGES}faq.html">How Calculations Work</a>
-      </div>
-      <div class="footer-pdf">
-        <span class="footer-pdf-label">Syllabus PDF</span>
-        ${renderPdfChoice()}
-      </div>
-      <!-- Handbook PDF Section -->
-      <div class="footer-pdf">
-        <span class="footer-pdf-label">Handbook PDF</span>
-        ${renderHandbookChoice()}
       </div>
       <div class="legal">
         &copy; ${year} B R Lohith Raj<br>

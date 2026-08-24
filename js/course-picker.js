@@ -10,6 +10,11 @@ window.MCA = window.MCA || {};
   const DATA = window.MCA.DATA;
   const YEAR_SEMS = { '1': ['I','II'], '2': ['III','IV'] };
 
+  function yearForSemester(semesterKey){
+    for(const y of Object.keys(YEAR_SEMS)) if(YEAR_SEMS[y].includes(semesterKey)) return y;
+    return null;
+  }
+
   function semesterList(){
     return Object.keys(DATA.semesters);
   }
@@ -81,6 +86,7 @@ window.MCA = window.MCA || {};
 
   window.MCA.courses = {
     YEAR_SEMS,
+    yearForSemester,
     semesterList,
     coursesFor,
     selectableEntries,

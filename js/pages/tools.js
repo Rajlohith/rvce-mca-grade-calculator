@@ -1,12 +1,11 @@
 (function(){
   const { qs, withParams, mount } = window.MCA.site;
-  const { YEAR_SEMS, coursesFor } = window.MCA.courses;
+  const { coursesFor } = window.MCA.courses;
   const DATA = window.MCA.DATA;
 
   const scheme = qs('scheme');
-  const year = qs('year');
   const semester = qs('semester');
-  const validSem = semester && DATA.semesters[semester] && YEAR_SEMS[year] && YEAR_SEMS[year].includes(semester);
+  const validSem = semester && DATA.semesters[semester];
 
   if(scheme !== '2024' || !validSem){
     window.location.replace('scheme.html');
@@ -18,9 +17,8 @@
     trail: [
       { label:'Home', href:'../index.html' },
       { label:'Scheme', href:'scheme.html' },
-      { label:'2024 Scheme', href: withParams('year.html', { scheme }) },
-      { label:`Year ${year}`, href: withParams('semester.html', { scheme, year }) },
-      { label:`Semester ${semester}`, href: withParams('tools.html', { scheme, year, semester }) },
+      { label:'2024 Scheme', href: withParams('semester.html', { scheme }) },
+      { label:`Semester ${semester}`, href: withParams('tools.html', { scheme, semester }) },
       { label:'Tools' }
     ]
   });
@@ -30,7 +28,7 @@
   document.getElementById('toolTitle').textContent = `Semester ${semester}`;
   document.getElementById('toolSub').textContent = `${d.totalCredits} credits across ${courseCount} courses \u00b7 what do you need?`;
 
-  const params = { scheme, year, semester };
+  const params = { scheme, semester };
   const { calculator, bookOpen, award, arrowRight } = window.MCA.icons;
   const tools = [
     {
