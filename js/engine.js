@@ -104,7 +104,24 @@ window.MCA = window.MCA || {};
     /* If the CIE floor isn't met, Section 4.2 marks the course 'DX' — the
        student isn't eligible to sit the SEE for it at all until they
        re-register and clear the CIE requirement in a later semester. */
-    return { rows, total, max, pct, note, passesFloor, dx: !passesFloor };
+
+    /* ---------- Department rounding: ceiling to the next whole mark ----------
+       RVCE's MCA department finalizes a course's CIE by rounding UP to the
+       next whole number, not to the nearest one — so a raw total of 135.1
+       or 135.4 both finalize as 136, the same as 135.9 would. This is a
+       ceiling, not standard rounding: 135.0 stays 135, but anything above
+       that up to 136.0 becomes 136. `total` is first rounded to 2 decimals
+       to strip ordinary floating-point noise (e.g. 135.40000000000003)
+       before the ceiling is applied, so a value that's genuinely exactly
+       135.4 doesn't accidentally read as "135.40000001" and still ceils
+       correctly either way.
+       This finalTotal — not the raw decimal above — is what actually gets
+       used as the CIE input for every SEE-requirement calculation below,
+       because that's the number your department will use once the
+       semester is finalized. */
+    const finalTotal = Math.ceil(fmt(total));
+    const finalPct = max ? Math.ceil(fmt(finalTotal/max*100)) : 0;
+    return { rows, total, max, pct, note, passesFloor, dx: !passesFloor, finalTotal, finalPct };
   }
 
   /* ---------- SEE Requirement Estimator ----------
@@ -178,20 +195,20 @@ window.MCA = window.MCA || {};
 
   /* ---------- Final Grade Calculator (Table 4.3 + 4.4) ----------
      Theory-only and Practice-only courses have a single CIE and a single
-     SEE floor, so the finalized totals are all Table 4.4 needs:
+     SEE floor:
        Theory only    CIE ≥50%, SEE ≥40%, Aggregate ≥50%
        Practice only  CIE ≥50%, SEE ≥50%, Aggregate ≥50%
 
-     Theory+Practice courses are different: Table 4.4 sets floors on the
-     Theory and Practice *components* of SEE separately (Theory SEE ≥40%
-     of 100, Practice/Lab SEE ≥50% of 50) in addition to the combined
-     TOTAL row (CIE ≥50%, SEE ≥50%, Aggregate ≥50%). A single combined SEE
-     number can satisfy the TOTAL row while one component is actually
-     failing — e.g. Theory SEE 35/100 (fails the 40% floor) plus Lab SEE
-     50/50 (max) sums to 85/150 = 56.7%, which clears TOTAL SEE ≥50% even
-     though the course should be an F. So theory-lab final grades are
-     computed from the four separate components (Theory CIE/SEE, Lab
-     CIE/SEE) rather than two combined totals — see Bug #2 / B1. */
+     Theory+Practice courses use one combined CIE total and one combined
+     SEE total (Table 4.4's TOTAL row: CIE ≥50%, SEE ≥50%, Aggregate ≥50%)
+     by design choice — this is simpler to fill in than four separate
+     component fields, at the cost of one known gap: Table 4.4 also sets
+     floors on the Theory and Practice *components* of SEE separately
+     (Theory SEE ≥40% of 100, Lab SEE ≥50% of 50), and a single combined
+     number can't show whether one of those two sub-floors was individually
+     missed even though the combined total clears 50%. If that matters for
+     a specific course, check the Theory and Lab SEE components add up to
+     at least 40 and 25 respectively before trusting a PASS here. */
   function finalGradeMax(type){
     if(type==='theory') return { cieMax:100, seeMax:100 };
     if(type==='theory-lab') return { cieMax:150, seeMax:150 };
@@ -199,8 +216,6 @@ window.MCA = window.MCA || {};
   }
 
   function computeFinalGrade(type, v){
-    if(type==='theory-lab') return computeFinalGradeTheoryLab(v);
-
     const { cieMax, seeMax } = finalGradeMax(type);
     const cie = clampNum(v.cie,0,cieMax);
     const see = clampNum(v.see,0,seeMax);
@@ -216,39 +231,15 @@ window.MCA = window.MCA || {};
     const pct = total/max*100;
     const band = gradeFromPct(pct);
     const isPass = allOk && band.grade!=='F';
-    return { total, max, pct, cie, cieMax, see, seeMax, badges, isPass, letter: allOk?band.grade:'F', gp: allOk?band.gp:0 };
-  }
-
-  /* Theory+Practice final grade: four inputs, per-component floors on both
-     CIE and SEE, plus the combined TOTAL row — matching Table 4.4 in full. */
-  function computeFinalGradeTheoryLab(v){
-    const theoryCie = clampNum(v.theoryCie,0,100);
-    const theorySee = clampNum(v.theorySee,0,100);
-    const labCie = clampNum(v.labCie,0,50);
-    const labSee = clampNum(v.labSee,0,50);
-
-    const cie = theoryCie+labCie, cieMax = 150;
-    const see = theorySee+labSee, seeMax = 150;
-    const total = cie+see, max = cieMax+seeMax;
-
-    const badges = [
-      [`Theory CIE ≥40% (40/100)`, theoryCie>=40],
-      [`Theory SEE ≥40% (40/100)`, theorySee>=40],
-      [`Lab CIE ≥50% (25/50)`, labCie>=25],
-      [`Lab SEE ≥50% (25/50)`, labSee>=25],
-      [`Overall CIE ≥50% (75/150)`, cie>=75],
-      [`Overall SEE ≥50% (75/150)`, see>=75],
-      [`Aggregate ≥50%`, total/max*100 >= 50],
-    ];
-    const allOk = badges.every(b=>b[1]);
-
-    const pct = total/max*100;
-    const band = gradeFromPct(pct);
-    const isPass = allOk && band.grade!=='F';
+    /* Same department ceiling convention as the CIE Finalizer (see
+       computeCIE above) applied to the finalized aggregate here too. */
+    const finalTotal = Math.ceil(fmt(total));
+    const finalPct = max ? Math.ceil(fmt(finalTotal/max*100)) : 0;
     return {
       total, max, pct, cie, cieMax, see, seeMax, badges, isPass,
       letter: allOk?band.grade:'F', gp: allOk?band.gp:0,
-      theoryCie, theorySee, labCie, labSee
+      finalTotal, finalPct,
+      componentCaveat: type==='theory-lab'
     };
   }
 

@@ -54,32 +54,12 @@
       </div>`;
     }
 
-    if(course.type === 'theory-lab'){
-      // Theory and Lab each carry their own CIE/SEE floor under Table 4.4
-      // (Theory ≥40% CIE & ≥40% SEE; Lab ≥50% CIE & ≥50% SEE), so they're
-      // entered — and checked — separately rather than as one combined
-      // CIE/SEE pair, which could hide a failing component. See Bug #2.
-      return `<div class="course-card" data-code="${course.code}" data-type="${course.type}">
-        ${head}
-        <div class="field-row">
-          <div class="field"><label>Theory CIE <span class="hint">/100</span></label><input type="number" class="f-theory-cie req" min="0" max="100" value=""></div>
-          <div class="field"><label>Theory SEE <span class="hint">/100</span></label><input type="number" class="f-theory-see req" min="0" max="100" value=""></div>
-        </div>
-        <div class="field-row">
-          <div class="field"><label>Lab CIE <span class="hint">/50</span></label><input type="number" class="f-lab-cie req" min="0" max="50" value=""></div>
-          <div class="field"><label>Lab SEE <span class="hint">/50</span></label><input type="number" class="f-lab-see req" min="0" max="50" value=""></div>
-        </div>
-        <div class="toolbar"><button type="button" class="btn amber full calc-btn">Calculate Grade</button></div>
-        <div class="course-result"></div>
-      </div>`;
-    }
-
     const { cieMax, seeMax } = MAX_BY_TYPE[course.type];
     return `<div class="course-card" data-code="${course.code}" data-type="${course.type}">
       ${head}
       <div class="field-row">
-        <div class="field"><label>CIE total <span class="hint">/${cieMax}</span></label><input type="number" class="f-cie req" min="0" max="${cieMax}" value=""></div>
-        <div class="field"><label>SEE total <span class="hint">/${seeMax}</span></label><input type="number" class="f-see req" min="0" max="${seeMax}" value=""></div>
+        <div class="field"><label>CIE total <span class="hint">/${cieMax}</span></label><input type="number" class="f-cie req" min="0" max="${cieMax}" step="1" value=""></div>
+        <div class="field"><label>SEE total <span class="hint">/${seeMax}</span></label><input type="number" class="f-see req" min="0" max="${seeMax}" step="1" value=""></div>
       </div>
       <div class="toolbar"><button type="button" class="btn amber full calc-btn">Calculate Grade</button></div>
       <div class="course-result"></div>
@@ -104,30 +84,21 @@
       return;
     }
     const type = card.dataset.type;
-    let r;
-    if(type === 'theory-lab'){
-      r = computeFinalGrade(type, {
-        theoryCie: card.querySelector('.f-theory-cie').value,
-        theorySee: card.querySelector('.f-theory-see').value,
-        labCie: card.querySelector('.f-lab-cie').value,
-        labSee: card.querySelector('.f-lab-see').value,
-      });
-    } else {
-      const cie = card.querySelector('.f-cie').value;
-      const see = card.querySelector('.f-see').value;
-      r = computeFinalGrade(type, { cie, see });
-    }
+    const cie = card.querySelector('.f-cie').value;
+    const see = card.querySelector('.f-see').value;
+    const r = computeFinalGrade(type, { cie, see });
 
     card.querySelector('.course-result').innerHTML = `
       <div class="result" style="margin-top:0;">
         <div class="stamp ${r.isPass?'pass':'fail'}"><span class="g">${r.letter}</span><span class="t">${r.isPass?'PASS':'FAIL'}</span></div>
         <div class="result-detail">
-          <div class="big">${fmt(r.total)} / ${r.max} &middot; ${fmt(r.pct)}% &middot; Grade point ${r.gp}</div>
+          <div class="big">${Math.round(r.total)} / ${r.max} (${Math.round(r.pct)}%) &middot; Grade point ${r.gp}</div>
           <div class="note">${r.isPass ? `Meets every passing condition &mdash; grade ${r.letter} stands.` : `A passing condition from Table 4.4 isn't met, so this is recorded as F regardless of the raw percentage.`}</div>
           <div class="badge-list">
             ${r.badges.map(b=>`<span class="badge ${b[1]?'ok':'no'}">${b[1]?'\u2713':'\u2715'} ${b[0]}</span>`).join('')}
           </div>
-          <div class="rounding-note">Marks and percentages are rounded to 2 decimal places using standard rounding (nearest hundredth) &mdash; never rounded up beyond that.</div>
+          <div class="callout" style="margin-top:10px;">Your department finalizes marks by rounding <b>up</b> to the next whole mark (ceiling) &mdash; so ${Math.round(r.total)} becomes <b>${r.finalTotal}</b>/${r.max} (${r.finalPct}%). ${r.componentCaveat ? `Note: Theory and Lab SEE floors (&ge;40/100 and &ge;25/50) aren't individually checked from a single combined SEE figure &mdash; verify them yourself if either component might be borderline.` : ''}</div>
+          <div class="rounding-note">Raw marks and percentages above are rounded to whole numbers for display.</div>
         </div>
       </div>`;
   }
@@ -138,7 +109,10 @@
   });
 
   grid.addEventListener('input', (e)=>{
-    if(e.target.matches('input.req') && e.target.value !== '') e.target.classList.remove('error');
+  if(e.target.matches('input.req')){
+    e.target.value = e.target.value.replace(/\D/g, '');
+    if(e.target.value !== '') e.target.classList.remove('error');
+  }
   });
 
   document.getElementById('resetAllBtn').addEventListener('click', ()=>{

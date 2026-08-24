@@ -160,16 +160,22 @@
     };
     const cieLabScheme = type==='theory-lab' ? labScheme : undefined;
     const r = computeCIE(type, vals, cieLabScheme);
-    cardState.set(code, { total: r.total, max: r.max, type, dx: r.dx });
+    // The SEE-requirement tools below key off the department's finalized
+    // (ceiling-rounded) CIE, not the raw decimal — see the note on
+    // computeCIE's finalTotal in engine.js.
+    cardState.set(code, { total: r.finalTotal, rawTotal: r.total, max: r.max, type, dx: r.dx });
 
     const roundingNote = `<div class="rounding-note">Marks are rounded to 2 decimal places using standard rounding (nearest hundredth) &mdash; never rounded up beyond that.</div>`;
+    const finalNote = `<div class="callout" style="margin-top:10px;">Your department finalizes CIE by rounding <b>up</b> to the next whole mark (ceiling) &mdash; so ${fmt(r.total)} becomes <b>${r.finalTotal}</b>, the same as any value between ${Math.floor(r.total)} and ${r.finalTotal} would. This finalized number, not the raw decimal above, is what's used for the SEE requirements below.</div>`;
 
     card.querySelector('.course-result').innerHTML = `
       <div class="breakdown">
         ${r.rows.map(row=>`<div class="row"><span>${row[0]}</span><span>${row[1]}</span></div>`).join('')}
-        <div class="row total"><span>Finalized CIE</span><span>${fmt(r.total)} / ${r.max} &middot; ${fmt(r.pct)}%</span></div>
+        <div class="row total"><span>Finalized CIE</span><span>${fmt(r.total)} / ${r.max} (${fmt(r.pct)}%)</span></div>
+        <div class="row total"><span>Final CIE (used for SEE)</span><span>${r.finalTotal} / ${r.max} (${r.finalPct}%)</span></div>
       </div>
       <div class="callout${r.dx ? ' dx' : ''}" style="margin-top:10px;">${r.note}</div>
+      ${finalNote}
       ${roundingNote}`;
 
     const seeBtn = card.querySelector('.see-btn');
