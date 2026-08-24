@@ -1,10 +1,9 @@
 # RVCE MCA Grade Calculator
 
-![Static Site](https://img.shields.io/badge/Type-Static%20Site-orange)
-![No Build Step](https://img.shields.io/badge/Build%20Step-None-success)
-![JavaScript](https://img.shields.io/badge/JavaScript-Vanilla-F7DF1E?logo=javascript&logoColor=black)
-![HTML5](https://img.shields.io/badge/HTML-5-E34F26?logo=html5&logoColor=white)
-![CSS3](https://img.shields.io/badge/CSS-3-1572B6?logo=css3&logoColor=white)
+![RVCE MCA](https://img.shields.io/badge/RVCE-MCA-8B0000)
+![HTML5](https://img.shields.io/badge/HTML5-E34F26?logo=html5&logoColor=white)
+![CSS3](https://img.shields.io/badge/CSS3-1572B6?logo=css3&logoColor=white)
+![JavaScript](https://img.shields.io/badge/JavaScript-F7DF1E?logo=javascript&logoColor=black)
 ![License](https://img.shields.io/badge/License-Apache%202.0-D22128)
 
 > An unofficial CIE, SEE, final-grade and GPA calculator for RVCE MCA (Master of Computer Applications) students, built directly from the college's own published rules rather than guesswork.
