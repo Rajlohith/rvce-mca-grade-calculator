@@ -8,12 +8,12 @@ window.MCA = window.MCA || {};
   /* Paste your Firebase config here (from Firebase Console → Project Settings → Web App Config)
      Get it at: https://console.firebase.google.com → Select Project → Settings (gear icon) → Project Settings → Web App Config */
   const firebaseConfig = {
-    apiKey: "YOUR_API_KEY",
-    authDomain: "rvce-mca-calculator.firebaseapp.com",
-    projectId: "rvce-mca-calculator",
-    storageBucket: "rvce-mca-calculator.appspot.com",
-    messagingSenderId: "YOUR_SENDER_ID",
-    appId: "YOUR_APP_ID"
+    projectId: "rvce-mca-grade-calc",
+    appId: "1:398744365411:web:e07e68f0f8ae317da74b56",
+    storageBucket: "rvce-mca-grade-calc.firebasestorage.app",
+    apiKey: "AIzaSyAi2ERW8Y8ev7K0LwnB07K9lcINaJQgFSg",
+    authDomain: "rvce-mca-grade-calc.firebaseapp.com",
+    messagingSenderId: "398744365411"
   };
 
   /* RVCE MCA student email format: <name(s)>.mca<YY>@rvce.edu.in
@@ -186,7 +186,7 @@ window.MCA = window.MCA || {};
       .doc(userId)
       .get()
       .then(doc => {
-        if(doc.exists && doc.data()[courseCode]){
+        if (doc.exists && Object.prototype.hasOwnProperty.call(doc.data(), courseCode)) {
           return doc.data()[courseCode];
         }
         return null;
