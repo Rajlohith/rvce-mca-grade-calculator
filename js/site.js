@@ -119,6 +119,9 @@ window.MCA = window.MCA || {};
             <span class="toggle-track"><span class="toggle-thumb"></span></span>
           </button>
         </div>
+      </div>
+      <div class="auth-bar">
+        <div class="auth-container"></div>
       </div>`;
   }
 

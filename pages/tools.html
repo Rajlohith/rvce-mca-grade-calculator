@@ -3,11 +3,29 @@
 <head>
 <meta charset="UTF-8">
 <script>(function(){try{var t=localStorage.getItem('mca-theme');if(t!=='light'){document.documentElement.setAttribute('data-theme','dark');}}catch(e){}})();</script>
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-o/+GXyt6byeaf7tb18ij7cN6UOI+QKMRnpkf0vF0viY='; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data:; connect-src 'self'; object-src 'none'; base-uri 'self'; frame-ancestors 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-o/+GXyt6byeaf7tb18ij7cN6UOI+QKMRnpkf0vF0viY=' https://www.gstatic.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data:; connect-src 'self' https://*.googleapis.com https://*.firebaseio.com https://firestore.googleapis.com; worker-src 'self'; manifest-src 'self'; frame-src https://*.firebaseapp.com https://accounts.google.com; object-src 'none'; base-uri 'self'; frame-ancestors 'none'">
 <meta name="robots" content="noindex">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#11131a" media="(prefers-color-scheme: dark)">
+<meta name="theme-color" content="#ffffff" media="(prefers-color-scheme: light)">
+<link rel="manifest" href="../manifest.webmanifest">
+<link rel="icon" href="../favicon.ico" sizes="any">
+<link rel="icon" href="../icons/icon-192.png" type="image/png">
+<link rel="apple-touch-icon" href="../apple-touch-icon.png">
 <title>Semester tools - RVCE MCA Grade Calculator</title>
 <meta name="description" content="Pick a calculator for the chosen RVCE MCA semester.">
+<link rel="canonical" href="https://rvce-mca-grade-calc.web.app/pages/tools.html">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="RVCE MCA Grade Calculator">
+<meta property="og:title" content="Semester tools - RVCE MCA Grade Calculator">
+<meta property="og:description" content="Pick a calculator for the chosen RVCE MCA semester.">
+<meta property="og:url" content="https://rvce-mca-grade-calc.web.app/pages/tools.html">
+<meta property="og:image" content="https://rvce-mca-grade-calc.web.app/icons/icon-512.png">
+<meta property="og:image:alt" content="RVCE MCA Grade Calculator">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Semester tools - RVCE MCA Grade Calculator">
+<meta name="twitter:description" content="Pick a calculator for the chosen RVCE MCA semester.">
+<meta name="twitter:image" content="https://rvce-mca-grade-calc.web.app/icons/icon-512.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="../css/variables.css">
@@ -41,13 +59,15 @@
   <footer id="site-footer" class="site-footer"></footer>
 </div>
 
-<script src="../js/util.js"></script>
-<script src="../js/data.js"></script>
-<script src="../js/icons.js"></script>
-<script src="../js/grading.js"></script>
-<script src="../js/course-picker.js"></script>
-<script src="../js/input-guard.js"></script>
-<script src="../js/site.js"></script>
-<script src="../js/pages/tools.js"></script>
+<script src="../js/firebase-auth.js" defer></script>
+<script src="../js/util.js" defer></script>
+<script src="../js/data.js" defer></script>
+<script src="../js/icons.js" defer></script>
+<script src="../js/grading.js" defer></script>
+<script src="../js/course-picker.js" defer></script>
+<script src="../js/input-guard.js" defer></script>
+<script src="../js/site.js" defer></script>
+<script src="../js/pages/tools.js" defer></script>
+<script src="../js/pwa-register.js" defer></script>
 </body>
 </html>

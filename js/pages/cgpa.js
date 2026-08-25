@@ -14,7 +14,6 @@
   document.getElementById('cgpaIconBadge').innerHTML = window.MCA.icons.trendingUp;
 
   const body = document.querySelector('#cgTable tbody');
-  const totalProgramCredits = DATA.meta.totalProgramCredits;
 
   Object.keys(DATA.semesters).forEach(s=>{
     const credits = DATA.semesters[s].totalCredits;
@@ -50,10 +49,31 @@
           <div class="row"><span>Projected class</span><span>${r.cls}</span></div>
         </div>
       </div>`;
-    const pct = Math.min(100, r.totalCredits / totalProgramCredits * 100);
-    document.getElementById('cgProgFill').style.width = pct + '%';
-    document.getElementById('cgProgLabel').textContent = `${fmt(r.totalCredits)} / ${totalProgramCredits}`;
   }
+
+  const progressRoot = document.getElementById('app');
+  function restoreProgress(){
+    window.MCA.progress.loadProgress('cgpa', progressRoot).then(restored=>{
+      if(restored) recompute();
+    });
+  }
+  restoreProgress();
+  document.addEventListener('signed-in', restoreProgress);
+
+  document.getElementById('saveProgressBtn').addEventListener('click', ()=>{
+    window.MCA.progress.saveProgress('cgpa', progressRoot);
+  });
+
+  document.getElementById('resetAllBtn').addEventListener('click', ()=>{
+    body.querySelectorAll('tr').forEach(tr=>{
+      const done = tr.querySelector('.c-done');
+      const sgpaInput = tr.querySelector('.c-sgpa');
+      done.checked = false;
+      sgpaInput.value = 0;
+      sgpaInput.disabled = true;
+    });
+    recompute();
+  });
 
   recompute();
 })();

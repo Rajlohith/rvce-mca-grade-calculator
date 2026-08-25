@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<script>(function(){try{var t=localStorage.getItem('mca-theme');if(t!=='light'){document.documentElement.setAttribute('data-theme','dark');}}catch(e){}})();</script>
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-o/+GXyt6byeaf7tb18ij7cN6UOI+QKMRnpkf0vF0viY=' https://www.gstatic.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data:; connect-src 'self' https://*.googleapis.com https://*.firebaseio.com https://firestore.googleapis.com; worker-src 'self'; manifest-src 'self'; frame-src https://*.firebaseapp.com https://accounts.google.com; object-src 'none'; base-uri 'self'; frame-ancestors 'none'">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#11131a" media="(prefers-color-scheme: dark)">
+<meta name="theme-color" content="#ffffff" media="(prefers-color-scheme: light)">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="favicon.ico" sizes="any">
+<link rel="icon" href="icons/icon-192.png" type="image/png">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<meta name="robots" content="noindex">
+<title>Page not found - RVCE MCA Grade Calculator</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/variables.css">
+<link rel="stylesheet" href="css/base.css">
+<link rel="stylesheet" href="css/layout.css">
+<link rel="stylesheet" href="css/components.css">
+</head>
+<body>
+<header id="site-header" class="site-header"></header>
+
+<div class="wrap">
+  <main id="app">
+    <div class="card" style="text-align:center;padding:56px 24px;">
+      <div class="hero-kicker">404</div>
+      <h2 style="font-size:26px;margin-bottom:8px;">That page doesn't exist.</h2>
+      <p class="sub" style="max-width:48ch;margin:0 auto 22px;">The link might be old, mistyped, or the page moved. Head back and pick your scheme again.</p>
+      <a class="btn amber" style="padding:13px 26px;font-size:14.5px;" href="index.html">Back to home &rarr;</a>
+    </div>
+  </main>
+
+  <footer id="site-footer" class="site-footer"></footer>
+</div>
+
+<script src="js/firebase-auth.js" defer></script>
+<script src="js/util.js" defer></script>
+<script src="js/data.js" defer></script>
+<script src="js/icons.js" defer></script>
+<script src="js/grading.js" defer></script>
+<script src="js/input-guard.js" defer></script>
+<script src="js/site.js" defer></script>
+<script src="js/pages/notfound.js" defer></script>
+<script src="js/pwa-register.js" defer></script>
+</body>
+</html>

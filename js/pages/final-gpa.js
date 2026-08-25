@@ -91,6 +91,20 @@
   }
   document.getElementById('computeSgpaBtn').addEventListener('click', computeSgpa);
 
+  const progressRoot = document.getElementById('app');
+  function restoreProgress(){
+    window.MCA.progress.loadProgress(`final-gpa:${semester}`, progressRoot).then(restored=>{
+      if(restored) computeSgpa();
+    });
+  }
+  restoreProgress();
+  document.addEventListener('signed-in', restoreProgress);
+
+  document.getElementById('saveProgressBtn').addEventListener('click', ()=>{
+    window.MCA.progress.saveProgress(`final-gpa:${semester}`, progressRoot);
+  });
+
+
   /* ---------- CGPA blend: prior CGPA + this semester's SGPA, without
      re-entering every earlier semester individually. The full, detailed
      semester-by-semester CGPA Calculator is still linked below for anyone

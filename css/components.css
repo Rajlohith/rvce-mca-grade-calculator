@@ -519,7 +519,10 @@ table.ledger input[type=checkbox]{
    aligned on the right (mirroring the left block on wide screens).
    Below that, the link row spans the full width and sits centered on its
    own line, then the legal line, centered, at the very bottom. */
-.site-footer{ margin-top:40px; border-top:1px solid var(--line); padding-top:28px; }
+.site-footer{
+  margin-top:40px; border-top:1px solid var(--line); padding-top:28px;
+  min-height: 180px; /* reserved so the footer's JS-rendered content doesn't shift the page as it fills in */
+}
 .footer-top{
   display:flex; justify-content:space-between; align-items:flex-start;
   gap:20px 48px; flex-wrap:wrap; margin-bottom:22px;
@@ -562,4 +565,50 @@ table.ledger input[type=checkbox]{
 
 @media(max-width:520px){
   .card{ padding:24px 20px; }
+}
+
+/* ---------- Authentication UI ----------
+   Sign-in/Sign-out button in the header, user email display when signed in */
+.auth-container{
+  display:flex; align-items:center; gap:12px;
+}
+
+.user-menu{
+  display:flex; align-items:center; gap:12px;
+}
+
+.user-name{
+  font-size:12.5px; color:var(--ink-soft); font-weight:600;
+  max-width:35ch; line-height:1.35; text-align:right;
+  overflow-wrap:break-word; word-break:normal;
+  /* Wraps at word boundaries onto a new line rather than truncating —
+     names longer than 35 characters break after the nearest whole word,
+     they never get cut off mid-word. */
+}
+
+.sign-in-btn, .sign-out-btn{
+  display:inline-flex; align-items:center; gap:8px;
+  padding:7px 14px 7px 12px; font-size:12.5px; font-weight:600;
+  border-radius:var(--radius-sm); background:var(--card);
+  border:1.5px solid var(--line-strong); color:var(--ink);
+  cursor:pointer; transition:all .2s ease;
+}
+
+.sign-in-btn svg{ flex-shrink:0; }
+
+.sign-in-btn:hover, .sign-out-btn:hover{
+  background:var(--paper); border-color:var(--ink-faint);
+}
+
+.sign-in-btn:active, .sign-out-btn:active{
+  opacity:.85;
+}
+
+@media(max-width:640px){
+  .user-name{
+    max-width:28ch; font-size:12px;
+  }
+  .sign-in-btn, .sign-out-btn{
+    padding:6px 12px 6px 10px; font-size:11.5px;
+  }
 }

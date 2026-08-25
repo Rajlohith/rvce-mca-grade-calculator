@@ -1,0 +1,7 @@
+User-agent: *
+Allow: /
+Disallow: /pages/scheme.html
+Disallow: /pages/semester.html
+Disallow: /pages/tools.html
+
+Sitemap: https://rvce-mca-grade-calc.web.app/sitemap.xml

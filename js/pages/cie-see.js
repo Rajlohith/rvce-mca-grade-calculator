@@ -119,6 +119,21 @@
   const grid = document.getElementById('courseGrid');
   grid.innerHTML = courses.map(cardHTML).join('');
 
+  // Restore any previously saved progress for this semester's CIE page.
+  // Firebase's auth state resolves asynchronously (it loads its SDK from
+  // a CDN and restores the session after that), so this can't just run
+  // once at page load — it also needs to re-run the moment sign-in
+  // actually completes, in case that happens after this script runs.
+  function restoreProgress(){
+    window.MCA.progress.loadProgress(`cie-see:${semester}`, grid);
+  }
+  restoreProgress();
+  document.addEventListener('signed-in', restoreProgress);
+
+  document.getElementById('saveProgressBtn').addEventListener('click', ()=>{
+    window.MCA.progress.saveProgress(`cie-see:${semester}`, grid);
+  });
+
   function readVal(card, cls){
     const el = card.querySelector('.'+cls);
     return el ? el.value : 0;
@@ -163,6 +178,23 @@
     // (ceiling-rounded) CIE, not the raw decimal — see the note on
     // computeCIE's finalTotal in engine.js.
     cardState.set(code, { total: r.finalTotal, rawTotal: r.total, max: r.max, type, dx: r.dx });
+
+    // Save CIE to Firestore if user is signed in
+    if(window.MCA.isSignedIn()){
+      window.MCA.saveMarks(`${code}:cie`, {
+        raw: r.total,
+        final: r.finalTotal,
+        max: r.max,
+        pct: r.pct,
+        finalPct: r.finalPct,
+        timestamp: new Date().toISOString()
+      }).then(() => {
+        window.MCA.util.toast('CIE saved', 'ok');
+      }).catch(err => {
+        console.error('Failed to save CIE:', err);
+        window.MCA.util.toast('Could not save CIE to your account', 'error');
+      });
+    }
 
     const roundingNote = `<div class="rounding-note">Marks are rounded to 2 decimal places using standard rounding (nearest hundredth) &mdash; never rounded up beyond that.</div>`;
     const finalNote = `<div class="callout" style="margin-top:10px;">Your department finalizes CIE by rounding <b>up</b> to the next whole mark (ceiling) &mdash; so ${fmt(r.total)} becomes <b>${r.finalTotal}</b>, the same as any value between ${Math.floor(r.total)} and ${r.finalTotal} would. This finalized number, not the raw decimal above, is what's used for the SEE requirements below.</div>`;

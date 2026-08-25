@@ -1,0 +1,14 @@
+firebase.json
+.firebaserc
+.git/
+.gitignore
+.github/
+node_modules/
+package.json
+package-lock.json
+README.md
+NOTICE
+LICENSE
+*.log
+.DS_Store
+.vscode/

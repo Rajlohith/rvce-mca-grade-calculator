@@ -3,7 +3,12 @@
    ========================================================================== */
 .wrap{ max-width: 1080px; margin: 0 auto; padding: 0 20px 60px; }
 
-/* ---------- Site header ---------- */
+/* ---------- Site header ----------
+   min-height reserved on the header (and breadcrumb below) so the empty
+   <header id="site-header"> present at first paint doesn't collapse to
+   0px and then jump to its real height once site.js renders the nav —
+   that collapse/expand was the single largest Cumulative Layout Shift
+   contributor in Lighthouse audits (0.2-0.67 depending on viewport). */
 .site-header{
   background: var(--header-bg);
   backdrop-filter: blur(8px);
@@ -11,10 +16,12 @@
   position: sticky;
   top: 0;
   z-index: 20;
+  min-height: 69px;
 }
 .site-header-inner{
   max-width: 1080px; margin: 0 auto; padding: 16px 20px;
   display:flex; align-items:center; justify-content:space-between; gap:14px; flex-wrap:wrap;
+  min-height: 36px;
 }
 .brand{ display:flex; align-items:center; gap:10px; text-decoration:none; }
 .brand-mark{
@@ -36,6 +43,22 @@
 .site-nav a.current{ background: var(--ink); color:var(--btn-fg); font-weight:600; }
 .site-nav a.ext{ display:flex; align-items:center; gap:5px; border:1px solid var(--line-strong); }
 .site-nav a.ext:hover{ border-color: var(--ink); background:transparent; }
+
+/* ---------- Auth bar ----------
+   A slim full-width strip directly under the main nav row, reserved for
+   sign-in state. Kept separate from .site-nav so the sign-in button/user
+   name never has to compete for space with CGPA/FAQ/GitHub/theme-toggle
+   on narrow screens — it always gets its own row. */
+.auth-bar{
+  max-width:1080px; margin:0 auto; padding:10px 20px;
+  border-top:1px solid var(--line);
+  display:flex; justify-content:flex-end;
+  min-height:44px; align-items:center;
+  /* Height reserved up front (not collapsed while empty) so the
+     sign-in button/user-name appearing after Firebase loads never
+     shifts the rest of the page down — a major contributor to the
+     Cumulative Layout Shift flagged in Lighthouse audits. */
+}
 
 /* ---------- Page hero (per-page title block) ---------- */
 .page-hero{
@@ -59,6 +82,7 @@
 }
 
 /* ---------- Breadcrumb ---------- */
+#breadcrumb{ min-height: 17px; } /* reserved before JS fills it in, to avoid a layout shift */
 .breadcrumb{
   display:flex; align-items:center; flex-wrap:wrap; gap:6px;
   margin: 8px 0 22px; font-size:13px;

@@ -68,6 +68,16 @@
   const grid = document.getElementById('courseGrid');
   grid.innerHTML = courses.map(cardHTML).join('');
 
+  function restoreProgress(){
+    window.MCA.progress.loadProgress(`final-grade:${semester}`, grid);
+  }
+  restoreProgress();
+  document.addEventListener('signed-in', restoreProgress);
+
+  document.getElementById('saveProgressBtn').addEventListener('click', ()=>{
+    window.MCA.progress.saveProgress(`final-grade:${semester}`, grid);
+  });
+
   function validateCard(card){
     const reqInputs = [...card.querySelectorAll('input.req')];
     const missing = reqInputs.filter(inp => inp.value === '' || inp.value === null);
