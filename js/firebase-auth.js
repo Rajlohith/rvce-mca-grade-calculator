@@ -21,6 +21,8 @@ window.MCA = window.MCA || {};
      batches. Extend the (24|25|26|27) group as new batches enroll. */
   const RVCE_MCA_EMAIL = /^[a-z]+(\.[a-z]+)*\.mca(24|25|26|27)@rvce\.edu\.in$/i;
 
+  let initialized = false;
+
   function initializeFirebase(){
     if(initialized || !window.firebase) return;
     initialized = true;
@@ -217,17 +219,17 @@ window.MCA = window.MCA || {};
   // Load Firebase SDK from CDN if not already loaded
   if(!window.firebase){
     const script = document.createElement('script');
-    script.src = 'https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js';
+    script.src = 'https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js';
     script.async = true;
     script.onload = () => {
       // Load Auth
       const authScript = document.createElement('script');
-      authScript.src = 'https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js';
+      authScript.src = 'https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js';
       authScript.async = true;
       authScript.onload = () => {
         // Load Firestore
         const fsScript = document.createElement('script');
-        fsScript.src = 'https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js';
+        fsScript.src = 'https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js';
         fsScript.async = true;
         fsScript.onload = () => {
           initializeFirebase();
