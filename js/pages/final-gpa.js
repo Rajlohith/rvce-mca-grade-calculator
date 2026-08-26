@@ -73,7 +73,18 @@
       grade: row.querySelector('.sgpa-grade-pick').value
     }));
     const r = computeSGPA(rows);
-    lastSgpa = r.sgpa; lastCredits = r.countedCredits;
+    /* Round the SGPA to 2 decimals BEFORE using it anywhere else (display,
+       or the CGPA blend below). Official transcripts publish SGPA already
+       rounded to 2 decimals, and CGPA is computed from those published
+       per-semester figures — not from the raw, unrounded fraction. Feeding
+       the full-precision value into the CGPA blend instead (e.g. 9.5217...
+       instead of the published 9.52) silently drifts the blended CGPA
+       upward past what the official calculation gives (seen as 9.72 here
+       vs. the correct 9.71 the official portal reports for the same
+       inputs) — not a rounding-direction bug, but a double-rounding one:
+       rounding needs to happen once, right here, not after the blend. */
+    const roundedSgpa = window.MCA.util.round2(r.sgpa);
+    lastSgpa = roundedSgpa; lastCredits = r.countedCredits;
 
     const resultEl = document.getElementById('gpaResult');
     resultEl.style.display = '';
@@ -81,9 +92,8 @@
       <div style="flex:1">
         <div class="breakdown">
           <div class="row"><span>Credits registered</span><span>${fmt(r.regCredits)}</span></div>
-          <div class="row"><span>Credits counted toward SGPA</span><span>${fmt(r.countedCredits)}</span></div>
           <div class="row"><span>Credits earned</span><span>${fmt(r.earnedCredits)}</span></div>
-          <div class="row total"><span>SGPA</span><span>${fmt(r.sgpa)}</span></div>
+          <div class="row total"><span>SGPA</span><span>${fmt(roundedSgpa)}</span></div>
         </div>
       </div>`;
     updateCgpaCurrentDisplay();

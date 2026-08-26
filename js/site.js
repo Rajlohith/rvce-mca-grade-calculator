@@ -34,6 +34,7 @@ window.MCA = window.MCA || {};
       { id:'home',  label:'Home',      href: ROOT + 'index.html' },
       { id:'start', label:'Calculate', href: PAGES + 'scheme.html' },
       { id:'cgpa',  label:'CGPA',      href: PAGES + 'cgpa.html' },
+      { id:'guide', label:'Guide',     href: PAGES + 'guide.html' },
       { id:'faq',   label:'FAQ',       href: PAGES + 'faq.html' }
     ];
   }
@@ -79,6 +80,35 @@ window.MCA = window.MCA || {};
     });
   }
 
+  /* ---------- Hamburger nav toggle (mobile) ----------
+     On wide screens .site-nav is shown inline via CSS and this button is
+     hidden entirely. Below the breakpoint, .site-nav is hidden by default
+     and this button reveals it as a dropdown panel — so the header itself
+     never grows past a single row regardless of screen width. Closes on
+     Escape, on an outside click, and whenever a link inside the panel is
+     followed (so navigating never leaves a stale open panel behind on
+     the next page's back-navigation from bfcache). */
+  function wireNavToggle(){
+    const btn = document.getElementById('navToggle');
+    const panel = document.getElementById('navPanel');
+    if(!btn || !panel) return;
+
+    const close = () => { btn.setAttribute('aria-expanded', 'false'); panel.classList.remove('open'); };
+    const open = () => { btn.setAttribute('aria-expanded', 'true'); panel.classList.add('open'); };
+
+    btn.addEventListener('click', (e)=>{
+      e.stopPropagation();
+      panel.classList.contains('open') ? close() : open();
+    });
+    panel.addEventListener('click', (e)=>{ if(e.target.tagName === 'A') close(); });
+    document.addEventListener('click', (e)=>{
+      if(panel.classList.contains('open') && !panel.contains(e.target) && e.target !== btn) close();
+    });
+    document.addEventListener('keydown', (e)=>{
+      if(e.key === 'Escape' && panel.classList.contains('open')) close();
+    });
+  }
+
   /* ---------- Syllabus PDF scheme choice (reused in the footer and on
      the home page) ---------- */
   function renderPdfChoice(){
@@ -98,6 +128,15 @@ window.MCA = window.MCA || {};
       </div>`;
   }
 
+  /* ---------- Single-row responsive header ----------
+     One navbar row at every width: brand on the left, nav links + sign-in
+     + theme toggle inline on the right on wide screens ("content menu"
+     style). Below a breakpoint, the nav links / sign-in / theme toggle
+     move into a collapsible panel opened by a hamburger button, so the
+     header itself never grows past one row's height on a phone — see
+     the toggleNavPanel() wiring in mount(). GitHub lives in the footer
+     only now; the header's right side is reserved for navigation and the
+     sign-in control. */
   function renderHeader(activeId){
     const nav = navLinks().map(l=>{
       const cls = l.id === activeId ? 'current' : '';
@@ -112,16 +151,20 @@ window.MCA = window.MCA || {};
             <span class="brand-tag">2024 &amp; 2026 Scheme</span>
           </div>
         </a>
-        <div class="site-nav">
-          ${nav}
-          <a class="ext" href="${REPO_URL}" target="_blank" rel="noopener noreferrer">GitHub</a>
-          <button type="button" id="themeToggle" class="theme-toggle" aria-pressed="false" aria-label="Toggle dark mode">
-            <span class="toggle-track"><span class="toggle-thumb"></span></span>
-          </button>
+
+        <button type="button" id="navToggle" class="nav-toggle" aria-expanded="false" aria-controls="navPanel" aria-label="Open menu">
+          <span class="nav-toggle-bars"><span></span><span></span><span></span></span>
+        </button>
+
+        <div class="site-nav" id="navPanel">
+          <div class="site-nav-links">${nav}</div>
+          <div class="site-nav-controls">
+            <div class="auth-container"></div>
+            <button type="button" id="themeToggle" class="theme-toggle" aria-pressed="false" aria-label="Toggle dark mode">
+              <span class="toggle-track"><span class="toggle-thumb"></span></span>
+            </button>
+          </div>
         </div>
-      </div>
-      <div class="auth-bar">
-        <div class="auth-container"></div>
       </div>`;
   }
 
@@ -185,6 +228,7 @@ window.MCA = window.MCA || {};
     if(crumbEl)  crumbEl.innerHTML  = renderBreadcrumb(opts.trail);
     if(footerEl) footerEl.innerHTML = renderFooter();
     wireThemeToggle();
+    wireNavToggle();
   }
 
   window.MCA.site = {

@@ -517,11 +517,16 @@ table.ledger input[type=checkbox]{
 /* ---------- Site footer ----------
    Top row: brand/about copy on the left, the two PDF choosers right-
    aligned on the right (mirroring the left block on wide screens).
-   Below that, the link row spans the full width and sits centered on its
-   own line, then the legal line, centered, at the very bottom. */
+   Both columns share the same top edge (align-items:flex-start) and the
+   same first-line font-size/line-height, so "RVCE MCA Grade Calculator
+   is..." and "Syllabus PDF" start on the same visual baseline instead of
+   drifting apart — the label row uses the same 13px/1.65 rhythm as the
+   paragraph text specifically so the two sides read as one aligned row,
+   not two independently-sized blocks. Below that, the link row spans the
+   full width and sits centered on its own line, then the legal line,
+   centered, at the very bottom. */
 .site-footer{
   margin-top:40px; border-top:1px solid var(--line); padding-top:28px;
-  min-height: 180px; /* reserved so the footer's JS-rendered content doesn't shift the page as it fills in */
 }
 .footer-top{
   display:flex; justify-content:space-between; align-items:flex-start;
@@ -550,27 +555,56 @@ table.ledger input[type=checkbox]{
 .footer-pdf{
   display:flex; align-items:center; justify-content:flex-end; gap:12px; flex-wrap:wrap;
 }
-.footer-pdf-label{ font-size:13px; font-weight:600; color:var(--ink-soft); }
+.footer-pdf-label{
+  font-size:13px; line-height:1.65; font-weight:600; color:var(--ink-soft);
+}
 .site-footer .legal{
   border-top:1px solid var(--line); padding-top:16px; text-align:center;
   font-size:11.5px; color:var(--ink-faint); line-height:1.8;
 }
 
 @media(max-width:640px){
-  .footer-top{ flex-direction:column; align-items:center; text-align:center; }
+  /* Stacked, but with a normal small gap between the two blocks — not
+     the large empty band that showed up here before, which came from
+     this whole section inheriting height reserved for a wider two-column
+     layout it was no longer using once stacked. */
+  .footer-top{ flex-direction:column; align-items:flex-start; text-align:left; gap:24px; }
   .footer-brand{ max-width:100%; }
-  .footer-meta{ align-items:center; max-width:100%; }
-  .footer-pdf{ justify-content:center; }
+  .footer-meta{ align-items:flex-start; max-width:100%; width:100%; }
+  .footer-pdf{ justify-content:flex-start; }
 }
 
 @media(max-width:520px){
   .card{ padding:24px 20px; }
 }
 
+/* ---------- Guide page ---------- */
+.guide-card{ display:flex; flex-direction:column; gap:0; }
+.guide-step{
+  display:flex; gap:18px; padding:22px 0; border-bottom:1px solid var(--line);
+}
+.guide-step:last-of-type{ border-bottom:none; padding-bottom:8px; }
+.guide-step-num{
+  flex:0 0 auto; width:34px; height:34px; border-radius:50%;
+  background:var(--ink); color:var(--btn-fg); font-weight:700; font-size:14px;
+  display:flex; align-items:center; justify-content:center;
+}
+.guide-step-body h2{ font-size:18px; margin:2px 0 6px; color:var(--ink); }
+.guide-when{ font-size:13.5px; color:var(--ink-soft); margin:0 0 8px; }
+.guide-step-body p{ font-size:14.5px; line-height:1.65; color:var(--ink-soft); margin:0 0 8px; }
+.guide-step-body p:last-child{ margin-bottom:0; }
+.guide-step-body code{
+  font-family:var(--font-mono); font-size:13px; background:var(--paper);
+  padding:1px 6px; border-radius:4px;
+}
+
 /* ---------- Authentication UI ----------
-   Sign-in/Sign-out button in the header, user email display when signed in */
+   Sign-in/Sign-out control shown inline in the header's nav row (desktop)
+   or the nav dropdown panel (mobile). min-height reserved so the empty
+   container present before Firebase resolves doesn't cause a layout
+   shift once the real button/name renders in. */
 .auth-container{
-  display:flex; align-items:center; gap:12px;
+  display:flex; align-items:center; gap:12px; min-height:34px;
 }
 
 .user-menu{

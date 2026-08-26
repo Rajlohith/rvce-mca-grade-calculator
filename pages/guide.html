@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<script>(function(){try{var t=localStorage.getItem('mca-theme');if(t!=='light'){document.documentElement.setAttribute('data-theme','dark');}}catch(e){}})();</script>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#11131a" media="(prefers-color-scheme: dark)">
+<meta name="theme-color" content="#ffffff" media="(prefers-color-scheme: light)">
+<link rel="manifest" href="../manifest.webmanifest">
+<link rel="icon" href="../favicon.ico" sizes="any">
+<link rel="icon" href="../icons/icon-192.png" type="image/png">
+<link rel="apple-touch-icon" href="../apple-touch-icon.png">
+<title>Guide - which calculator do I need? - RVCE MCA Grade Calculator</title>
+<meta name="description" content="What each calculator on this site is for and when to use it, from mid-semester CIE tracking through to final CGPA projections.">
+<link rel="canonical" href="https://rvce-mca-grade-calc.web.app/pages/guide.html">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="RVCE MCA Grade Calculator">
+<meta property="og:title" content="Guide - which calculator do I need? - RVCE MCA Grade Calculator">
+<meta property="og:description" content="What each calculator on this site is for and when to use it, from mid-semester CIE tracking through to final CGPA projections.">
+<meta property="og:url" content="https://rvce-mca-grade-calc.web.app/pages/guide.html">
+<meta property="og:image" content="https://rvce-mca-grade-calc.web.app/icons/icon-512.png">
+<meta property="og:image:alt" content="RVCE MCA Grade Calculator">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Guide - which calculator do I need? - RVCE MCA Grade Calculator">
+<meta name="twitter:description" content="What each calculator on this site is for and when to use it, from mid-semester CIE tracking through to final CGPA projections.">
+<meta name="twitter:image" content="https://rvce-mca-grade-calc.web.app/icons/icon-512.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../css/variables.css">
+<link rel="stylesheet" href="../css/base.css">
+<link rel="stylesheet" href="../css/layout.css">
+<link rel="stylesheet" href="../css/components.css">
+</head>
+<body>
+<header id="site-header" class="site-header"></header>
+
+<div class="wrap">
+  <div class="page-hero">
+    <div class="eyebrow">Reference</div>
+    <h1>Which calculator do I need?</h1>
+    <p>Four tools, four different points in the semester. Here's what each one is actually for, and when to reach for it.</p>
+  </div>
+
+  <div id="breadcrumb"></div>
+
+  <main id="app">
+    <div class="card guide-card">
+      <div class="guide-step">
+        <div class="guide-step-num">1</div>
+        <div class="guide-step-body">
+          <h2>CIE Finalization &amp; SEE Marks Required</h2>
+          <p class="guide-when">Use this <strong>during the semester, before you write your SEE</strong>.</p>
+          <p>As your Quiz, Test, EL/PBL and Lab marks come in, enter them here to see exactly where your CIE stands right now &mdash; finalized and rounded the way the department actually does it, not just a rough total. Once you know your CIE, the same tool tells you the SEE score you'd need in the actual exam to land each possible grade, from O down to a bare pass. That's the real use case: figuring out where you stand and what you need to aim for <em>before</em> you sit the exam, not after.</p>
+        </div>
+      </div>
+
+      <div class="guide-step">
+        <div class="guide-step-num">2</div>
+        <div class="guide-step-body">
+          <h2>Final Grade Calculator</h2>
+          <p class="guide-when">Use this <strong>once you have a CIE total, and either a real or an assumed SEE score</strong>.</p>
+          <p>This is the flip side of the tool above. Instead of asking "what SEE do I need?", it answers "what grade do I get?" &mdash; you put in your finalized CIE and a SEE number (real or a guess) and it tells you the resulting letter grade and pass/fail status. It's useful in two moments: right before the SEE, to sanity-check a target score against Table 4.4's actual passing conditions; and right after the SEE, before results are officially out, to get an approximate idea of your grade from what you think you scored.</p>
+        </div>
+      </div>
+
+      <div class="guide-step">
+        <div class="guide-step-num">3</div>
+        <div class="guide-step-body">
+          <h2>Final SGPA Calculator</h2>
+          <p class="guide-when">Use this <strong>once results are out on the SAP portal</strong>.</p>
+          <p>SAP shows your grade for every course, but it doesn't show your SGPA anywhere &mdash; you have to work it out yourself. This tool exists for exactly that: enter the grade SAP gave you for each course in the semester and it computes (and lets you verify) your SGPA. Underneath that, it also blends in your CGPA from the semester before, so you can check your running CGPA the same way, using the actual figures from your last result.</p>
+        </div>
+      </div>
+
+      <div class="guide-step">
+        <div class="guide-step-num">4</div>
+        <div class="guide-step-body">
+          <h2>CGPA Calculator</h2>
+          <p class="guide-when">Use this <strong>any time you want to project forward</strong>.</p>
+          <p>The most straightforward of the four: pick a semester, guess an SGPA you think you might get, and see what that does to your CGPA. No results needed &mdash; it's a "what if" tool for planning, not a verification tool like the one above.</p>
+        </div>
+      </div>
+
+      <div class="callout" style="margin-top:8px;">
+        <strong>About saving your numbers:</strong> every calculator has a Save Progress button, but it only works once you're signed in with your RVCE MCA Google account (the one ending in <code>.mca25@rvce.edu.in</code> or similar). Signed out, everything still works exactly the same &mdash; it just won't be there when you come back.
+      </div>
+    </div>
+  </main>
+
+  <footer id="site-footer" class="site-footer"></footer>
+</div>
+
+<script src="../js/firebase-auth.js" defer></script>
+<script src="../js/util.js" defer></script>
+<script src="../js/data.js" defer></script>
+<script src="../js/icons.js" defer></script>
+<script src="../js/grading.js" defer></script>
+<script src="../js/input-guard.js" defer></script>
+<script src="../js/site.js" defer></script>
+<script src="../js/pages/guide.js" defer></script>
+<script src="../js/pwa-register.js" defer></script>
+</body>
+</html>

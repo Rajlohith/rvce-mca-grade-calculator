@@ -48,7 +48,7 @@ The site is a plain set of statically linked HTML pages: `index.html` at the pro
 ## Key Features
 
 **Guided Navigation**
-- A four-step wizard (Scheme, Year, Semester, Tool) that narrows down to the exact calculator needed, with a breadcrumb trail on every page for jumping back.
+- A three-step wizard (Scheme, Semester, Tool) that narrows down to the exact calculator needed, with a breadcrumb trail on every page for jumping back. The header itself is a single navbar row at every screen size — on narrow screens the nav links, sign-in control and theme toggle collapse behind a hamburger button instead of the header growing extra rows.
 - Every step's query string is validated on load; an invalid or missing parameter redirects back to scheme selection instead of rendering a broken page.
 
 **Course-Card Layout**
@@ -74,6 +74,16 @@ The site is a plain set of statically linked HTML pages: `index.html` at the pro
 **FAQ**
 - A plain-language explanation of every formula the app uses, sourced from the same two documents as the calculators themselves.
 
+**Guide**
+- A plain-language walkthrough of what each calculator is actually for and the point in the semester you'd reach for it — from mid-semester CIE tracking, to a post-CIE/pre-SEE or post-exam grade estimate, to verifying SGPA against the SAP portal once results are out, to projecting a future CGPA.
+
+**Google Sign-In & Save Progress**
+- Every calculator has a Save Progress button, gated behind Google Sign-In restricted to RVCE MCA student emails (the `<name>.mca<YY>@rvce.edu.in` format, `YY` being the enrollment year). Signed out, every calculator works identically — nothing is gated behind sign-in except persisting your entries between visits.
+- Data is stored in Firestore, scoped so a signed-in student can only ever read or write their own document (enforced server-side in `firestore.rules`, not just hidden in the UI). There is currently no automatic expiry on this data — it persists indefinitely until the student explicitly clears it or the project's Firestore data is manually purged; there is no scheduled deletion job.
+
+**Installable, Works Offline**
+- A PWA manifest and service worker mean the site can be installed to a home screen / as a desktop app, and previously visited pages keep working without a connection. Firebase Auth and Firestore requests always go straight to the network — offline mode covers browsing the calculators, not saving new data while offline.
+
 Only the 2024 scheme is implemented today. A 2026 scheme option is visible on the scheme-selection page but disabled and marked "Coming soon" until that syllabus is published and added.
 
 ## Technology Stack
@@ -84,10 +94,12 @@ Only the 2024 scheme is implemented today. A 2026 scheme option is visible on th
 | Styling | Plain CSS, no preprocessor, split into `variables.css`, `base.css`, `layout.css`, `components.css` |
 | Logic | Vanilla JavaScript, ES5-style function scoping, no framework |
 | Data | A single `data/courses.json` file, mirrored as a plain JS object in `js/data.js` |
+| Persistence & Auth | Firebase Authentication (Google Sign-In, restricted to RVCE MCA emails) + Firestore, used only for the optional Save Progress feature |
+| Offline / Installable | A web app manifest (`manifest.webmanifest`) + service worker (`sw.js`) for offline browsing and home-screen installation |
 | Fonts | Google Fonts (Inter and JetBrains Mono), loaded via a standard `<link>` tag |
 | Build tooling | None. There is no bundler, transpiler or install step of any kind |
 
-`js/data.js` mirrors `data/courses.json` as a plain JS object, so the browser never needs to `fetch()` anything at runtime. That keeps the app fully working even when `index.html` is opened directly from disk, with no server involved at all.
+`js/data.js` mirrors `data/courses.json` as a plain JS object, so the browser never needs to `fetch()` anything at runtime. That keeps the app fully working even when `index.html` is opened directly from disk, with no server involved at all — the one exception is Google Sign-In and Save Progress, which require the page to be served over `http://` or `https://` (Firebase Hosting, or any local static server); Google's sign-in popup will not work against a `file://` URL.
 
 ## System Architecture
 
@@ -165,6 +177,8 @@ Course-picker, tool-picker and semester-picker cards use small colored icon badg
 
 A light and dark toggle sits in the header on every page. Dark mode is a soft charcoal surface rather than pure black, so it stays comfortable during long study sessions. The choice is remembered through `localStorage` and applied before the page paints, so there is no flash of the wrong theme on reload.
 
+The header is a single navbar row at any screen width. On wide screens the nav links, sign-in control and theme toggle sit inline next to the brand; below a breakpoint they collapse behind a hamburger button into a dropdown panel instead of the header itself growing extra rows. GitHub is linked from the footer only, not the header.
+
 The footer is intentionally minimal: one short paragraph, one row of links, the syllabus PDF choice, and a legal line, rather than a dense multi-column grid of repeated headings.
 
 ## Repository Structure
@@ -173,6 +187,14 @@ The footer is intentionally minimal: one short paragraph, one row of links, the 
 rvce-mca-grade-calculator/
 │
 ├── index.html                    Home (must stay at the project root)
+├── 404.html                       Custom not-found page
+├── manifest.webmanifest           PWA manifest
+├── sw.js                          Service worker (offline + caching)
+├── robots.txt, sitemap.xml        SEO
+├── firebase.json                  Firebase Hosting config, security headers, CSP
+├── firestore.rules                Firestore access rules (RVCE MCA emails only, own-document only)
+├── firestore.indexes.json         Firestore index config (currently empty — no composite queries)
+├── icons/                         PWA icon set + favicon source
 ├── pages/
 │   ├── scheme.html                 Step 1: scheme selection
 │   ├── semester.html               Step 2: semester selection (Year 1 / Year 2 grouped)
@@ -181,25 +203,30 @@ rvce-mca-grade-calculator/
 │   ├── final-grade.html            Final Grade Calculator
 │   ├── final-gpa.html              Final SGPA Calculator (+ CGPA blend)
 │   ├── cgpa.html                   CGPA Calculator (all semesters)
+│   ├── guide.html                  What each calculator is for and when to use it
 │   └── faq.html                    FAQ
 ├── css/
 │   ├── variables.css               design tokens: colors, type, radii
 │   ├── base.css                    resets and base typography
-│   ├── layout.css                  site header, page hero, breadcrumb, footer
-│   └── components.css              cards, forms, tables, buttons, FAQ, footer
+│   ├── layout.css                  site header (single-row + hamburger), page hero, breadcrumb
+│   └── components.css              cards, forms, tables, buttons, FAQ, footer, guide page
 ├── js/
 │   ├── data.js                     MCA course data and grading constants (mirrors data/courses.json)
 │   ├── grading.js                  shared grading-table helpers (letter to grade point, etc.)
 │   ├── engine.js                   pure calculation functions: CIE, SEE, final grade, SGPA, CGPA
 │   ├── course-picker.js            restricts every course dropdown to data.js, no manual entry
 │   ├── input-guard.js              clamps every numeric field to its min/max, shows a warning
+│   ├── util.js                     shared escaping/formatting/toast helpers
+│   ├── firebase-auth.js            Google Sign-In (RVCE MCA emails only) + Firestore save/load
+│   ├── progress.js                 generic Save Progress serialization used by every calculator page
+│   ├── pwa-register.js             registers the service worker
 │   ├── icons.js                    shared inline-SVG icon set for the colored badges
 │   ├── faqContent.js               FAQ question and answer content
 │   ├── site.js                     shared header, footer, breadcrumb, path and query-string helpers
 │   └── pages/                      one small script per HTML page, wiring that page only
-│       ├── year.js, semester.js, tools.js
+│       ├── scheme.js, semester.js, tools.js
 │       ├── cie-see.js, final-grade.js, final-gpa.js
-│       └── cgpa.js, faq.js
+│       └── cgpa.js, faq.js, guide.js
 ├── data/
 │   └── courses.json                canonical course data: semester to courses, credits, CIE/SEE max, syllabus page
 └── docs/

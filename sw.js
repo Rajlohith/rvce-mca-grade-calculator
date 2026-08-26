@@ -1,16 +1,27 @@
 /* ==========================================================================
    sw.js — service worker for offline support + installability.
-   Cache-first for static assets (CSS/JS/fonts/icons), network-first for
-   HTML pages (so a deployed content update is picked up quickly while a
-   flaky/offline connection still falls back to the last cached copy).
-   Firebase/Firestore/auth requests are always passed straight to the
-   network — they carry live, per-user data and must never be served
-   from cache or intercepted.
+
+   CACHE_VERSION must be bumped on every deploy that changes any cached
+   file's content. This project has no build step and no content-hashed
+   filenames (e.g. site.abc123.js), so the browser and the service worker
+   have no other way to know a same-named file's content changed —
+   forgetting to bump this is exactly how a returning visitor ends up
+   with a stale mix of old cached CSS/JS alongside a freshly fetched
+   HTML page, which is a real bug that shipped here previously (visible
+   as wildly inconsistent Lighthouse runs and console errors that only
+   showed up on a warm cache, not a cold one).
+
+   Strategy, given that constraint: network-first for EVERYTHING except
+   genuinely immutable assets (icons, PDFs) — correctness over raw speed,
+   since a build-hashed cache-first setup isn't available here. Firebase
+   Hosting's own Cache-Control headers (see firebase.json) still let the
+   browser's HTTP cache do its job on top of this for repeat loads within
+   the same session.
    ========================================================================== */
 
-const CACHE_VERSION = 'mca-calc-v1';
-const STATIC_CACHE = `${CACHE_VERSION}-static`;
-const PAGES_CACHE = `${CACHE_VERSION}-pages`;
+const CACHE_VERSION = 'mca-calc-v2';
+const RUNTIME_CACHE = `${CACHE_VERSION}-runtime`;
+const IMMUTABLE_CACHE = `${CACHE_VERSION}-immutable`;
 
 // Precached on install — the shell needed to render every page offline.
 const PRECACHE_URLS = [
@@ -32,6 +43,7 @@ const PRECACHE_URLS = [
   '/js/progress.js',
   '/js/site.js',
   '/js/firebase-auth.js',
+  '/js/pwa-register.js',
   '/js/pages/home.js',
   '/pages/scheme.html',
   '/pages/semester.html',
@@ -41,6 +53,7 @@ const PRECACHE_URLS = [
   '/pages/final-gpa.html',
   '/pages/cgpa.html',
   '/pages/faq.html',
+  '/pages/guide.html',
   '/js/pages/scheme.js',
   '/js/pages/semester.js',
   '/js/pages/tools.js',
@@ -49,10 +62,16 @@ const PRECACHE_URLS = [
   '/js/pages/final-gpa.js',
   '/js/pages/cgpa.js',
   '/js/pages/faq.js',
+  '/js/pages/guide.js',
   '/js/faqContent.js',
   '/icons/icon-192.png',
   '/icons/icon-512.png'
 ];
+
+// Only things that genuinely never change once published — a given PDF
+// or icon file is replaced by uploading a new file, not by editing this
+// one in place, so cache-first is safe for these specifically.
+const IMMUTABLE_EXTENSIONS = /\.(png|jpg|jpeg|svg|ico|pdf)$/;
 
 // Never let the service worker touch these — live, authenticated,
 // per-user data must always go straight to the network.
@@ -61,12 +80,13 @@ const NEVER_CACHE = [
   'identitytoolkit.googleapis.com',
   'securetoken.googleapis.com',
   'www.gstatic.com/firebasejs',
-  'accounts.google.com'
+  'accounts.google.com',
+  'apis.google.com'
 ];
 
 self.addEventListener('install', (event) => {
   event.waitUntil(
-    caches.open(STATIC_CACHE)
+    caches.open(RUNTIME_CACHE)
       .then(cache => cache.addAll(PRECACHE_URLS))
       .then(() => self.skipWaiting())
       .catch(err => console.warn('SW precache failed (non-fatal):', err))
@@ -78,7 +98,7 @@ self.addEventListener('activate', (event) => {
     caches.keys().then(keys =>
       Promise.all(
         keys
-          .filter(key => key.startsWith('mca-calc-') && key !== STATIC_CACHE && key !== PAGES_CACHE)
+          .filter(key => key.startsWith('mca-calc-') && key !== RUNTIME_CACHE && key !== IMMUTABLE_CACHE)
           .map(key => caches.delete(key))
       )
     ).then(() => self.clients.claim())
@@ -97,38 +117,41 @@ self.addEventListener('fetch', (event) => {
   // cross-origin auth/Firestore calls, etc.) pass through untouched.
   if(req.method !== 'GET' || isNeverCached(url)) return;
 
-  const isHTML = req.mode === 'navigate' || (req.headers.get('accept') || '').includes('text/html');
-
-  if(isHTML){
-    // Network-first for pages: always try to get the freshest deployed
-    // version, but fall back to the cached copy (and finally to
-    // 404.html) when offline.
+  if(IMMUTABLE_EXTENSIONS.test(new URL(url).pathname)){
+    // Cache-first: these files are safe to serve instantly from cache
+    // and only fetched once.
     event.respondWith(
-      fetch(req)
-        .then(res => {
+      caches.match(req).then(cached => cached || fetch(req).then(res => {
+        if(res && res.status === 200){
           const resClone = res.clone();
-          caches.open(PAGES_CACHE).then(cache => cache.put(req, resClone));
-          return res;
-        })
-        .catch(() =>
-          caches.match(req).then(cached => cached || caches.match('/404.html'))
-        )
+          caches.open(IMMUTABLE_CACHE).then(cache => cache.put(req, resClone));
+        }
+        return res;
+      }))
     );
     return;
   }
 
-  // Cache-first for static assets (CSS/JS/fonts/icons): fast repeat
-  // loads, with a background network fetch to keep the cache warm.
+  // Network-first for everything else — HTML, CSS, and JS. Always tries
+  // to get the current deployed version first (so a fresh HTML page can
+  // never end up paired with stale CSS/JS from a previous deploy), and
+  // only falls back to whatever's cached when there's no network at all.
   event.respondWith(
-    caches.match(req).then(cached => {
-      const networkFetch = fetch(req).then(res => {
+    fetch(req)
+      .then(res => {
         if(res && res.status === 200){
           const resClone = res.clone();
-          caches.open(STATIC_CACHE).then(cache => cache.put(req, resClone));
+          caches.open(RUNTIME_CACHE).then(cache => cache.put(req, resClone));
         }
         return res;
-      }).catch(() => cached);
-      return cached || networkFetch;
-    })
+      })
+      .catch(() =>
+        caches.match(req).then(cached => {
+          if(cached) return cached;
+          const isHTML = req.mode === 'navigate' || (req.headers.get('accept') || '').includes('text/html');
+          return isHTML ? caches.match('/404.html') : Response.error();
+        })
+      )
   );
 });
+

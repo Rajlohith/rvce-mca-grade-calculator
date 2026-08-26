@@ -4,11 +4,18 @@
 .wrap{ max-width: 1080px; margin: 0 auto; padding: 0 20px 60px; }
 
 /* ---------- Site header ----------
-   min-height reserved on the header (and breadcrumb below) so the empty
+   One row, always. Brand on the left; nav links, sign-in control and the
+   theme toggle on the right, inline, on wide screens. Below the
+   MOBILE_BREAKPOINT (see the media query at the bottom of this block),
+   those three collapse into a hamburger-triggered dropdown panel instead
+   of wrapping onto extra header rows — a header that keeps growing by a
+   row per feature (nav links, then GitHub, then sign-in) is what caused
+   it to eat nearly half the viewport on a phone before this. min-height
+   is still reserved here (and on #breadcrumb below) so the empty
    <header id="site-header"> present at first paint doesn't collapse to
    0px and then jump to its real height once site.js renders the nav —
-   that collapse/expand was the single largest Cumulative Layout Shift
-   contributor in Lighthouse audits (0.2-0.67 depending on viewport). */
+   that collapse/expand was a major Cumulative Layout Shift contributor
+   in Lighthouse audits. */
 .site-header{
   background: var(--header-bg);
   backdrop-filter: blur(8px);
@@ -19,11 +26,12 @@
   min-height: 69px;
 }
 .site-header-inner{
-  max-width: 1080px; margin: 0 auto; padding: 16px 20px;
-  display:flex; align-items:center; justify-content:space-between; gap:14px; flex-wrap:wrap;
-  min-height: 36px;
+  max-width: 1080px; margin: 0 auto; padding: 14px 20px;
+  display:flex; align-items:center; justify-content:space-between; gap:14px;
+  min-height: 40px;
+  position: relative;
 }
-.brand{ display:flex; align-items:center; gap:10px; text-decoration:none; }
+.brand{ display:flex; align-items:center; gap:10px; text-decoration:none; flex-shrink:0; }
 .brand-mark{
   width:36px; height:36px; border-radius: var(--radius-sm);
   background: var(--ink); color:var(--btn-fg);
@@ -34,30 +42,55 @@
 .brand-name{ font-family:var(--font-display); font-weight:700; font-size:16px; color:var(--ink); display:block; }
 .brand-tag{ font-size:11px; color:var(--ink-faint); font-weight:500; }
 
-.site-nav{ display:flex; align-items:center; gap:6px; flex-wrap:wrap; }
-.site-nav a{
+/* Wide screens: everything inline in the one header row ("content menu"). */
+.site-nav{
+  display:flex; align-items:center; gap:18px; flex-wrap:wrap;
+}
+.site-nav-links{ display:flex; align-items:center; gap:6px; flex-wrap:wrap; }
+.site-nav-links a{
   font-size:13.5px; font-weight:500; color:var(--ink-soft); text-decoration:none;
   border-radius:999px; padding:8px 15px; transition: background .15s ease, color .15s ease;
+  white-space:nowrap;
 }
-.site-nav a:hover{ background: var(--paper); color:var(--ink); }
-.site-nav a.current{ background: var(--ink); color:var(--btn-fg); font-weight:600; }
-.site-nav a.ext{ display:flex; align-items:center; gap:5px; border:1px solid var(--line-strong); }
-.site-nav a.ext:hover{ border-color: var(--ink); background:transparent; }
+.site-nav-links a:hover{ background: var(--paper); color:var(--ink); }
+.site-nav-links a.current{ background: var(--ink); color:var(--btn-fg); font-weight:600; }
+.site-nav-controls{ display:flex; align-items:center; gap:12px; }
 
-/* ---------- Auth bar ----------
-   A slim full-width strip directly under the main nav row, reserved for
-   sign-in state. Kept separate from .site-nav so the sign-in button/user
-   name never has to compete for space with CGPA/FAQ/GitHub/theme-toggle
-   on narrow screens — it always gets its own row. */
-.auth-bar{
-  max-width:1080px; margin:0 auto; padding:10px 20px;
-  border-top:1px solid var(--line);
-  display:flex; justify-content:flex-end;
-  min-height:44px; align-items:center;
-  /* Height reserved up front (not collapsed while empty) so the
-     sign-in button/user-name appearing after Firebase loads never
-     shifts the rest of the page down — a major contributor to the
-     Cumulative Layout Shift flagged in Lighthouse audits. */
+/* Hamburger button: hidden on wide screens, shown only in the mobile
+   media query below. */
+.nav-toggle{
+  display:none; width:38px; height:38px; border-radius:var(--radius-sm);
+  border:1.5px solid var(--line-strong); background:var(--card);
+  align-items:center; justify-content:center; cursor:pointer; flex-shrink:0;
+}
+.nav-toggle-bars{ display:flex; flex-direction:column; gap:4px; width:18px; }
+.nav-toggle-bars span{ display:block; height:2px; border-radius:1px; background:var(--ink); }
+
+@media(max-width: 768px){
+  .nav-toggle{ display:flex; }
+
+  /* Below the breakpoint, .site-nav becomes a dropdown panel anchored
+     under the header row rather than an inline flex group — hidden by
+     default, revealed by adding .open (see wireNavToggle in site.js). */
+  .site-nav{
+    position:absolute; top:100%; left:0; right:0;
+    background: var(--card); border-bottom:1px solid var(--line);
+    box-shadow: var(--shadow-lg);
+    flex-direction:column; align-items:stretch; gap:4px;
+    padding:10px 20px 16px;
+    max-height:0; overflow:hidden; opacity:0;
+    transition: max-height .22s ease, opacity .18s ease;
+  }
+  .site-nav.open{ max-height:420px; opacity:1; overflow:visible; }
+  .site-nav-links{ flex-direction:column; align-items:stretch; gap:2px; }
+  .site-nav-links a{ padding:11px 12px; }
+  .site-nav-controls{
+    flex-direction:column; align-items:stretch; gap:10px;
+    margin-top:8px; padding-top:12px; border-top:1px solid var(--line);
+  }
+  .auth-container{ width:100%; }
+  .auth-container .user-menu{ width:100%; justify-content:space-between; }
+  .auth-container .sign-in-btn{ width:100%; justify-content:center; }
 }
 
 /* ---------- Page hero (per-page title block) ---------- */
