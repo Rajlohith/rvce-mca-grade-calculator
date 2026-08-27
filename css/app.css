@@ -786,6 +786,13 @@ table.ledger input[type=checkbox]{
 }
 .quick-links{ display:flex; flex-direction:column; }
 
+/* Desktop: the three quick-link cards sit side by side instead of
+   stacked. Mobile keeps the original stacked layout above (untouched). */
+@media(min-width:641px){
+  .quick-links{ flex-direction:row; gap:16px; align-items:stretch; }
+  .quick-links .list-card{ flex:1; margin-bottom:0; }
+}
+
 /* ---------- Choice cards (year / scheme / semester / tool) ---------- */
 .choice-grid{ display:grid; grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); gap:16px; }
 .choice-grid.three{ grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); }
@@ -891,6 +898,7 @@ table.ledger input[type=checkbox]{
 .site-footer{
   margin-top:40px;
   padding-top:28px;
+  border-top:1px solid var(--line);
 }
 
 /* Desktop: description on left, document choices on right */
@@ -956,8 +964,8 @@ table.ledger input[type=checkbox]{
   text-align:center;
   margin-top:24px;
   margin-bottom:22px;
-  padding-top:0;
-  border-top:none;
+  padding-top:20px;
+  border-top:1px solid var(--line);
 }
 
 .footer-links a{
@@ -981,6 +989,15 @@ table.ledger input[type=checkbox]{
   font-size:11.5px;
   color:var(--ink-faint);
   line-height:1.8;
+}
+
+/* Third divider — only on the full (home-page) footer, where the legal
+   line follows the link row. On the compact footer used on inner pages
+   (legal line only) the .site-footer top border already provides the
+   single divider it needs, so this doesn't double up there. */
+.footer-links + .legal{
+  border-top:1px solid var(--line);
+  padding-top:18px;
 }
 
 @media(max-width:640px){
