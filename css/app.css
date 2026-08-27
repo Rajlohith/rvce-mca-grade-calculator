@@ -410,8 +410,24 @@ html.mca-splash-active{ overflow:hidden; }
 
 .breakdown{ font-size:13.5px; display:flex; flex-direction:column; gap:6px; margin-top:8px; }
 .breakdown .row{ display:flex; justify-content:space-between; gap:12px; }
-.breakdown .row.total{ border-top:1px solid var(--line-strong); padding-top:8px; margin-top:4px; font-weight:700; font-size:15px; flex-wrap:nowrap; }
-.breakdown .row.total span:first-child{ color:var(--ink-soft); font-weight:500; white-space:nowrap; }
+.breakdown .row.total{
+  border-top:1px solid var(--line-strong); padding-top:8px; margin-top:4px;
+  font-weight:700; font-size:15px;
+  flex-wrap:nowrap; align-items:baseline; gap:8px;
+}
+/* Font-size tracks the card's own width (via cqw, falling back to the
+   fixed 15px above in browsers without container query support) so the
+   label and value always have room to sit fully on one line, however
+   narrow the card gets, instead of wrapping or truncating. */
+@supports (font-size: 1cqw){
+  .breakdown .row.total{
+    font-size: clamp(13px, 4.6cqw, 15px);
+  }
+}
+.breakdown .row.total span:first-child{
+  color:var(--ink-soft); font-weight:500; white-space:nowrap;
+}
+.breakdown .row.total span:last-child{ white-space:nowrap; flex-shrink:0; }
 
 /* ---------- Tables (SGPA / CGPA) ---------- */
 table.ledger{ width:100%; border-collapse:collapse; margin-top:8px; }
@@ -631,6 +647,10 @@ table.ledger input[type=checkbox]{
 .course-card{
   background:var(--card); border:1px solid var(--line); border-radius:var(--radius-lg);
   box-shadow:var(--shadow-sm); padding:22px;
+  /* Lets descendants (the CIE total row below) size themselves off this
+     card's own width via cqw, instead of the viewport — the card's width
+     doesn't track viewport width once the grid lays out multiple columns. */
+  container-type:inline-size;
 }
 .course-card-head{ display:flex; justify-content:space-between; align-items:flex-start; gap:10px; margin-bottom:16px; }
 .course-card-head h3{ font-size:16px; font-weight:700; line-height:1.35; }
@@ -963,8 +983,17 @@ table.ledger input[type=checkbox]{
   justify-content:center;
   gap:8px 22px;
   text-align:center;
-  margin-top:24px;
   margin-bottom:22px;
+}
+
+/* This divider only belongs here when a .footer-top actually precedes the
+   links (the home-page footer) — it separates the brand/PDF block from the
+   link row. On inner pages there's no .footer-top, so .footer-links is the
+   first thing in .site-footer and already sits right under the
+   .site-footer top border; adding a second border+gap here would just
+   stack a redundant line a few pixels below the first one. */
+.footer-top + .footer-links{
+  margin-top:24px;
   padding-top:20px;
   border-top:1px solid var(--line);
 }
@@ -1051,8 +1080,11 @@ table.ledger input[type=checkbox]{
     justify-content:center;
     text-align:center;
     gap:8px 16px;
-    margin-top:20px;
     margin-bottom:18px;
+  }
+
+  .footer-top + .footer-links{
+    margin-top:20px;
   }
 
   .footer-links a{

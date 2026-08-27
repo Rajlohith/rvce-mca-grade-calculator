@@ -19,7 +19,7 @@
    the same session.
    ========================================================================== */
 
-const CACHE_VERSION = 'mca-calc-v3';
+const CACHE_VERSION = 'mca-calc-v4';
 const RUNTIME_CACHE = `${CACHE_VERSION}-runtime`;
 const IMMUTABLE_CACHE = `${CACHE_VERSION}-immutable`;
 
