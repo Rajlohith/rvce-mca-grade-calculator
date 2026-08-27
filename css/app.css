@@ -409,8 +409,8 @@ html.mca-splash-active{ overflow:hidden; }
 
 .breakdown{ font-size:13.5px; display:flex; flex-direction:column; gap:6px; margin-top:8px; }
 .breakdown .row{ display:flex; justify-content:space-between; gap:12px; }
-.breakdown .row.total{ border-top:1px solid var(--line-strong); padding-top:8px; margin-top:4px; font-weight:700; font-size:15px; }
-.breakdown .row span:first-child{ color:var(--ink-soft); font-weight:500; }
+.breakdown .row.total{ border-top:1px solid var(--line-strong); padding-top:8px; margin-top:4px; font-weight:700; font-size:15px; flex-wrap:nowrap; }
+.breakdown .row.total span:first-child{ color:var(--ink-soft); font-weight:500; white-space:nowrap; }
 
 /* ---------- Tables (SGPA / CGPA) ---------- */
 table.ledger{ width:100%; border-collapse:collapse; margin-top:8px; }

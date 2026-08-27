@@ -188,7 +188,7 @@
         finalPct: r.finalPct,
         timestamp: new Date().toISOString()
       }).then(() => {
-        window.MCA.util.toast('CIE saved', 'ok');
+        // Silent save — no toast notification
       }).catch(err => {
         console.error('Failed to save CIE:', err);
         window.MCA.util.toast('Could not save CIE to your account', 'error');
