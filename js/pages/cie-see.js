@@ -33,19 +33,21 @@
   function quizTestBlock(){
     return `
       <div class="field-row-2">
-        <div class="field"><label>Quiz 1 <span class="hint">/10</span></label><input type="number" class="f-q1 req" min="0" max="10" value=""></div>
-        <div class="field"><label>Quiz 2 <span class="hint">/10</span></label><input type="number" class="f-q2 req" min="0" max="10" value=""></div>
+        <div class="field"><label>Quiz 1 <span class="hint">/10</span></label><input type="number" class="f-q1 quiz-field" min="0" max="10" value=""></div>
+        <div class="field"><label>Quiz 2 <span class="hint">/10</span></label><input type="number" class="f-q2 quiz-field" min="0" max="10" value=""></div>
       </div>
       <div class="field-row-2">
-        <div class="field"><label>Quiz 3 <span class="hint">/10</span></label><input type="number" class="f-q3 req" min="0" max="10" value=""></div>
+        <div class="field"><label>Quiz 3 <span class="hint">/10</span></label><input type="number" class="f-q3 quiz-field" min="0" max="10" value=""></div>
+      </div>
+      <div class="hint qt-note">Enter any 2 of the 3 quiz marks &mdash; the best 2 count anyway.</div>
+      <div class="field-row-2">
+        <div class="field"><label>Test 1 <span class="hint">/50</span></label><input type="number" class="f-t1 test-field" min="0" max="50" value=""></div>
+        <div class="field"><label>Test 2 <span class="hint">/50</span></label><input type="number" class="f-t2 test-field" min="0" max="50" value=""></div>
       </div>
       <div class="field-row-2">
-        <div class="field"><label>Test 1 <span class="hint">/50</span></label><input type="number" class="f-t1 req" min="0" max="50" value=""></div>
-        <div class="field"><label>Test 2 <span class="hint">/50</span></label><input type="number" class="f-t2 req" min="0" max="50" value=""></div>
+        <div class="field"><label>Test 3 <span class="hint">/50</span></label><input type="number" class="f-t3 test-field" min="0" max="50" value=""></div>
       </div>
-      <div class="field-row-2">
-        <div class="field"><label>Test 3 <span class="hint">/50</span></label><input type="number" class="f-t3 req" min="0" max="50" value=""></div>
-      </div>`;
+      <div class="hint qt-note">Enter any 2 of the 3 test marks &mdash; the best 2 count anyway.</div>`;
   }
 
   function fieldsHTML(type){
@@ -144,21 +146,43 @@
     return course.title;
   }
 
+  function isFilled(inp){ return inp.value !== '' && inp.value !== null; }
+
+  // Quiz and Test each have 3 attempts, but only the best 2 of 3 are ever
+  // used (see engine.js bestTwoOfThree), so the group only needs any 2 of
+  // its 3 inputs filled — not all 3. The other "req" fields (EL, Lab, PBL)
+  // are still individually required as before.
   function validateCard(card){
     const reqInputs = [...card.querySelectorAll('input.req')];
-    const missing = reqInputs.filter(inp => inp.value === '' || inp.value === null);
+    const missing = reqInputs.filter(inp => !isFilled(inp));
     reqInputs.forEach(inp => inp.classList.toggle('error', missing.includes(inp)));
-    return missing;
+
+    const quizInputs = [...card.querySelectorAll('input.quiz-field')];
+    const testInputs = [...card.querySelectorAll('input.test-field')];
+    const quizShort = quizInputs.filter(isFilled).length < 2;
+    const testShort = testInputs.filter(isFilled).length < 2;
+    // Only mark the still-empty ones in a short group as errors.
+    quizInputs.forEach(inp => inp.classList.toggle('error', quizShort && !isFilled(inp)));
+    testInputs.forEach(inp => inp.classList.toggle('error', testShort && !isFilled(inp)));
+
+    return { missing, quizShort, testShort, quizInputs, testInputs };
   }
 
   function calculateCard(card){
-    const missing = validateCard(card);
-    if(missing.length){
-      card.querySelector('.course-result').innerHTML = `<div class="callout error">Fill in every mark for this course before calculating. ${missing.length} field${missing.length===1?'':'s'} still empty.</div>`;
+    const { missing, quizShort, testShort, quizInputs, testInputs } = validateCard(card);
+    if(missing.length || quizShort || testShort){
+      const parts = [];
+      if(quizShort) parts.push('any 2 of the 3 Quiz marks');
+      if(testShort) parts.push('any 2 of the 3 Test marks');
+      if(missing.length) parts.push(`${missing.length} other field${missing.length===1?'':'s'}`);
+      card.querySelector('.course-result').innerHTML = `<div class="callout error">Still need: ${parts.join(', ')}.</div>`;
       const seeBtn = card.querySelector('.see-btn');
       seeBtn.disabled = true;
       seeBtn.classList.remove('ready');
-      missing[0].focus();
+      const firstBad = (quizShort && quizInputs.find(i=>!isFilled(i)))
+        || (testShort && testInputs.find(i=>!isFilled(i)))
+        || missing[0];
+      if(firstBad) firstBad.focus();
       return;
     }
     const code = card.dataset.code;
@@ -233,7 +257,7 @@
   });
 
   grid.addEventListener('input', (e)=>{
-    if(e.target.matches('input.req') && e.target.value !== '') e.target.classList.remove('error');
+    if(e.target.matches('input[type=number]')) validateCard(e.target.closest('.course-card'));
   });
 
   document.getElementById('resetAllBtn').addEventListener('click', ()=>{
