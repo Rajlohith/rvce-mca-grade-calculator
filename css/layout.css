@@ -34,9 +34,7 @@
 .brand{ display:flex; align-items:center; gap:10px; text-decoration:none; flex-shrink:0; }
 .brand-mark{
   width:36px; height:36px; border-radius: var(--radius-sm);
-  background: var(--ink); color:var(--btn-fg);
-  display:flex; align-items:center; justify-content:center; font-weight:700; font-size:15px;
-  flex:0 0 auto;
+  object-fit:cover; flex:0 0 auto;
 }
 .brand-text{ line-height:1.2; }
 .brand-name{ font-family:var(--font-display); font-weight:700; font-size:16px; color:var(--ink); display:block; }
@@ -118,7 +116,7 @@
 #breadcrumb{ min-height: 17px; } /* reserved before JS fills it in, to avoid a layout shift */
 .breadcrumb{
   display:flex; align-items:center; flex-wrap:wrap; gap:6px;
-  margin: 8px 0 22px; font-size:13px;
+  margin: 8px 0 22px; font-size:17px;
 }
 .breadcrumb a{ color:var(--ink-faint); text-decoration:none; font-weight:500; }
 .breadcrumb a:hover{ color:var(--ink); }

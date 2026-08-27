@@ -63,4 +63,50 @@
     const el = e.target;
     if(el.tagName === 'INPUT' && el.type === 'number') hideWarning(el);
   }, true);
+
+  /* ---------- Scroll wheel: never changes a number field's value ----------
+     Chrome/Edge/Firefox all bump a focused number input's value when the
+     mouse wheel turns over it — surprising and easy to trigger by accident
+     while scrolling the page. Blurring the field the instant a wheel event
+     reaches it (while it's still the focused element) removes focus before
+     the browser applies its native increment/decrement, so the value never
+     changes; the page then scrolls normally since nothing is capturing the
+     wheel event. */
+  document.addEventListener('wheel', function(e){
+    const el = e.target;
+    if(el && el.tagName === 'INPUT' && el.type === 'number' && el === document.activeElement){
+      el.blur();
+    }
+  }, { passive: true });
+
+  /* ---------- Arrow Up/Down: move between fields instead of the value ----------
+     By default Up/Down also bump a number input's value like the wheel
+     does. Instead, treat them like Tab/Shift+Tab across the "current group"
+     of number fields: on the CIE finalizer page each course is its own
+     '.course-card', so navigation stays inside that subject's fields and
+     never jumps into the next course; every other page has no such
+     container, so navigation simply moves through all of that page's
+     number fields in order. */
+  function navGroup(el){
+    return el.closest('.course-card') || el.closest('.modal') || document;
+  }
+
+  function navigableInputs(scope){
+    return Array.prototype.slice.call(scope.querySelectorAll('input[type="number"]'))
+      .filter(function(el){ return !el.disabled && el.offsetParent !== null; });
+  }
+
+  document.addEventListener('keydown', function(e){
+    if(e.key !== 'ArrowUp' && e.key !== 'ArrowDown') return;
+    const el = e.target;
+    if(!(el.tagName === 'INPUT' && el.type === 'number')) return;
+    if(e.ctrlKey || e.metaKey || e.altKey || e.shiftKey) return;
+
+    e.preventDefault();
+    const list = navigableInputs(navGroup(el));
+    const idx = list.indexOf(el);
+    if(idx === -1) return;
+    const target = list[e.key === 'ArrowUp' ? idx - 1 : idx + 1];
+    if(target){ target.focus(); target.select(); }
+  }, true);
 })();

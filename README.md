@@ -1,11 +1,12 @@
 # RVCE MCA Grade Calculator
 
-![Static Site](https://img.shields.io/badge/Type-Static%20Site-orange)
-![No Build Step](https://img.shields.io/badge/Build%20Step-None-success)
-![JavaScript](https://img.shields.io/badge/JavaScript-Vanilla-F7DF1E?logo=javascript&logoColor=black)
-![HTML5](https://img.shields.io/badge/HTML-5-E34F26?logo=html5&logoColor=white)
-![CSS3](https://img.shields.io/badge/CSS-3-1572B6?logo=css3&logoColor=white)
-![License](https://img.shields.io/badge/License-Apache%202.0-D22128)
+![RVCE MCA](https://img.shields.io/badge/RVCE-MCA-800000)
+![HTML5](https://img.shields.io/badge/HTML5-C2410C?logo=html5&logoColor=white)
+![CSS3](https://img.shields.io/badge/CSS3-8B5CF6?logo=css3&logoColor=white)
+![JavaScript](https://img.shields.io/badge/JavaScript-D4A017?logo=javascript&logoColor=white)
+[![Firebase](https://img.shields.io/badge/Firebase-F59E0B?logo=firebase&logoColor=white)](https://firebase.google.com/)
+![PWA](https://img.shields.io/badge/PWA-4338CA?logo=pwa&logoColor=white)
+![License](https://img.shields.io/badge/License-Apache%202.0-047857?logo=apache&logoColor=white)
 
 > An unofficial CIE, SEE, final-grade and GPA calculator for RVCE MCA (Master of Computer Applications) students, built directly from the college's own published rules rather than guesswork.
 

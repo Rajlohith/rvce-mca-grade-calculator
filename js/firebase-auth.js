@@ -9,22 +9,20 @@
      (`firebase.auth()`, `new firebase.auth.GoogleAuthProvider()`, etc.) —
      using them silently breaks sign-in with no obvious error, which is
      what was happening before this was caught and fixed.
-   - Firebase Analytics is intentionally NOT loaded. This project doesn't
-     use it, and the Firebase Console's copy-paste config snippet includes
-     a measurementId by default whether you asked for it or not. Loading
-     it pulls in an extra script, opens connections to Google Analytics /
-     Tag Manager domains, and (if the measurementId doesn't exactly match
-     what's registered server-side) prints a scary-looking mismatch warning
-     to the console — none of which this app needs. If you ever want
-     Analytics, add it back deliberately rather than by leaving Firebase's
-     default snippet as-is.
+   - Firebase Analytics IS loaded (deliberately re-added — the project owner
+     wants it for usage insights). The measurementId below must exactly
+     match what's registered server-side for this Firebase project, or the
+     SDK logs a mismatch warning to the console; "G-5XMZFH8N1M" is the
+     value Firebase's own console reported as the real one for this
+     project, confirmed from a live browser console log, not a placeholder.
    - The Firestore SDK is loaded only on pages that actually use Save
      Progress (set via a `data-needs-firestore="true"` attribute on this
      script's own <script> tag). Pages like the home page, scheme picker,
      or FAQ never call saveMarks/getMarks, so there's no reason to make
      every visitor download and parse the Firestore bundle — this alone
      removes a large chunk of "unused JavaScript" on 5 of the site's 9
-     pages, per Lighthouse.
+     pages, per Lighthouse. Analytics is loaded everywhere, same as Auth,
+     since page-view tracking is wanted on every page.
    ========================================================================== */
 
 window.MCA = window.MCA || {};
@@ -41,7 +39,8 @@ window.MCA = window.MCA || {};
     projectId: "rvce-mca-grade-calc",
     storageBucket: "rvce-mca-grade-calc.firebasestorage.app",
     messagingSenderId: "398744365411",
-    appId: "1:398744365411:web:e07e68f0f8ae317da74b56"
+    appId: "1:398744365411:web:e07e68f0f8ae317da74b56",
+    measurementId: "G-5XMZFH8N1M"
   };
 
   /* RVCE MCA student email format: <name(s)>.mca<YY>@rvce.edu.in
@@ -62,6 +61,9 @@ window.MCA = window.MCA || {};
     try {
       window.firebase.initializeApp(firebaseConfig);
       window.MCA.auth = window.firebase.auth();
+      if(window.firebase.analytics){
+        try { window.MCA.analytics = window.firebase.analytics(); } catch(e){ /* analytics blocked (ad-blocker etc.) — non-fatal */ }
+      }
       if(NEEDS_FIRESTORE && window.firebase.firestore){
         window.MCA.firestore = window.firebase.firestore();
       }
@@ -263,6 +265,7 @@ window.MCA = window.MCA || {};
     const BASE = 'https://www.gstatic.com/firebasejs/10.12.0/';
     loadScript(BASE + 'firebase-app-compat.js')
       .then(() => loadScript(BASE + 'firebase-auth-compat.js'))
+      .then(() => loadScript(BASE + 'firebase-analytics-compat.js'))
       .then(() => NEEDS_FIRESTORE ? loadScript(BASE + 'firebase-firestore-compat.js') : Promise.resolve())
       .then(() => {
         initializeFirebase();

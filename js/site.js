@@ -145,11 +145,8 @@ window.MCA = window.MCA || {};
     return `
       <div class="site-header-inner">
         <a class="brand" href="${ROOT}index.html">
-          <div class="brand-mark">M</div>
-          <div class="brand-text">
-            <span class="brand-name">RVCE MCA Grade Calculator</span>
-            <span class="brand-tag">2024 &amp; 2026 Scheme</span>
-          </div>
+          <img class="brand-mark" src="${ROOT}icons/brand-mark.png" alt="" width="36" height="36">
+          <span class="brand-name">RVCE MCA Grade Calculator</span>
         </a>
 
         <button type="button" id="navToggle" class="nav-toggle" aria-expanded="false" aria-controls="navPanel" aria-label="Open menu">
@@ -183,29 +180,38 @@ window.MCA = window.MCA || {};
   /* A single, quiet footer: one short line about the project, one row of
      links, the syllabus PDF choice, and the legal line — no repeated
      column headings or dense grids. */
-  function renderFooter(){
-    const year = new Date().getFullYear();
+  function renderFooter(opts){
+  opts = opts || {};
+  const year = new Date().getFullYear();
+
+  if(opts.showLinks){
     return `
       <div class="footer-top">
         <div class="footer-brand">
           <p class="footer-about">
-            <strong>RVCE MCA Grade Calculator</strong> is an independent, unofficial grades and GPA calculator for RVCE MCA students, built using the published PG Academic Handbook and the syllabus scheme.
+            <strong>RVCE MCA Grade Calculator</strong> is an independent, unofficial
+            grades and GPA calculator for RVCE MCA students, built using the
+            published PG Academic Handbook and the syllabus scheme.
           </p>
+
           <p class="footer-about">
-             Not affiliated with or endorsed by R V College of Engineering.
+            Not affiliated with or endorsed by R V College of Engineering.
           </p>
         </div>
+
         <div class="footer-meta">
           <div class="footer-pdf">
             <span class="footer-pdf-label">Syllabus PDF</span>
             ${renderPdfChoice()}
           </div>
+
           <div class="footer-pdf">
             <span class="footer-pdf-label">Handbook PDF</span>
             ${renderHandbookChoice()}
           </div>
         </div>
       </div>
+
       <div class="footer-links">
         <a href="${REPO_URL}" target="_blank" rel="noopener noreferrer">GitHub</a>
         <a href="mailto:${EMAIL}">Contact</a>
@@ -213,20 +219,39 @@ window.MCA = window.MCA || {};
         <a href="${HANDBOOK_URL}" target="_blank" rel="noopener noreferrer">Official Handbook</a>
         <a href="${PAGES}faq.html">How Calculations Work</a>
       </div>
+
       <div class="legal">
         &copy; ${year} B R Lohith Raj<br>
-        Unofficial student project &middot; not affiliated with RVCE &middot; always confirm results against your official grade card and the Controller of Examinations.
+        Unofficial student project &middot; Not affiliated with RVCE.
+        Please verify all results against your official grade card and
+        with the Controller of Examinations.
       </div>`;
+  }
+
+  return `
+    <div class="legal">
+      &copy; ${year} B R Lohith Raj<br>
+      Unofficial student project &middot; Not affiliated with RVCE.
+      Please verify all results against your official grade card and
+      with the Controller of Examinations.
+    </div>`;
   }
 
   function mount(opts){
     opts = opts || {};
+
     const headerEl = document.getElementById('site-header');
     const crumbEl  = document.getElementById('breadcrumb');
     const footerEl = document.getElementById('site-footer');
+
     if(headerEl) headerEl.innerHTML = renderHeader(opts.active);
     if(crumbEl)  crumbEl.innerHTML  = renderBreadcrumb(opts.trail);
-    if(footerEl) footerEl.innerHTML = renderFooter();
+    if(footerEl) {
+    footerEl.innerHTML = renderFooter({
+      showLinks: opts.active === 'home'
+    });
+}
+
     wireThemeToggle();
     wireNavToggle();
   }

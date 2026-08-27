@@ -9,87 +9,190 @@
 <link rel="manifest" href="../manifest.webmanifest">
 <link rel="icon" href="../favicon.ico" sizes="any">
 <link rel="icon" href="../icons/icon-192.png" type="image/png">
-<link rel="apple-touch-icon" href="../apple-touch-icon.png">
+<link rel="icon" href="../icons/icon.svg" type="image/svg+xml" sizes="any">
+<link rel="apple-touch-icon" sizes="180x180" href="../icons/icon-180.png">
+<link rel="apple-touch-icon" sizes="167x167" href="../icons/icon-167.png">
+<link rel="apple-touch-icon" sizes="152x152" href="../icons/icon-152.png">
+<link rel="apple-touch-icon" sizes="120x120" href="../icons/icon-120.png">
+
 <title>Guide - which calculator do I need? - RVCE MCA Grade Calculator</title>
+
 <meta name="description" content="What each calculator on this site is for and when to use it, from mid-semester CIE tracking through to final CGPA projections.">
+
 <link rel="canonical" href="https://rvce-mca-grade-calc.web.app/pages/guide.html">
+
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="RVCE MCA Grade Calculator">
 <meta property="og:title" content="Guide - which calculator do I need? - RVCE MCA Grade Calculator">
 <meta property="og:description" content="What each calculator on this site is for and when to use it, from mid-semester CIE tracking through to final CGPA projections.">
 <meta property="og:url" content="https://rvce-mca-grade-calc.web.app/pages/guide.html">
-<meta property="og:image" content="https://rvce-mca-grade-calc.web.app/icons/icon-512.png">
+<meta property="og:image" content="https://rvce-mca-grade-calc.web.app/icons/social-preview.png">
 <meta property="og:image:alt" content="RVCE MCA Grade Calculator">
+
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="Guide - which calculator do I need? - RVCE MCA Grade Calculator">
 <meta name="twitter:description" content="What each calculator on this site is for and when to use it, from mid-semester CIE tracking through to final CGPA projections.">
-<meta name="twitter:image" content="https://rvce-mca-grade-calc.web.app/icons/icon-512.png">
+<meta name="twitter:image" content="https://rvce-mca-grade-calc.web.app/icons/social-preview.png">
+
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+
 <link rel="stylesheet" href="../css/variables.css">
 <link rel="stylesheet" href="../css/base.css">
 <link rel="stylesheet" href="../css/layout.css">
 <link rel="stylesheet" href="../css/components.css">
 </head>
+
 <body>
+<div id="mca-splash" aria-hidden="true"><div class="mca-splash-mark"><img src="../icons/icon-192.png" width="96" height="96" alt=""></div><div class="mca-splash-name">RVCE MCA Grade Calculator</div><div class="mca-splash-dots"><span></span><span></span><span></span></div></div>
+<script>(function(){try{var standalone=window.matchMedia('(display-mode: standalone)').matches||window.navigator.standalone===true;var seen=sessionStorage.getItem('mca-splash-seen');if(standalone&&!seen){document.documentElement.classList.add('mca-splash-active');sessionStorage.setItem('mca-splash-seen','1');}else{var el=document.getElementById('mca-splash');if(el)el.remove();}}catch(e){var el=document.getElementById('mca-splash');if(el)el.remove();}})();</script>
+
 <header id="site-header" class="site-header"></header>
 
 <div class="wrap">
+
   <div class="page-hero">
     <div class="eyebrow">Reference</div>
     <h1>Which calculator do I need?</h1>
-    <p>Four tools, four different points in the semester. Here's what each one is actually for, and when to reach for it.</p>
+    <p>Four tools, which one's to use and when?</p>
   </div>
 
   <div id="breadcrumb"></div>
 
   <main id="app">
+
     <div class="card guide-card">
+
+      <!-- STEP 1 -->
       <div class="guide-step">
         <div class="guide-step-num">1</div>
+
         <div class="guide-step-body">
           <h2>CIE Finalization &amp; SEE Marks Required</h2>
-          <p class="guide-when">Use this <strong>during the semester, before you write your SEE</strong>.</p>
-          <p>As your Quiz, Test, EL/PBL and Lab marks come in, enter them here to see exactly where your CIE stands right now &mdash; finalized and rounded the way the department actually does it, not just a rough total. Once you know your CIE, the same tool tells you the SEE score you'd need in the actual exam to land each possible grade, from O down to a bare pass. That's the real use case: figuring out where you stand and what you need to aim for <em>before</em> you sit the exam, not after.</p>
+
+          <p class="guide-when">
+            Use this <strong>during the semester, before you write your SEE</strong>.
+          </p>
+
+          <ul>
+            <li>Enter your <strong>Quiz, Test, EL/PBL and Lab marks</strong> as they become available.</li>
+            <li>See your <strong>current CIE score</strong> based on the marks entered so far.</li>
+            <li>The tool applies the required <strong>finalization and rounding rules</strong>.</li>
+            <li>Once your CIE is finalized, enter or confirm your CIE total.</li>
+            <li>See the <strong>SEE marks required</strong> for each possible grade.</li>
+            <li>Check what you need for grades ranging from <strong>O down to the minimum passing grade</strong>.</li>
+            <li>Use it before the SEE to know <strong>where you stand and what score to target</strong>.</li>
+          </ul>
         </div>
       </div>
 
+
+      <!-- STEP 2 -->
       <div class="guide-step">
         <div class="guide-step-num">2</div>
+
         <div class="guide-step-body">
           <h2>Final Grade Calculator</h2>
-          <p class="guide-when">Use this <strong>once you have a CIE total, and either a real or an assumed SEE score</strong>.</p>
-          <p>This is the flip side of the tool above. Instead of asking "what SEE do I need?", it answers "what grade do I get?" &mdash; you put in your finalized CIE and a SEE number (real or a guess) and it tells you the resulting letter grade and pass/fail status. It's useful in two moments: right before the SEE, to sanity-check a target score against Table 4.4's actual passing conditions; and right after the SEE, before results are officially out, to get an approximate idea of your grade from what you think you scored.</p>
+
+          <p class="guide-when">
+            Use this <strong>once you have a CIE total, and either a real or an assumed SEE score</strong>.
+          </p>
+
+          <ul>
+            <li>The flip side of the CIE tool: instead of <strong>"what SEE do I need?"</strong>, it answers <strong>"what grade do I get?"</strong>.</li>
+            <li>Enter your <strong>CIE total</strong>.</li>
+            <li>Enter your actual SEE marks or an <strong>assumed/estimated SEE score</strong>.</li>
+            <li>Check the resulting <strong>percentage and letter grade</strong>.</li>
+            <li>Before the SEE, use it to <strong>sanity-check a target score</strong>.</li>
+            <li>After the SEE, use it to estimate your <strong>likely grade before official results are released</strong>.</li>
+            <li>The tool also checks the applicable <strong>Table 4.4 passing conditions</strong>.</li>
+          </ul>
         </div>
       </div>
 
+
+      <!-- STEP 3 -->
       <div class="guide-step">
         <div class="guide-step-num">3</div>
+
         <div class="guide-step-body">
           <h2>Final SGPA Calculator</h2>
-          <p class="guide-when">Use this <strong>once results are out on the SAP portal</strong>.</p>
-          <p>SAP shows your grade for every course, but it doesn't show your SGPA anywhere &mdash; you have to work it out yourself. This tool exists for exactly that: enter the grade SAP gave you for each course in the semester and it computes (and lets you verify) your SGPA. Underneath that, it also blends in your CGPA from the semester before, so you can check your running CGPA the same way, using the actual figures from your last result.</p>
+
+          <p class="guide-when">
+            Use this <strong>once results are out on the SAP portal</strong>.
+          </p>
+
+          <ul>
+            <li>Enter the <strong>final grade</strong> SAP shows for each course.</li>
+            <li>Enter the grades for <strong>all courses in the semester</strong>.</li>
+            <li>The tool automatically applies the corresponding <strong>grade points and course credits</strong>.</li>
+            <li>Calculate your <strong>semester SGPA</strong>.</li>
+            <li>Use your previous semester's result to blend the new SGPA into your <strong>updated CGPA</strong>.</li>
+            <li>Use it to <strong>verify your calculated SGPA</strong> against the result you expect.</li>
+          </ul>
+
+          <p>
+            <strong>Why use it?</strong>
+          </p>
+
+          <ul>
+            <li>SAP shows your individual course grades.</li>
+            <li>Your SGPA can be calculated from those grades using the course credits.</li>
+            <li>This tool performs that calculation for you.</li>
+          </ul>
         </div>
       </div>
 
+
+      <!-- STEP 4 -->
       <div class="guide-step">
         <div class="guide-step-num">4</div>
+
         <div class="guide-step-body">
-          <h2>CGPA Calculator</h2>
-          <p class="guide-when">Use this <strong>any time you want to project forward</strong>.</p>
-          <p>The most straightforward of the four: pick a semester, guess an SGPA you think you might get, and see what that does to your CGPA. No results needed &mdash; it's a "what if" tool for planning, not a verification tool like the one above.</p>
+          <h2><a href="cgpa.html">CGPA Calculator</a></h2>
+
+          <p class="guide-when">
+            Use this <strong>any time you want to project forward</strong>.
+          </p>
+
+          <ul>
+            <li>Select the semester you want to plan for.</li>
+            <li>Enter an <strong>expected or target SGPA</strong>.</li>
+            <li>See how that SGPA would affect your <strong>overall CGPA</strong>.</li>
+            <li>Try different SGPA values to compare possible outcomes.</li>
+            <li>No official results are required.</li>
+            <li>Use it as a <strong>"what if" planning tool</strong>.</li>
+            <li>It is intended for <strong>future CGPA projections</strong>, rather than verifying an already published result.</li>
+          </ul>
         </div>
       </div>
 
+
+      <!-- SAVE PROGRESS -->
       <div class="callout" style="margin-top:8px;">
-        <strong>About saving your numbers:</strong> every calculator has a Save Progress button, but it only works once you're signed in with your RVCE MCA Google account (the one ending in <code>.mca25@rvce.edu.in</code> or similar). Signed out, everything still works exactly the same &mdash; it just won't be there when you come back.
+
+        <strong>About saving your numbers:</strong>
+
+        <ul>
+          <li>Every calculator has a <strong>Save Progress</strong> button.</li>
+          <li>Saving requires you to be signed in with your <strong>RVCE MCA Google account</strong>.</li>
+          <li>This is the account ending in <code>.mca25@rvce.edu.in</code> or a similar RVCE MCA address.</li>
+          <li>When signed out, all calculators still work normally.</li>
+          <li>Your numbers simply <strong>will not be available when you return</strong>.</li>
+        </ul>
+
       </div>
+
     </div>
+
   </main>
 
   <footer id="site-footer" class="site-footer"></footer>
+
 </div>
 
+
+<script src="../js/splash.js" defer></script>
 <script src="../js/firebase-auth.js" defer></script>
 <script src="../js/util.js" defer></script>
 <script src="../js/data.js" defer></script>
@@ -99,5 +202,6 @@
 <script src="../js/site.js" defer></script>
 <script src="../js/pages/guide.js" defer></script>
 <script src="../js/pwa-register.js" defer></script>
+
 </body>
 </html>

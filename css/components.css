@@ -526,41 +526,133 @@ table.ledger input[type=checkbox]{
    full width and sits centered on its own line, then the legal line,
    centered, at the very bottom. */
 .site-footer{
-  margin-top:40px; border-top:1px solid var(--line); padding-top:28px;
+  margin-top:40px;
+  padding-top:28px;
 }
+
+/* Desktop: description on left, document choices on right */
 .footer-top{
-  display:flex; justify-content:space-between; align-items:flex-start;
-  gap:20px 48px; flex-wrap:wrap; margin-bottom:22px;
+  display:grid;
+  grid-template-columns:minmax(0, 1fr) 360px;
+  gap:40px;
+  align-items:start;
 }
-.footer-brand{ flex:1 1 320px; max-width:480px; }
-.footer-meta{
-  flex:1 1 260px; max-width:360px;
-  display:flex; flex-direction:column; gap:14px; align-items:flex-end;
+
+.footer-brand{
+  min-width:0;
+  max-width:560px;
 }
+
 .footer-about{
-  font-size:13px; color:var(--ink-soft); line-height:1.65; max-width:70ch;
+  font-size:13px;
+  color:var(--ink-soft);
+  line-height:1.65;
   margin:0 0 10px;
 }
-.footer-about:last-child{ margin-bottom:0; }
-.footer-about strong{ color:var(--ink); }
-.footer-links{
-  display:flex; flex-wrap:wrap; justify-content:center; gap:8px 22px;
-  text-align:center; padding-top:18px; margin-bottom:22px;
-  border-top:1px solid var(--line);
+
+.footer-about:last-child{
+  margin-bottom:0;
 }
-.footer-links a{
-  font-size:13px; font-weight:600; color:var(--ink-soft); text-decoration:none;
+
+.footer-about strong{
+  color:var(--ink);
 }
-.footer-links a:hover{ color:var(--link); text-decoration:underline; }
+
+/* Document section */
+.footer-meta{
+  display:flex;
+  flex-direction:column;
+  gap:16px;
+  align-items:flex-start;
+  min-width:0;
+}
+
 .footer-pdf{
-  display:flex; align-items:center; justify-content:flex-end; gap:12px; flex-wrap:wrap;
+  display:flex;
+  flex-direction:column;
+  align-items:flex-start;
+  gap:6px;
+  width:100%;
 }
+
 .footer-pdf-label{
-  font-size:13px; line-height:1.65; font-weight:600; color:var(--ink-soft);
+  font-size:13px;
+  line-height:1.65;
+  font-weight:600;
+  color:var(--ink-soft);
 }
+
+.pdf-choice{
+  display:flex;
+  gap:8px;
+  flex-wrap:wrap;
+  align-items:center;
+}
+
+.pdf-chip{
+  font-size:12.5px;
+  font-weight:600;
+  padding:6px 12px;
+  border-radius:999px;
+  border:1.5px solid var(--line-strong);
+  text-decoration:none;
+  color:var(--ink);
+  display:inline-flex;
+  align-items:center;
+  gap:6px;
+  transition:all .15s ease;
+}
+
+.pdf-chip:not(.disabled):hover{
+  border-color:var(--ink);
+  background:var(--paper);
+}
+
+.pdf-chip.disabled{
+  color:var(--ink-faint);
+  cursor:not-allowed;
+  border-style:dashed;
+}
+
+.pdf-chip .soon-badge{
+  margin-top:0;
+}
+
+
+/* Footer navigation links */
+.footer-links{
+  display:flex;
+  flex-wrap:wrap;
+  justify-content:center;
+  gap:8px 22px;
+  text-align:center;
+  margin-top:24px;
+  margin-bottom:22px;
+  padding-top:0;
+  border-top:none;
+}
+
+.footer-links a{
+  font-size:13px;
+  font-weight:600;
+  color:var(--ink-soft);
+  text-decoration:none;
+}
+
+.footer-links a:hover{
+  color:var(--link);
+  text-decoration:underline;
+}
+
+
+/* Legal line */
 .site-footer .legal{
-  border-top:1px solid var(--line); padding-top:16px; text-align:center;
-  font-size:11.5px; color:var(--ink-faint); line-height:1.8;
+  border-top:none;
+  padding-top:0;
+  text-align:center;
+  font-size:11.5px;
+  color:var(--ink-faint);
+  line-height:1.8;
 }
 
 @media(max-width:640px){
@@ -568,10 +660,63 @@ table.ledger input[type=checkbox]{
      the large empty band that showed up here before, which came from
      this whole section inheriting height reserved for a wider two-column
      layout it was no longer using once stacked. */
-  .footer-top{ flex-direction:column; align-items:flex-start; text-align:left; gap:24px; }
-  .footer-brand{ max-width:100%; }
-  .footer-meta{ align-items:flex-start; max-width:100%; width:100%; }
-  .footer-pdf{ justify-content:flex-start; }
+  /* Description first, documents underneath */
+  .footer-top{
+    display:flex;
+    flex-direction:column;
+    gap:18px;
+    align-items:stretch;
+  }
+
+  .footer-brand{
+    max-width:100%;
+    text-align:left;
+  }
+
+  /* Documents stay below the description */
+  .footer-meta{
+    width:100%;
+    display:flex;
+    flex-direction:column;
+    gap:14px;
+    align-items:flex-start;
+  }
+
+  .footer-pdf{
+    width:100%;
+    display:flex;
+    flex-direction:column;
+    align-items:flex-start;
+    gap:6px;
+  }
+
+  .footer-pdf-label{
+    font-size:12.5px;
+  }
+
+  .pdf-choice{
+    width:100%;
+    justify-content:flex-start;
+    gap:6px;
+  }
+
+  /* Center footer navigation links */
+  .footer-links{
+    justify-content:center;
+    text-align:center;
+    gap:8px 16px;
+    margin-top:20px;
+    margin-bottom:18px;
+  }
+
+  .footer-links a{
+    font-size:12px;
+  }
+
+  .site-footer .legal{
+    padding-top:0;
+    text-align:center;
+  }
 }
 
 @media(max-width:520px){
@@ -593,6 +738,11 @@ table.ledger input[type=checkbox]{
 .guide-when{ font-size:13.5px; color:var(--ink-soft); margin:0 0 8px; }
 .guide-step-body p{ font-size:14.5px; line-height:1.65; color:var(--ink-soft); margin:0 0 8px; }
 .guide-step-body p:last-child{ margin-bottom:0; }
+.guide-step-body ul{ margin:0; padding-left:20px; }
+.guide-step-body ul li{ font-size:14.5px; line-height:1.6; color:var(--ink-soft); margin-bottom:6px; }
+.guide-step-body ul li:last-child{ margin-bottom:0; }
+.guide-step-body h2 a{ color:inherit; text-decoration:underline; text-decoration-color:var(--line-strong); text-underline-offset:3px; }
+.guide-step-body h2 a:hover{ color:var(--link); }
 .guide-step-body code{
   font-family:var(--font-mono); font-size:13px; background:var(--paper);
   padding:1px 6px; border-radius:4px;

@@ -26,7 +26,6 @@
   const d = DATA.semesters[semester];
   const courseCount = coursesFor(semester).length;
   document.getElementById('toolTitle').textContent = `Semester ${semester}`;
-  document.getElementById('toolSub').textContent = `${d.totalCredits} credits across ${courseCount} courses \u00b7 what do you need?`;
 
   const params = { scheme, semester };
   const { calculator, bookOpen, award, arrowRight } = window.MCA.icons;

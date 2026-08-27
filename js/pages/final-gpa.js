@@ -19,7 +19,6 @@
       { label:'Final SGPA' }
     ]
   });
-  document.getElementById('toolEyebrow').textContent = `Semester ${semester} \u00b7 2024 Scheme`;
 
   const courses = coursesFor(semester);
   const totalCredits = DATA.semesters[semester].totalCredits;
@@ -132,7 +131,7 @@
   if(semester === 'I'){
     cgpaTitle.textContent = 'Your CGPA';
     cgpaBadge.textContent = `${totalCredits} Credits`;
-    cgpaBody.innerHTML = `<div class="callout">Semester I is your first semester, so there's no prior CGPA to blend in &mdash; your CGPA here is simply this semester's SGPA once you compute it above.</div>`;
+    cgpaBody.innerHTML = `<div class="callout">No prior CGPA to blend &mdash; your CGPA is just this semester's SGPA once computed above.</div>`;
     computeCgpaBtn.style.display = 'none';
   } else {
     cgpaTitle.textContent = `CGPA Through Semester ${semester}`;
@@ -148,13 +147,13 @@
           <input type="number" id="priorCreditsInput" min="0" max="200" value="${priorCredits}">
         </div>
       </div>
-      <div class="callout" id="cgpaCurrentSemNote">Compute this semester's SGPA above first &mdash; it'll be used automatically here.</div>`;
+      <div class="callout" id="cgpaCurrentSemNote">Compute this semester's SGPA above first.</div>`;
   }
 
   function updateCgpaCurrentDisplay(){
     const note = document.getElementById('cgpaCurrentSemNote');
     if(!note || lastSgpa === null) return;
-    note.innerHTML = `This semester: SGPA <b>${fmt(lastSgpa)}</b> over <b>${fmt(lastCredits)}</b> credits &mdash; will be blended in below.`;
+    note.innerHTML = `This semester: SGPA <b>${fmt(lastSgpa)}</b> over <b>${fmt(lastCredits)}</b> credits.`;
   }
 
   computeCgpaBtn.addEventListener('click', ()=>{
@@ -190,7 +189,7 @@
     document.getElementById('cgpaResult').innerHTML = '';
     lastSgpa = null; lastCredits = null;
     const note = document.getElementById('cgpaCurrentSemNote');
-    if(note) note.innerHTML = `Compute this semester's SGPA above first &mdash; it'll be used automatically here.`;
+    if(note) note.innerHTML = `Compute this semester's SGPA above first.`;
     const priorCgpaInput = document.getElementById('priorCgpaInput');
     if(priorCgpaInput) priorCgpaInput.value = '';
     const priorCreditsInput = document.getElementById('priorCreditsInput');

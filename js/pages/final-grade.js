@@ -19,7 +19,6 @@
       { label:'Final Grade' }
     ]
   });
-  document.getElementById('toolEyebrow').textContent = `Semester ${semester} \u00b7 2024 Scheme`;
   document.getElementById('gradeScaleStrip').innerHTML = renderGradeScale();
 
   const NON_STANDARD_NAMES = { project:'Project', internship:'Internship', nptel:'NPTEL / online course' };
@@ -49,7 +48,7 @@
     if(isNonStandard){
       return `<div class="course-card" data-code="${course.code}" data-type="${course.type}">
         ${head}
-        <div class="callout locked">${NON_STANDARD_NAMES[course.type] || 'This course'} doesn't follow the standard CIE/SEE split, so it isn't modeled here. Check the syllabus or your course coordinator for how it's evaluated.</div>
+        <div class="callout locked">${NON_STANDARD_NAMES[course.type] || 'This course'} isn't modeled here &mdash; check your syllabus or course coordinator for how it's evaluated.</div>
       </div>`;
     }
 
@@ -102,12 +101,12 @@
         <div class="stamp ${r.isPass?'pass':'fail'}"><span class="g">${r.letter}</span><span class="t">${r.isPass?'PASS':'FAIL'}</span></div>
         <div class="result-detail">
           <div class="big">${Math.round(r.total)} / ${r.max} (${Math.round(r.pct)}%) &middot; Grade point ${r.gp}</div>
-          <div class="note">${r.isPass ? `Meets every passing condition &mdash; grade ${r.letter} stands.` : `A passing condition from Table 4.4 isn't met, so this is recorded as F regardless of the raw percentage.`}</div>
+          <div class="note">${r.isPass ? `Meets every passing condition &mdash; grade ${r.letter} stands.` : `A passing condition isn't met, so this is recorded as F.`}</div>
           <div class="badge-list">
             ${r.badges.map(b=>`<span class="badge ${b[1]?'ok':'no'}">${b[1]?'\u2713':'\u2715'} ${b[0]}</span>`).join('')}
           </div>
-          <div class="callout" style="margin-top:10px;">Your department finalizes marks by rounding <b>up</b> to the next whole mark (ceiling) &mdash; so ${Math.round(r.total)} becomes <b>${r.finalTotal}</b>/${r.max} (${r.finalPct}%). ${r.componentCaveat ? `Note: Theory and Lab SEE floors (&ge;40/100 and &ge;25/50) aren't individually checked from a single combined SEE figure &mdash; verify them yourself if either component might be borderline.` : ''}</div>
-          <div class="rounding-note">Raw marks and percentages above are rounded to whole numbers for display.</div>
+          <div class="callout" style="margin-top:10px;">Department rounds up to the next whole mark &mdash; ${Math.round(r.total)} becomes <b>${r.finalTotal}</b>/${r.max} (${r.finalPct}%). ${r.componentCaveat ? `Theory/Lab SEE sub-floors (&ge;40/100, &ge;25/50) aren't checked separately &mdash; verify them if borderline.` : ''}</div>
+          <div class="rounding-note">Marks and percentages above are rounded for display.</div>
         </div>
       </div>`;
   }

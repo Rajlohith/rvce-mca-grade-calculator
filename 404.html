@@ -9,7 +9,11 @@
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="icon" href="favicon.ico" sizes="any">
 <link rel="icon" href="icons/icon-192.png" type="image/png">
-<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="icon" href="icons/icon.svg" type="image/svg+xml" sizes="any">
+<link rel="apple-touch-icon" sizes="180x180" href="icons/icon-180.png">
+<link rel="apple-touch-icon" sizes="167x167" href="icons/icon-167.png">
+<link rel="apple-touch-icon" sizes="152x152" href="icons/icon-152.png">
+<link rel="apple-touch-icon" sizes="120x120" href="icons/icon-120.png">
 <meta name="robots" content="noindex">
 <title>Page not found - RVCE MCA Grade Calculator</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -20,6 +24,8 @@
 <link rel="stylesheet" href="css/components.css">
 </head>
 <body>
+<div id="mca-splash" aria-hidden="true"><div class="mca-splash-mark"><img src="icons/icon-192.png" width="96" height="96" alt=""></div><div class="mca-splash-name">RVCE MCA Grade Calculator</div><div class="mca-splash-dots"><span></span><span></span><span></span></div></div>
+<script>(function(){try{var standalone=window.matchMedia('(display-mode: standalone)').matches||window.navigator.standalone===true;var seen=sessionStorage.getItem('mca-splash-seen');if(standalone&&!seen){document.documentElement.classList.add('mca-splash-active');sessionStorage.setItem('mca-splash-seen','1');}else{var el=document.getElementById('mca-splash');if(el)el.remove();}}catch(e){var el=document.getElementById('mca-splash');if(el)el.remove();}})();</script>
 <header id="site-header" class="site-header"></header>
 
 <div class="wrap">
@@ -35,6 +41,7 @@
   <footer id="site-footer" class="site-footer"></footer>
 </div>
 
+<script src="js/splash.js" defer></script>
 <script src="js/firebase-auth.js" defer></script>
 <script src="js/util.js" defer></script>
 <script src="js/data.js" defer></script>

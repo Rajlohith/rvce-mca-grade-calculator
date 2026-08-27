@@ -1,6 +1,6 @@
 (function(){
   window.MCA.site.mount({ active: 'home' });
-  const { helpCircle, trendingUp, fileText, arrowRight } = window.MCA.icons;
+  const { bookOpen, trendingUp, fileText, arrowRight } = window.MCA.icons;
   document.getElementById('quickLinks').innerHTML = `
     <a class="list-card" href="pages/cgpa.html">
       <div class="icon-badge solid green">${trendingUp}</div>
@@ -10,11 +10,11 @@
       </div>
       <div class="list-card-arrow">${arrowRight}</div>
     </a>
-    <a class="list-card" href="pages/faq.html">
-      <div class="icon-badge solid purple">${helpCircle}</div>
+    <a class="list-card" href="pages/guide.html">
+      <div class="icon-badge solid purple">${bookOpen}</div>
       <div class="list-card-body">
-        <div class="list-card-title">FAQ</div>
-        <div class="list-card-sub">How every formula works</div>
+        <div class="list-card-title">Guide</div>
+        <div class="list-card-sub">Which calculator to use, and when</div>
       </div>
       <div class="list-card-arrow">${arrowRight}</div>
     </a>

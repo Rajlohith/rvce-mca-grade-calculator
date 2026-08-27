@@ -19,7 +19,6 @@
       { label:'CIE & SEE' }
     ]
   });
-  document.getElementById('toolEyebrow').textContent = `Semester ${semester} \u00b7 2024 Scheme`;
   document.getElementById('gradeScaleStrip').innerHTML = renderGradeScale();
 
   // Semester I keeps the original Lab(/40)+Lab EL(/10) split. Semester II
@@ -101,7 +100,7 @@
     if(isNonStandard){
       return `<div class="course-card" data-code="${course.code}" data-type="${course.type}">
         ${head}
-        <div class="callout locked">${NON_STANDARD_NAMES[course.type] || 'This course'} doesn't follow the standard CIE/SEE split, so it isn't modeled here. Check the syllabus or your course coordinator for how it's evaluated.</div>
+        <div class="callout locked">${NON_STANDARD_NAMES[course.type] || 'This course'} isn't modeled here &mdash; check your syllabus or course coordinator for how it's evaluated.</div>
       </div>`;
     }
 
@@ -196,8 +195,8 @@
       });
     }
 
-    const roundingNote = `<div class="rounding-note">Marks are rounded to 2 decimal places using standard rounding (nearest hundredth) &mdash; never rounded up beyond that.</div>`;
-    const finalNote = `<div class="callout" style="margin-top:10px;">Your department finalizes CIE by rounding <b>up</b> to the next whole mark (ceiling) &mdash; so ${fmt(r.total)} becomes <b>${r.finalTotal}</b>, the same as any value between ${Math.floor(r.total)} and ${r.finalTotal} would. This finalized number, not the raw decimal above, is what's used for the SEE requirements below.</div>`;
+    const roundingNote = `<div class="rounding-note">Marks shown to 2 decimals (nearest hundredth).</div>`;
+    const finalNote = `<div class="callout" style="margin-top:10px;">Department rounds CIE <b>up</b> to the next whole mark &mdash; ${fmt(r.total)} becomes <b>${r.finalTotal}</b>. This finalized value is used for the SEE requirements below.</div>`;
 
     card.querySelector('.course-result').innerHTML = `
       <div class="breakdown">
@@ -298,7 +297,7 @@
         </div>
         <button type="button" class="gr-copy" title="Copy" data-copy="Grade ${r.grade}: ${r.label}">${COPY_SVG}</button>
       </div>`).join('') +
-      `<div class="rounding-note">SEE figures are rounded to 2 decimal places using standard rounding (nearest hundredth) &mdash; never rounded up beyond that.</div>`;
+      `<div class="rounding-note">Figures shown to 2 decimals (nearest hundredth).</div>`;
   }
 
   modalRows.addEventListener('click', (e)=>{

@@ -41,7 +41,7 @@ window.MCA = window.MCA || {};
       ];
       const ok = quizTest>=30 && total>=50;
       passesFloor = ok;
-      note = `Passing floor: Quiz+Test &ge;30/60 <b>and</b> overall CIE &ge;50/100. Currently Quiz+Test ${fmt(quizTest)}/60, CIE ${fmt(total)}/100 &mdash; <b style="color:${ok?'#16a34a':'#dc2626'}">${ok?'meets the CIE floor':'below the CIE floor'}</b>.`;
+      note = `Floor: Quiz+Test &ge;30/60 &amp; CIE &ge;50/100 &mdash; yours: ${fmt(quizTest)}/60, ${fmt(total)}/100 <b style="color:${ok?'#16a34a':'#dc2626'}">(${ok?'meets floor':'below floor'})</b>.`;
     } else if(type==='theory-lab' && labScheme==='sem23'){
       /* Semester II & III: PBL (Project Based Learning) stands in for the
          theory-side Experiential Learning mark — same 40-mark size, same
@@ -67,7 +67,7 @@ window.MCA = window.MCA || {};
       const labOk = labCIE>=25;
       const totOk = total>=75;
       passesFloor = thOk && labOk && totOk;
-      note = `Semester II &amp; III use PBL in place of Experiential Learning, not a labeling in the published handbook table, but the same floors apply: Quiz+Test &ge;24/60 &amp; Quiz+Test+PBL &ge;40/100 (${thOk?'met':'not met'}); Lab CIE &ge;25/50 (${labOk?'met':'not met'}); combined CIE &ge;75/150 (${totOk?'met':'not met'}).`;
+      note = `PBL stands in for Experiential Learning here. Floors: Quiz+Test &ge;24/60 &amp; +PBL &ge;40/100 (${thOk?'met':'not met'}); Lab &ge;25/50 (${labOk?'met':'not met'}); combined &ge;75/150 (${totOk?'met':'not met'}).`;
     } else if(type==='theory-lab'){
       /* Semester I: Lab / Practical CIE is a single combined 50-mark field
          (record + test, plus Lab Experiential Learning), matching Table
@@ -87,7 +87,7 @@ window.MCA = window.MCA || {};
       const labOk = lab>=25;
       const totOk = total>=75;
       passesFloor = thOk && labOk && totOk;
-      note = `Theory Quiz+Test &ge;24/60 &amp; Theory CIE &ge;40/100 (${thOk?'met':'not met'}); Lab (CIE+EL) &ge;25/50 (${labOk?'met':'not met'}); combined CIE &ge;75/150 (${totOk?'met':'not met'}).`;
+      note = `Floors: Theory Quiz+Test &ge;24/60 &amp; Theory CIE &ge;40/100 (${thOk?'met':'not met'}); Lab &ge;25/50 (${labOk?'met':'not met'}); combined &ge;75/150 (${totOk?'met':'not met'}).`;
     } else {
       const lab=clampNum(v.lab,0,40);
       const elLab=clampNum(v.elLab,0,10);
@@ -98,7 +98,7 @@ window.MCA = window.MCA || {};
       ];
       const ok = total>=25;
       passesFloor = ok;
-      note = `Passing floor: CIE &ge;25/50 &mdash; currently <b style="color:${ok?'#16a34a':'#dc2626'}">${fmt(total)}/50 ${ok?'(met)':'(not met)'}</b>.`;
+      note = `Floor: CIE &ge;25/50 &mdash; yours: <b style="color:${ok?'#16a34a':'#dc2626'}">${fmt(total)}/50 ${ok?'(met)':'(not met)'}</b>.`;
     }
     const pct = max ? total/max*100 : 0;
     /* If the CIE floor isn't met, Section 4.2 marks the course 'DX' — the
