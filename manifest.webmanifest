@@ -1,6 +1,6 @@
 {
   "name": "RVCE MCA Grade Calculator",
-  "short_name": "MCA Calc",
+  "short_name": "MCA Calc.",
   "description": "CIE finalization, SEE requirements, final grades and GPA, worked out exactly the way the RVCE PG Academic Handbook defines it.",
   "start_url": "/index.html",
   "scope": "/",
