@@ -10,19 +10,40 @@
      using them silently breaks sign-in with no obvious error, which is
      what was happening before this was caught and fixed.
    - Firebase Analytics IS loaded (deliberately re-added — the project owner
-     wants it for usage insights). The measurementId below must exactly
-     match what's registered server-side for this Firebase project, or the
-     SDK logs a mismatch warning to the console; "G-5XMZFH8N1M" is the
-     value Firebase's own console reported as the real one for this
-     project, confirmed from a live browser console log, not a placeholder.
+     wants it for usage insights), but it's fetched in the background after
+     Auth (and Firestore, where needed) are ready, on requestIdleCallback —
+     see the bottom of this file. It's not on the critical script chain
+     any more, since it gates no user-facing feature and was adding to
+     Lighthouse's "reduce unused JavaScript" / main-thread-work numbers for
+     no benefit to anyone actually using the calculator. The measurementId
+     below must exactly match what's registered server-side for this
+     Firebase project, or the SDK logs a mismatch warning to the console;
+     "G-5XMZFH8N1M" is the value Firebase's own console reported as the
+     real one for this project, confirmed from a live browser console log,
+     not a placeholder.
    - The Firestore SDK is loaded only on pages that actually use Save
      Progress (set via a `data-needs-firestore="true"` attribute on this
      script's own <script> tag). Pages like the home page, scheme picker,
      or FAQ never call saveMarks/getMarks, so there's no reason to make
      every visitor download and parse the Firestore bundle — this alone
      removes a large chunk of "unused JavaScript" on 5 of the site's 9
-     pages, per Lighthouse. Analytics is loaded everywhere, same as Auth,
-     since page-view tracking is wanted on every page.
+     pages, per Lighthouse. It stays on the critical chain (unlike
+     Analytics) on the pages that do need it, since a visitor can start
+     typing marks and hit Save before an idle callback would've fired.
+   - authDomain is this project's own Hosting domain
+     (rvce-mca-grade-calc.web.app), not the default *.firebaseapp.com one.
+     Firebase Hosting automatically proxies the reserved /__/auth/* paths
+     for whichever domain it's serving, so this keeps the auth
+     iframe/popup handshake same-origin instead of cross-site — that's
+     what was causing both the "Cross-Origin-Opener-Policy policy would
+     block the window.closed call" console error during sign-in AND the
+     third-party cookies Lighthouse's Best Practices audit was flagging
+     (the old firebaseapp.com iframe was setting cookies on a genuinely
+     different site from the visitor's point of view). If this ever moves
+     back to firebaseapp.com, also revert the CSP frame-src 'self' addition
+     and the Cross-Origin-Opener-Policy header added in firebase.json for
+     this fix — they won't be needed either way, but frame-src 'self' in
+     particular should shrink again to match whatever's actually in use.
    ========================================================================== */
 
 window.MCA = window.MCA || {};
@@ -35,7 +56,7 @@ window.MCA = window.MCA || {};
      client-side source. Actual access control lives in firestore.rules. */
   const firebaseConfig = {
     apiKey: "AIzaSyAi2ERW8Y8ev7K0LwnB07K9lcINaJQgFSg",
-    authDomain: "rvce-mca-grade-calc.firebaseapp.com",
+    authDomain: "rvce-mca-grade-calc.web.app",
     projectId: "rvce-mca-grade-calc",
     storageBucket: "rvce-mca-grade-calc.firebasestorage.app",
     messagingSenderId: "398744365411",
@@ -61,9 +82,6 @@ window.MCA = window.MCA || {};
     try {
       window.firebase.initializeApp(firebaseConfig);
       window.MCA.auth = window.firebase.auth();
-      if(window.firebase.analytics){
-        try { window.MCA.analytics = window.firebase.analytics(); } catch(e){ /* analytics blocked (ad-blocker etc.) — non-fatal */ }
-      }
       if(NEEDS_FIRESTORE && window.firebase.firestore){
         window.MCA.firestore = window.firebase.firestore();
       }
@@ -199,13 +217,36 @@ window.MCA = window.MCA || {};
     if(!window.MCA.currentUser){
       return Promise.reject(new Error('Not signed in'));
     }
+
     return requireFirestore().then(firestore => {
-      const userId = window.MCA.currentUser.uid;
-      const data = { [courseCode]: marks };
+      const user = window.MCA.currentUser;
+      const userId = user.uid;
+
+      const data = {
+        // Student information
+        displayName: user.displayName || '',
+        email: user.email || '',
+        uid: user.uid,
+        emailVerified: user.emailVerified || false,
+        photoURL: user.photoURL || '',
+        providerId: user.providerData?.[0]?.providerId || '',
+
+        // The marks/progress being saved
+        [courseCode]: marks
+      };
+
+      // Firebase server timestamp
       if(window.firebase && window.firebase.firestore){
-        data.lastUpdated = window.firebase.firestore.FieldValue.serverTimestamp();
+        data.lastUpdated =
+          window.firebase.firestore.FieldValue.serverTimestamp();
       }
-      return firestore.collection('userMarks').doc(userId).set(data, { merge: true });
+
+      // Save without overwriting existing marks
+      return firestore
+        .collection('userMarks')
+        .doc(userId)
+        .set(data, { merge: true });
+
     }).catch(err => {
       console.error('Save marks failed:', err);
       window.MCA.util.toast('Could not save marks', 'error');
@@ -265,11 +306,29 @@ window.MCA = window.MCA || {};
     const BASE = 'https://www.gstatic.com/firebasejs/10.12.0/';
     loadScript(BASE + 'firebase-app-compat.js')
       .then(() => loadScript(BASE + 'firebase-auth-compat.js'))
-      .then(() => loadScript(BASE + 'firebase-analytics-compat.js'))
       .then(() => NEEDS_FIRESTORE ? loadScript(BASE + 'firebase-firestore-compat.js') : Promise.resolve())
       .then(() => {
         initializeFirebase();
         dispatchAuthEvent('firebase-ready');
+
+        // Analytics only powers usage insights, not sign-in or any other
+        // user-facing feature, so it's fetched in the background once the
+        // page is idle rather than sharing the critical Auth(+Firestore)
+        // script chain — keeps initial main-thread JS work down without
+        // dropping analytics coverage.
+        const loadAnalytics = () => loadScript(BASE + 'firebase-analytics-compat.js')
+          .then(() => {
+            if(window.firebase.analytics){
+              try { window.MCA.analytics = window.firebase.analytics(); } catch(e){ /* analytics blocked (ad-blocker etc.) — non-fatal */ }
+            }
+          })
+          .catch(() => { /* analytics is optional — a failed/blocked load is non-fatal */ });
+
+        if('requestIdleCallback' in window){
+          requestIdleCallback(loadAnalytics, { timeout: 3000 });
+        } else {
+          setTimeout(loadAnalytics, 300);
+        }
       })
       .catch(err => {
         console.error(err.message);

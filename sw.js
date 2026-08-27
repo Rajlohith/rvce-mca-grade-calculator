@@ -19,7 +19,7 @@
    the same session.
    ========================================================================== */
 
-const CACHE_VERSION = 'mca-calc-v2';
+const CACHE_VERSION = 'mca-calc-v3';
 const RUNTIME_CACHE = `${CACHE_VERSION}-runtime`;
 const IMMUTABLE_CACHE = `${CACHE_VERSION}-immutable`;
 
@@ -29,10 +29,7 @@ const PRECACHE_URLS = [
   '/index.html',
   '/404.html',
   '/manifest.webmanifest',
-  '/css/variables.css',
-  '/css/base.css',
-  '/css/layout.css',
-  '/css/components.css',
+  '/css/app.css',
   '/js/util.js',
   '/js/data.js',
   '/js/icons.js',

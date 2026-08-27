@@ -8,7 +8,7 @@
 :root{
   --ink:        #111827;   /* gray-900 — headings, primary text */
   --ink-soft:   #4b5563;   /* gray-600 — body text */
-  --ink-faint:  #9ca3af;   /* gray-400 — muted / hint text */
+  --ink-faint:  #5f6673;   /* gray-600ish — muted / hint text (kept dark enough for 4.5:1+ contrast on --paper and --card) */
   --paper:      #f3f4f6;   /* gray-100 — page background (bottom of gradient) */
   --paper-top:  #f9fafb;   /* gray-50  — page background (top of gradient) */
   --card:       #ffffff;
@@ -60,7 +60,7 @@ html[data-theme="dark"]{
 
   --ink:        #eef0f3;   /* primary text */
   --ink-soft:   #b7bdc9;   /* body text */
-  --ink-faint:  #7c8493;   /* muted / hint text */
+  --ink-faint:  #909aab;   /* muted / hint text (lightened for 4.5:1+ contrast on --paper and --card) */
   --paper:      #23262e;   /* page background (bottom of gradient) */
   --paper-top:  #2a2e37;   /* page background (top of gradient) */
   --card:       #2c303a;

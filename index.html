@@ -30,11 +30,11 @@
 <meta name="twitter:description" content="Unofficial CIE, SEE, grade, and GPA calculator for RVCE MCA students, built from the PG Academic Handbook and the 2024 scheme syllabus.">
 <meta name="twitter:image" content="https://rvce-mca-grade-calc.web.app/icons/social-preview.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="css/variables.css">
-<link rel="stylesheet" href="css/base.css">
-<link rel="stylesheet" href="css/layout.css">
-<link rel="stylesheet" href="css/components.css">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="preload" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" as="style">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" media="print" onload="this.media='all'">
+<noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap"></noscript>
+<link rel="stylesheet" href="css/app.css?v=20260827">
 </head>
 <body>
 <div id="mca-splash" aria-hidden="true"><div class="mca-splash-mark"><img src="icons/icon-192.png" width="96" height="96" alt=""></div><div class="mca-splash-name">RVCE MCA Grade Calculator</div><div class="mca-splash-dots"><span></span><span></span><span></span></div></div>
@@ -59,21 +59,49 @@
       <b>Disclaimer:</b> Not an official RVCE tool. No responsibility is taken for discrepancies. Always confirm against your official grade card.
     </div>
 
-    <div class="quick-links" id="quickLinks"></div>
+    <div class="quick-links" id="quickLinks">
+      <a class="list-card" href="pages/cgpa.html">
+        <div class="icon-badge solid green"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 17 9 11 13 15 21 7"/><polyline points="14 7 21 7 21 14"/></svg></div>
+        <div class="list-card-body">
+          <div class="list-card-title">CGPA Calculator</div>
+          <div class="list-card-sub">Across all four semesters</div>
+        </div>
+        <div class="list-card-arrow"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg></div>
+      </a>
+      <a class="list-card" href="pages/guide.html">
+        <div class="icon-badge solid purple"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 4h6a4 4 0 0 1 4 4v12a3 3 0 0 0-3-3H2z"/><path d="M22 4h-6a4 4 0 0 0-4 4v12a3 3 0 0 1 3-3h7z"/></svg></div>
+        <div class="list-card-body">
+          <div class="list-card-title">Guide</div>
+          <div class="list-card-sub">Which calculator to use, and when</div>
+        </div>
+        <div class="list-card-arrow"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg></div>
+      </a>
+      <div class="list-card" style="cursor:default;">
+        <div class="icon-badge solid orange"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="8" y1="13" x2="16" y2="13"/><line x1="8" y1="17" x2="16" y2="17"/></svg></div>
+        <div class="list-card-body">
+          <div class="list-card-title">Syllabus PDF</div>
+          <div class="list-card-sub" style="margin-bottom:8px;">Choose a scheme, Semester I&ndash;IV</div>
+          <div class="pdf-choice" role="group" aria-label="Syllabus PDF scheme">
+            <a class="pdf-chip" href="docs/MCA-2024-Scheme-Syllabus.pdf" target="_blank" rel="noopener noreferrer">2024 Scheme</a>
+            <span class="pdf-chip disabled" aria-disabled="true">2026 Scheme <span class="soon-badge">Coming soon</span></span>
+          </div>
+        </div>
+      </div>
+    </div>
   </main>
 
   <footer id="site-footer" class="site-footer"></footer>
 </div>
 
-<script src="js/splash.js" defer></script>
-<script src="js/firebase-auth.js" defer></script>
-<script src="js/util.js" defer></script>
-<script src="js/data.js" defer></script>
-<script src="js/icons.js" defer></script>
-<script src="js/grading.js" defer></script>
-<script src="js/input-guard.js" defer></script>
-<script src="js/site.js" defer></script>
-<script src="js/pages/home.js" defer></script>
-<script src="js/pwa-register.js" defer></script>
+<script src="js/splash.js?v=20260827" defer></script>
+<script src="js/firebase-auth.js?v=20260827" defer></script>
+<script src="js/util.js?v=20260827" defer></script>
+<script src="js/data.js?v=20260827" defer></script>
+<script src="js/icons.js?v=20260827" defer></script>
+<script src="js/grading.js?v=20260827" defer></script>
+<script src="js/input-guard.js?v=20260827" defer></script>
+<script src="js/site.js?v=20260827" defer></script>
+<script src="js/pages/home.js?v=20260827" defer></script>
+<script src="js/pwa-register.js?v=20260827" defer></script>
 </body>
 </html>

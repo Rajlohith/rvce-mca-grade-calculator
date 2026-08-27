@@ -57,7 +57,7 @@
 /* Hamburger button: hidden on wide screens, shown only in the mobile
    media query below. */
 .nav-toggle{
-  display:none; width:38px; height:38px; border-radius:var(--radius-sm);
+  display:none; width:44px; height:44px; border-radius:var(--radius-sm);
   border:1.5px solid var(--line-strong); background:var(--card);
   align-items:center; justify-content:center; cursor:pointer; flex-shrink:0;
 }
