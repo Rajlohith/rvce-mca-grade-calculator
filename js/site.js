@@ -181,11 +181,10 @@ window.MCA = window.MCA || {};
      links, the syllabus PDF choice, and the legal line — no repeated
      column headings or dense grids. */
   function renderFooter(opts){
-  opts = opts || {};
-  const year = new Date().getFullYear();
+    opts = opts || {};
+    const year = new Date().getFullYear();
 
-  if(opts.showLinks){
-    return `
+    const footerTop = opts.showLinks ? `
       <div class="footer-top">
         <div class="footer-brand">
           <p class="footer-about">
@@ -211,13 +210,17 @@ window.MCA = window.MCA || {};
           </div>
         </div>
       </div>
+    ` : '';
+
+    return `
+      ${footerTop}
 
       <div class="footer-links">
         <a href="${REPO_URL}" target="_blank" rel="noopener noreferrer">GitHub</a>
         <a href="mailto:${EMAIL}">Contact</a>
         <a href="${SYLLABUS_URL}" target="_blank" rel="noopener noreferrer">Official Syllabus</a>
         <a href="${HANDBOOK_URL}" target="_blank" rel="noopener noreferrer">Official Handbook</a>
-        <a href="${PAGES}faq.html">How Calculations Work</a>
+        <a href="${PAGES}guide.html">Guide</a>
       </div>
 
       <div class="legal">
@@ -226,15 +229,6 @@ window.MCA = window.MCA || {};
         Please verify all results against your official grade card and
         with the Controller of Examinations.
       </div>`;
-  }
-
-  return `
-    <div class="legal">
-      &copy; ${year} B R Lohith Raj<br>
-      Unofficial student project &middot; Not affiliated with RVCE.
-      Please verify all results against your official grade card and
-      with the Controller of Examinations.
-    </div>`;
   }
 
   function mount(opts){
