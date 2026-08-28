@@ -9,43 +9,67 @@
    file works out the right relative prefixes so the header/footer links
    always resolve correctly either way.
    ========================================================================== */
+
 window.MCA = window.MCA || {};
 
 (function(){
-  const REPO_URL   = 'https://github.com/Rajlohith/rvce-mca-grade-calculator';
+  const REPO_URL = 'https://github.com/Rajlohith/rvce-mca-grade-calculator';
+
   // Obfuscated so plain-text scrapers/bots that scan page source for
-  // "mailto:" or "@" patterns don't harvest the address directly; anyone
-  // reading it in a rendered browser still sees and can click a normal
-  // mailto link. Not a security boundary — just cuts down on spam bots.
+  // "mailto:" or "@" patterns don't harvest the address directly.
   const EMAIL_USER = 'brlohithraj.mca25';
   const EMAIL_HOST = 'rvce.edu.in';
   const EMAIL = `${EMAIL_USER}@${EMAIL_HOST}`;
-  const SYLLABUS_URL = 'https://rvce.edu.in/academics_and_examinations/rvce_scheme_syllabus/';
+
+  const SYLLABUS_URL =
+    'https://rvce.edu.in/academics_and_examinations/rvce_scheme_syllabus/';
+
   const HANDBOOK_URL = 'https://rvce.edu.in/handbook/';
+
   const THEME_KEY = 'mca-theme';
   const { escapeHTML } = window.MCA.util;
 
   const IN_PAGES = /\/pages\//.test(window.location.pathname);
-  const ROOT  = IN_PAGES ? '../' : '';       // prefix to reach the project root
-  const PAGES = IN_PAGES ? '' : 'pages/';    // prefix to reach anything inside pages/
+  const ROOT = IN_PAGES ? '../' : '';
+  const PAGES = IN_PAGES ? '' : 'pages/';
+
+  /* ---------- Navigation links ---------- */
 
   function navLinks(){
     return [
-      { id:'home',  label:'Home',      href: ROOT + 'index.html' },
-      { id:'start', label:'Calculate', href: PAGES + 'scheme.html' },
-      { id:'cgpa',  label:'CGPA',      href: PAGES + 'cgpa.html' },
-      { id:'guide', label:'Guide',     href: PAGES + 'guide.html' },
-      { id:'faq',   label:'FAQ',       href: PAGES + 'faq.html' }
+      {
+        id: 'home',
+        label: 'Home',
+        href: ROOT + 'index.html'
+      },
+      {
+        id: 'start',
+        label: 'Calculate',
+        href: PAGES + 'scheme.html'
+      },
+      {
+        id: 'cgpa',
+        label: 'CGPA',
+        href: PAGES + 'cgpa.html'
+      },
+      {
+        id: 'guide',
+        label: 'Guide',
+        href: PAGES + 'guide.html'
+      },
+      {
+        id: 'faq',
+        label: 'FAQ',
+        href: PAGES + 'faq.html'
+      }
     ];
   }
 
-  // Every nav/breadcrumb label used on this site today is a hardcoded
-  // string literal, so this isn't reachable by anything a visitor can
-  // control. It's still escaped before going into innerHTML as
-  // defense-in-depth, so a future label built from dynamic data (e.g. a
-  // course name or query param) can't become a markup-injection point
-  // just because nobody remembered to escape it there too.
-  function escapeLabel(label){ return escapeHTML(label); }
+  function escapeLabel(label){
+    return escapeHTML(label);
+  }
+
+  /* ---------- Query-string helpers ---------- */
 
   function qs(name, fallback){
     const v = new URLSearchParams(window.location.search).get(name);
@@ -54,204 +78,313 @@ window.MCA = window.MCA || {};
 
   function withParams(page, params){
     const usp = new URLSearchParams();
-    Object.keys(params || {}).forEach(k=>{
-      if(params[k] !== undefined && params[k] !== null && params[k] !== '') usp.set(k, params[k]);
+
+    Object.keys(params || {}).forEach(k => {
+      if(
+        params[k] !== undefined &&
+        params[k] !== null &&
+        params[k] !== ''
+      ){
+        usp.set(k, params[k]);
+      }
     });
+
     const q = usp.toString();
+
     return q ? `${page}?${q}` : page;
   }
 
   /* ---------- Theme (light / soft-dark) ---------- */
+
   function currentTheme(){
-    return document.documentElement.getAttribute('data-theme') === 'dark' ? 'dark' : 'light';
+    return document.documentElement.getAttribute('data-theme') === 'dark'
+      ? 'dark'
+      : 'light';
   }
+
   function applyTheme(theme){
-    document.documentElement.setAttribute('data-theme', theme === 'dark' ? 'dark' : 'light');
-    try{ localStorage.setItem(THEME_KEY, theme); }catch(e){ /* private mode etc. */ }
+    document.documentElement.setAttribute(
+      'data-theme',
+      theme === 'dark' ? 'dark' : 'light'
+    );
+
+    try{
+      localStorage.setItem(THEME_KEY, theme);
+    }catch(e){
+      /* Private mode etc. */
+    }
   }
+
   function wireThemeToggle(){
     const btn = document.getElementById('themeToggle');
+
     if(!btn) return;
-    const sync = () => btn.setAttribute('aria-pressed', currentTheme()==='dark' ? 'true' : 'false');
+
+    const sync = () => {
+      btn.setAttribute(
+        'aria-pressed',
+        currentTheme() === 'dark' ? 'true' : 'false'
+      );
+    };
+
     sync();
-    btn.addEventListener('click', ()=>{
-      applyTheme(currentTheme()==='dark' ? 'light' : 'dark');
+
+    btn.addEventListener('click', () => {
+      applyTheme(
+        currentTheme() === 'dark' ? 'light' : 'dark'
+      );
+
       sync();
     });
   }
 
-  /* ---------- Hamburger nav toggle (mobile) ----------
-     On wide screens .site-nav is shown inline via CSS and this button is
-     hidden entirely. Below the breakpoint, .site-nav is hidden by default
-     and this button reveals it as a dropdown panel — so the header itself
-     never grows past a single row regardless of screen width. Closes on
-     Escape, on an outside click, and whenever a link inside the panel is
-     followed (so navigating never leaves a stale open panel behind on
-     the next page's back-navigation from bfcache). */
+  /* ---------- Hamburger navigation ---------- */
+
   function wireNavToggle(){
     const btn = document.getElementById('navToggle');
     const panel = document.getElementById('navPanel');
+
     if(!btn || !panel) return;
 
-    const close = () => { btn.setAttribute('aria-expanded', 'false'); panel.classList.remove('open'); };
-    const open = () => { btn.setAttribute('aria-expanded', 'true'); panel.classList.add('open'); };
+    const close = () => {
+      btn.setAttribute('aria-expanded', 'false');
+      panel.classList.remove('open');
+    };
 
-    btn.addEventListener('click', (e)=>{
+    const open = () => {
+      btn.setAttribute('aria-expanded', 'true');
+      panel.classList.add('open');
+    };
+
+    btn.addEventListener('click', e => {
       e.stopPropagation();
-      panel.classList.contains('open') ? close() : open();
+
+      panel.classList.contains('open')
+        ? close()
+        : open();
     });
-    panel.addEventListener('click', (e)=>{ if(e.target.tagName === 'A') close(); });
-    document.addEventListener('click', (e)=>{
-      if(panel.classList.contains('open') && !panel.contains(e.target) && e.target !== btn) close();
+
+    panel.addEventListener('click', e => {
+      if(e.target.tagName === 'A'){
+        close();
+      }
     });
-    document.addEventListener('keydown', (e)=>{
-      if(e.key === 'Escape' && panel.classList.contains('open')) close();
+
+    document.addEventListener('click', e => {
+      if(
+        panel.classList.contains('open') &&
+        !panel.contains(e.target) &&
+        e.target !== btn
+      ){
+        close();
+      }
+    });
+
+    document.addEventListener('keydown', e => {
+      if(
+        e.key === 'Escape' &&
+        panel.classList.contains('open')
+      ){
+        close();
+      }
     });
   }
 
-  /* ---------- Syllabus PDF scheme choice (reused in the footer and on
-     the home page) ---------- */
-  function renderPdfChoice(){
-    return `
-      <div class="pdf-choice" role="group" aria-label="Syllabus PDF scheme">
-        <a class="pdf-chip" href="${ROOT}docs/MCA-2024-Scheme-Syllabus.pdf" target="_blank" rel="noopener noreferrer">2024 Scheme</a>
-        <span class="pdf-chip disabled" aria-disabled="true">2026 Scheme <span class="soon-badge">Coming soon</span></span>
-      </div>`;
-  }
+  /* ---------- Shared header ---------- */
 
-  function renderHandbookChoice(){
-    return `
-      <div class="pdf-choice" role="group" aria-label="Handbook PDF scheme">
-        <!-- Make sure the filename matches your actual handbook PDF in the docs folder -->
-        <a class="pdf-chip" href="${ROOT}docs/PG-2024-Scheme-Handbook.pdf" target="_blank" rel="noopener noreferrer">2024 Handbook</a>
-        <span class="pdf-chip disabled" aria-disabled="true">2026 Handbook <span class="soon-badge">Coming soon</span></span>
-      </div>`;
-  }
-
-  /* ---------- Single-row responsive header ----------
-     One navbar row at every width: brand on the left, nav links + sign-in
-     + theme toggle inline on the right on wide screens ("content menu"
-     style). Below a breakpoint, the nav links / sign-in / theme toggle
-     move into a collapsible panel opened by a hamburger button, so the
-     header itself never grows past one row's height on a phone — see
-     the toggleNavPanel() wiring in mount(). GitHub lives in the footer
-     only now; the header's right side is reserved for navigation and the
-     sign-in control. */
   function renderHeader(activeId){
-    const nav = navLinks().map(l=>{
-      const cls = l.id === activeId ? 'current' : '';
-      return `<a href="${escapeHTML(l.href)}" class="${cls}">${escapeLabel(l.label)}</a>`;
-    }).join('');
+    const nav = navLinks()
+      .map(l => {
+        const cls = l.id === activeId ? 'current' : '';
+
+        return `
+          <a href="${escapeHTML(l.href)}" class="${cls}">
+            ${escapeLabel(l.label)}
+          </a>
+        `;
+      })
+      .join('');
+
     return `
       <div class="site-header-inner">
+
         <a class="brand" href="${ROOT}index.html">
-          <img class="brand-mark" src="${ROOT}icons/brand-mark.png" alt="" width="36" height="36">
-          <span class="brand-name">RVCE MCA Grade Calculator</span>
+          <img
+            class="brand-mark"
+            src="${ROOT}icons/brand-mark.png"
+            alt=""
+            width="36"
+            height="36"
+          >
+          <span class="brand-name">
+            RVCE MCA Grade Calculator
+          </span>
         </a>
 
-        <button type="button" id="navToggle" class="nav-toggle" aria-expanded="false" aria-controls="navPanel" aria-label="Open menu">
-          <span class="nav-toggle-bars"><span></span><span></span><span></span></span>
+        <button
+          type="button"
+          id="navToggle"
+          class="nav-toggle"
+          aria-expanded="false"
+          aria-controls="navPanel"
+          aria-label="Open menu"
+        >
+          <span class="nav-toggle-bars">
+            <span></span>
+            <span></span>
+            <span></span>
+          </span>
         </button>
 
         <div class="site-nav" id="navPanel">
-          <div class="site-nav-links">${nav}</div>
-          <div class="site-nav-controls">
-            <div class="auth-container"></div>
-            <button type="button" id="themeToggle" class="theme-toggle" aria-pressed="false" aria-label="Toggle dark mode">
-              <span class="toggle-track"><span class="toggle-thumb"></span></span>
-            </button>
+
+          <div class="site-nav-links">
+            ${nav}
           </div>
+
+          <div class="site-nav-controls">
+
+            <div class="auth-container"></div>
+
+            <button
+              type="button"
+              id="themeToggle"
+              class="theme-toggle"
+              aria-pressed="false"
+              aria-label="Toggle dark mode"
+            >
+              <span class="toggle-track">
+                <span class="toggle-thumb"></span>
+              </span>
+            </button>
+
+          </div>
+
         </div>
-      </div>`;
+
+      </div>
+    `;
   }
+
+  /* ---------- Breadcrumb ---------- */
 
   function renderBreadcrumb(trail){
     if(!trail || !trail.length) return '';
-    const parts = trail.map((c,i)=>{
+
+    const parts = trail.map((c, i) => {
       const isLast = i === trail.length - 1;
-      if(isLast || !c.href) return `<span class="current">${escapeLabel(c.label)}</span>`;
-      return `<a href="${escapeHTML(c.href)}">${escapeLabel(c.label)}</a>`;
+
+      if(isLast || !c.href){
+        return `
+          <span class="current">
+            ${escapeLabel(c.label)}
+          </span>
+        `;
+      }
+
+      return `
+        <a href="${escapeHTML(c.href)}">
+          ${escapeLabel(c.label)}
+        </a>
+      `;
     });
-    return `<nav class="breadcrumb" aria-label="Breadcrumb">` +
-      parts.join(`<span class="sep">&rsaquo;</span>`) +
-      `</nav>`;
-  }
-
-  /* A single, quiet footer: one short line about the project, one row of
-     links, the syllabus PDF choice, and the legal line — no repeated
-     column headings or dense grids. */
-  function renderFooter(opts){
-    opts = opts || {};
-    const year = new Date().getFullYear();
-
-    const footerTop = opts.showLinks ? `
-      <div class="footer-top">
-        <div class="footer-brand">
-          <p class="footer-about">
-            <strong>RVCE MCA Grade Calculator</strong> is an independent, unofficial
-            grades and GPA calculator for RVCE MCA students, built using the
-            published PG Academic Handbook and the syllabus scheme.
-          </p>
-
-          <p class="footer-about">
-            Not affiliated with or endorsed by R V College of Engineering.
-          </p>
-        </div>
-
-        <div class="footer-meta">
-          <div class="footer-pdf">
-            <span class="footer-pdf-label">Syllabus PDF</span>
-            ${renderPdfChoice()}
-          </div>
-
-          <div class="footer-pdf">
-            <span class="footer-pdf-label">Handbook PDF</span>
-            ${renderHandbookChoice()}
-          </div>
-        </div>
-      </div>
-    ` : '';
 
     return `
-      ${footerTop}
+      <nav class="breadcrumb" aria-label="Breadcrumb">
+        ${parts.join('<span class="sep">&rsaquo;</span>')}
+      </nav>
+    `;
+  }
 
+  /* ---------- Simplified footer ---------- */
+
+  function renderFooter(){
+    const year = new Date().getFullYear();
+
+    return `
       <div class="footer-links">
-        <a href="${REPO_URL}" target="_blank" rel="noopener noreferrer">GitHub</a>
-        <a href="mailto:${EMAIL}">Contact</a>
-        <a href="${SYLLABUS_URL}" target="_blank" rel="noopener noreferrer">Official Syllabus</a>
-        <a href="${HANDBOOK_URL}" target="_blank" rel="noopener noreferrer">Official Handbook</a>
-        <a href="${PAGES}guide.html">Guide</a>
+        <a
+          href="${REPO_URL}"
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          GitHub
+        </a>
+
+        <a href="mailto:${EMAIL}">
+          Contact
+        </a>
+
+        <a
+          href="${SYLLABUS_URL}"
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          Official Syllabus
+        </a>
+
+        <a
+          href="${HANDBOOK_URL}"
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          Official Handbook
+        </a>
+
+        <a href="${PAGES}guide.html">
+          Guide
+        </a>
       </div>
 
       <div class="legal">
         &copy; ${year} B R Lohith Raj<br>
-        Unofficial student project &middot; Not affiliated with RVCE.
+        Unofficial student project &middot;
+        Not affiliated with or endorsed by R V College of Engineering.
         Please verify all results against your official grade card and
         with the Controller of Examinations.
-      </div>`;
+      </div>
+    `;
   }
+
+  /* ---------- Mount shared components ---------- */
 
   function mount(opts){
     opts = opts || {};
 
     const headerEl = document.getElementById('site-header');
-    const crumbEl  = document.getElementById('breadcrumb');
+    const crumbEl = document.getElementById('breadcrumb');
     const footerEl = document.getElementById('site-footer');
 
-    if(headerEl) headerEl.innerHTML = renderHeader(opts.active);
-    if(crumbEl)  crumbEl.innerHTML  = renderBreadcrumb(opts.trail);
-    if(footerEl) {
-    footerEl.innerHTML = renderFooter({
-      showLinks: opts.active === 'home'
-    });
-}
+    if(headerEl){
+      headerEl.innerHTML = renderHeader(opts.active);
+    }
+
+    if(crumbEl){
+      crumbEl.innerHTML = renderBreadcrumb(opts.trail);
+    }
+
+    if(footerEl){
+      footerEl.innerHTML = renderFooter();
+    }
 
     wireThemeToggle();
     wireNavToggle();
   }
 
+  /* ---------- Public API ---------- */
+
   window.MCA.site = {
-    mount, qs, withParams, applyTheme, currentTheme, renderPdfChoice,
-    REPO_URL, EMAIL, SYLLABUS_URL, HANDBOOK_URL, ROOT, PAGES
+    mount,
+    qs,
+    withParams,
+    applyTheme,
+    currentTheme,
+    REPO_URL,
+    EMAIL,
+    SYLLABUS_URL,
+    HANDBOOK_URL,
+    ROOT,
+    PAGES
   };
+
 })();
