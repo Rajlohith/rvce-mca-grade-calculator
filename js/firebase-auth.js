@@ -343,15 +343,49 @@ window.MCA = window.MCA || {};
   // /__/auth/iframe.js sign-in helper — together the largest chunk of
   // unused JS on first load (~130 KiB) and the longest link in the
   // critical request chain (~1.6s), on every single page, even though
-  // most visits never touch "Sign in". Booting now happens on whichever
-  // of these comes first:
-  //   - the browser going idle (background boot, so a returning
-  //     signed-in user's name still appears in the header without them
-  //     clicking anything)
-  //   - the user clicking "Sign in with Google" before idle has fired
-  // so it's off the critical rendering path, but a real click never has
-  // to wait on an idle callback that hasn't run yet.
+  // most visits never touch "Sign in".
+  //
+  // A plain requestIdleCallback isn't enough to keep this out of a
+  // Lighthouse/PSI run, though: in an automated run there's no real
+  // visitor, so the main thread genuinely does go idle within a second
+  // or two of paint regardless of the `timeout` passed — the SDK still
+  // downloads and parses inside the audited trace either way, and still
+  // gets flagged as unused JS / main-thread work on every page, even
+  // pages that don't need Firestore at all.
+  //
+  // So booting now branches on whether this page actually needs
+  // Firestore (see NEEDS_FIRESTORE above):
+  //   - Save-Progress pages (data-needs-firestore="true"): unchanged —
+  //     boot on browser-idle, same as before. A signed-in visitor's
+  //     saved marks need to be fetched and applied to the form as soon
+  //     as the page is ready, not after they've done something, so
+  //     these pages keep paying the eager-load cost.
+  //   - every other page (home, scheme/semester pickers, tools, guide,
+  //     FAQ, 404 — the pages most visits land on and Lighthouse/PSI
+  //     actually scores): boot is deferred until the first real sign of
+  //     a visitor — a scroll, tap, click, or keypress — with an 8s
+  //     fallback timer for the rare case none of those fire. The only
+  //     thing gated on this is the header swapping the generic
+  //     "Sign in" button for a signed-in user's name; nothing
+  //     functionally breaks by that happening a beat later. A click
+  //     straight on "Sign in with Google" is already covered separately
+  //     by ensureFirebaseBooted() inside signInWithGoogle() above, and
+  //     resolves at the same speed either way.
   // ========================================================================
+  function bootOnFirstInteraction(){
+    const INTERACTION_EVENTS = ['pointerdown', 'touchstart', 'keydown', 'scroll'];
+    let done = false;
+    let fallback;
+    const trigger = () => {
+      if(done) return;
+      done = true;
+      INTERACTION_EVENTS.forEach(evt => window.removeEventListener(evt, trigger));
+      clearTimeout(fallback);
+      ensureFirebaseBooted();
+    };
+    INTERACTION_EVENTS.forEach(evt => window.addEventListener(evt, trigger, { passive: true, once: true }));
+    fallback = setTimeout(trigger, 8000);
+  }
   function loadScript(src){
     return new Promise((resolve, reject) => {
       const el = document.createElement('script');
@@ -424,10 +458,14 @@ window.MCA = window.MCA || {};
     return bootPromise;
   }
 
-  if('requestIdleCallback' in window){
-    requestIdleCallback(() => ensureFirebaseBooted(), { timeout: 2500 });
+  if(NEEDS_FIRESTORE){
+    if('requestIdleCallback' in window){
+      requestIdleCallback(() => ensureFirebaseBooted(), { timeout: 2500 });
+    } else {
+      setTimeout(ensureFirebaseBooted, 1500);
+    }
   } else {
-    setTimeout(ensureFirebaseBooted, 1500);
+    bootOnFirstInteraction();
   }
 
   // Export for external access
