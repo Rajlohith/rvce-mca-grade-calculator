@@ -1,27 +1,36 @@
 rules_version = '2';
+
 service cloud.firestore {
   match /databases/{database}/documents {
-    // RVCE MCA student email format: <name>.mca<YY>@rvce.edu.in
-    // where YY is the enrollment year (24, 25, 26, or 27 for current
-    // batches — extend this regex as new batches enroll).
-    function isRvceMcaEmail(){
-      return request.auth.token.email.matches('^[a-zA-Z]+([.][a-zA-Z]+)*[.]mca(24|25|26|27)@rvce[.]edu[.]in$');
+
+    // RVCE MCA student email format
+    function isRvceMcaEmail() {
+      return request.auth != null &&
+             request.auth.token.email_verified == true &&
+             request.auth.token.email.matches(
+               '^[a-zA-Z]+([.][a-zA-Z]+)*[.]mca(24|25|26|27)@rvce[.]edu[.]in$'
+             );
+    }
+
+    // Block this specific student
+    function isBlockedEmail() {
+      return request.auth != null &&
+             request.auth.token.email == "kirankumarab.mca25@rvce.edu.in";
     }
 
     // Users can only read/write their own marks document
     match /userMarks/{userId} {
-      allow read, write: if request.auth.uid == userId &&
-                           request.auth.token.firebase.identities["google.com"] != null &&
-                           isRvceMcaEmail();
-      allow create: if request.auth.uid == userId &&
-                       request.auth.token.firebase.identities["google.com"] != null &&
-                       isRvceMcaEmail();
+      allow read, write: if request.auth != null &&
+                          request.auth.uid == userId &&
+                          request.auth.token.firebase.identities["google.com"] != null &&
+                          isRvceMcaEmail() &&
+                          !isBlockedEmail();
     }
 
-    // Public FAQ and course reference data (read-only for students)
+    // Public FAQ and course reference data
     match /publicData/{document=**} {
       allow read: if true;
-      allow write: if false; // Admins manage via console only
+      allow write: if false;
     }
 
     // Deny everything else by default

@@ -69,6 +69,9 @@ window.MCA = window.MCA || {};
      batches. Extend the (24|25|26|27) group as new batches enroll. */
   const RVCE_MCA_EMAIL = /^[a-z]+(\.[a-z]+)*\.mca(24|25|26|27)@rvce\.edu\.in$/i;
 
+  // Block specific account
+  const BLOCKED_EMAILS = ["kirankumarab.mca25@rvce.edu.in"];
+
   // Read this once, synchronously, while this script is the currently
   // executing script — this still works correctly with `defer`.
   const NEEDS_FIRESTORE = !!(document.currentScript && document.currentScript.dataset.needsFirestore === 'true');
@@ -88,18 +91,54 @@ window.MCA = window.MCA || {};
 
       window.MCA.auth.onAuthStateChanged((user) => {
         if(user){
-          // Restrict to RVCE MCA students only: <name>.mca<YY>@rvce.edu.in
-          if(!RVCE_MCA_EMAIL.test(user.email)){
-            console.warn('Non-MCA-format email sign-in attempt, signing out:', user.email);
+          if (
+            user.email &&
+            BLOCKED_EMAILS.includes(user.email.toLowerCase())
+          ) {
+            console.warn('Blocked account sign-in attempt, signing out:', user.email);
+
             window.MCA.auth.signOut();
             window.MCA.currentUser = null;
-            dispatchAuthEvent('auth-rejected', { reason: 'Not an RVCE MCA student email' });
+
+            dispatchAuthEvent('auth-rejected', {
+              reason: 'Account is blocked'
+            });
+
+            window.MCA.util.toast(
+              'Access denied. This account is not permitted to use this site.',
+              'error'
+            );
+
             updateAuthUI({ rejected: true });
             return;
           }
+
+          // Restrict to RVCE MCA students only
+          if(!RVCE_MCA_EMAIL.test(user.email)){
+            console.warn(
+              'Non-MCA-format email sign-in attempt, signing out:',
+              user.email
+            );
+
+            window.MCA.auth.signOut();
+            window.MCA.currentUser = null;
+
+            dispatchAuthEvent('auth-rejected', {
+              reason: 'Not an RVCE MCA student email'
+            });
+
+            updateAuthUI({ rejected: true });
+            return;
+          }
+
           window.MCA.currentUser = user;
-          dispatchAuthEvent('signed-in', { user, email: user.email, uid: user.uid });
+          dispatchAuthEvent('signed-in', {
+            user,
+            email: user.email,
+            uid: user.uid
+          });
           updateAuthUI();
+
         } else {
           window.MCA.currentUser = null;
           dispatchAuthEvent('signed-out');
