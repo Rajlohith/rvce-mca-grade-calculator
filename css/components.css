@@ -538,8 +538,8 @@ table.ledger input[type=checkbox]{
    full width and sits centered on its own line, then the legal line,
    centered, at the very bottom. */
 .site-footer{
-  margin-top:40px;
-  padding-top:28px;
+  margin-top:32px;
+  padding-top:16px;
   border-top:1px solid var(--line);
 }
 
@@ -607,7 +607,7 @@ table.ledger input[type=checkbox]{
   justify-content:center;
   gap:4px 10px;
   text-align:center;
-  margin-bottom:22px;
+  margin-bottom:14px;
 }
 
 .footer-links a{
@@ -643,7 +643,7 @@ table.ledger input[type=checkbox]{
    single divider it needs, so this doesn't double up there. */
 .footer-links + .legal{
   border-top:1px solid var(--line);
-  padding-top:18px;
+  padding-top:20px;
 }
 
 @media(max-width:640px){
@@ -696,8 +696,7 @@ table.ledger input[type=checkbox]{
     justify-content:center;
     text-align:center;
     gap:2px 12px;
-    margin-top:20px;
-    margin-bottom:18px;
+    margin-bottom:12px;
   }
 
   .footer-links a{
@@ -706,7 +705,7 @@ table.ledger input[type=checkbox]{
   }
 
   .site-footer .legal{
-    padding-top:0;
+    padding-top:16px;
     text-align:center;
   }
 }
