@@ -597,17 +597,17 @@ table.ledger input[type=checkbox]{
 
 
 
-/* Footer navigation links */
+/* Footer navigation links. No top border here — .site-footer's own
+   border-top is already the divider above this block; a second
+   border-top on .footer-links used to draw a redundant second line
+   right under it. */
 .footer-links{
   display:flex;
   flex-wrap:wrap;
   justify-content:center;
   gap:4px 10px;
   text-align:center;
-  margin-top:24px;
   margin-bottom:22px;
-  padding-top:20px;
-  border-top:1px solid var(--line);
 }
 
 .footer-links a{
