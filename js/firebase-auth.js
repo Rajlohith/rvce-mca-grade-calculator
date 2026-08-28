@@ -221,15 +221,23 @@ window.MCA = window.MCA || {};
 
   // Public API
   window.MCA.signInWithGoogle = function(){
-    if(!window.firebase || !window.MCA.auth){
-      window.MCA.util.toast('Firebase not ready yet, try again', 'error');
-      return;
-    }
-    const provider = new window.firebase.auth.GoogleAuthProvider();
-    provider.setCustomParameters({ hd: 'rvce.edu.in' }); // Hint: use RVCE domain
-    window.MCA.auth.signInWithPopup(provider).catch(err => {
-      console.error('Sign-in failed:', err.message);
-      window.MCA.util.toast('Sign-in failed: ' + err.message, 'error');
+    // The SDK is usually already booted in the background by the idle
+    // callback below. On the rare click that beats it there, this just
+    // finishes booting first — see ensureFirebaseBooted() at the bottom
+    // of this file.
+    ensureFirebaseBooted().then(() => {
+      if(!window.firebase || !window.MCA.auth){
+        window.MCA.util.toast('Firebase not ready yet, try again', 'error');
+        return;
+      }
+      const provider = new window.firebase.auth.GoogleAuthProvider();
+      provider.setCustomParameters({ hd: 'rvce.edu.in' }); // Hint: use RVCE domain
+      window.MCA.auth.signInWithPopup(provider).catch(err => {
+        console.error('Sign-in failed:', err.message);
+        window.MCA.util.toast('Sign-in failed: ' + err.message, 'error');
+      });
+    }).catch(() => {
+      window.MCA.util.toast('Could not load sign-in — check your connection and try again', 'error');
     });
   };
 
@@ -329,6 +337,20 @@ window.MCA = window.MCA || {};
   // Load the Firebase SDK from the CDN, if it isn't already on the page.
   // Firestore is only pulled in when this page's script tag opted in via
   // data-needs-firestore="true".
+  //
+  // This no longer kicks off at parse time on every page. Booting Auth
+  // pulls in the auth-compat bundle *and* triggers Firebase Hosting's
+  // /__/auth/iframe.js sign-in helper — together the largest chunk of
+  // unused JS on first load (~130 KiB) and the longest link in the
+  // critical request chain (~1.6s), on every single page, even though
+  // most visits never touch "Sign in". Booting now happens on whichever
+  // of these comes first:
+  //   - the browser going idle (background boot, so a returning
+  //     signed-in user's name still appears in the header without them
+  //     clicking anything)
+  //   - the user clicking "Sign in with Google" before idle has fired
+  // so it's off the critical rendering path, but a real click never has
+  // to wait on an idle callback that hasn't run yet.
   // ========================================================================
   function loadScript(src){
     return new Promise((resolve, reject) => {
@@ -341,44 +363,71 @@ window.MCA = window.MCA || {};
     });
   }
 
-  if(!window.firebase){
-    const BASE = 'https://www.gstatic.com/firebasejs/10.12.0/';
-    loadScript(BASE + 'firebase-app-compat.js')
-      .then(() => loadScript(BASE + 'firebase-auth-compat.js'))
-      .then(() => NEEDS_FIRESTORE ? loadScript(BASE + 'firebase-firestore-compat.js') : Promise.resolve())
+  const SDK_BASE = 'https://www.gstatic.com/firebasejs/10.12.0/';
+
+  // Analytics only powers usage insights, not sign-in or any other
+  // user-facing feature, so it's fetched in the background once the page
+  // is idle rather than sharing the Auth(+Firestore) script chain — keeps
+  // main-thread JS work down without dropping analytics coverage.
+  function loadAnalyticsWhenIdle(){
+    const loadAnalytics = () => loadScript(SDK_BASE + 'firebase-analytics-compat.js')
+      .then(() => {
+        if(window.firebase.analytics){
+          try { window.MCA.analytics = window.firebase.analytics(); } catch(e){ /* analytics blocked (ad-blocker etc.) — non-fatal */ }
+        }
+      })
+      .catch(() => { /* analytics is optional — a failed/blocked load is non-fatal */ });
+
+    if('requestIdleCallback' in window){
+      requestIdleCallback(loadAnalytics, { timeout: 3000 });
+    } else {
+      setTimeout(loadAnalytics, 300);
+    }
+  }
+
+  let bootPromise = null;
+
+  // Kicks off (once, memoized) loading the Auth SDK — and Firestore, if
+  // this page needs it — then initializes Firebase against it. Safe to
+  // call repeatedly; every caller shares the same in-flight/resolved
+  // promise.
+  function ensureFirebaseBooted(){
+    if(bootPromise) return bootPromise;
+
+    if(window.firebase){
+      // Already on the page somehow — just initialize against it.
+      bootPromise = Promise.resolve().then(() => {
+        if(document.readyState === 'loading'){
+          return new Promise(resolve => {
+            document.addEventListener('DOMContentLoaded', () => { initializeFirebase(); resolve(); });
+          });
+        }
+        initializeFirebase();
+      });
+      return bootPromise;
+    }
+
+    bootPromise = loadScript(SDK_BASE + 'firebase-app-compat.js')
+      .then(() => loadScript(SDK_BASE + 'firebase-auth-compat.js'))
+      .then(() => NEEDS_FIRESTORE ? loadScript(SDK_BASE + 'firebase-firestore-compat.js') : Promise.resolve())
       .then(() => {
         initializeFirebase();
         dispatchAuthEvent('firebase-ready');
-
-        // Analytics only powers usage insights, not sign-in or any other
-        // user-facing feature, so it's fetched in the background once the
-        // page is idle rather than sharing the critical Auth(+Firestore)
-        // script chain — keeps initial main-thread JS work down without
-        // dropping analytics coverage.
-        const loadAnalytics = () => loadScript(BASE + 'firebase-analytics-compat.js')
-          .then(() => {
-            if(window.firebase.analytics){
-              try { window.MCA.analytics = window.firebase.analytics(); } catch(e){ /* analytics blocked (ad-blocker etc.) — non-fatal */ }
-            }
-          })
-          .catch(() => { /* analytics is optional — a failed/blocked load is non-fatal */ });
-
-        if('requestIdleCallback' in window){
-          requestIdleCallback(loadAnalytics, { timeout: 3000 });
-        } else {
-          setTimeout(loadAnalytics, 300);
-        }
+        loadAnalyticsWhenIdle();
       })
       .catch(err => {
         console.error(err.message);
         dispatchAuthEvent('firebase-load-error');
+        bootPromise = null; // let a later click (e.g. once back online) retry
+        throw err;
       });
+    return bootPromise;
+  }
+
+  if('requestIdleCallback' in window){
+    requestIdleCallback(() => ensureFirebaseBooted(), { timeout: 2500 });
   } else {
-    if(document.readyState === 'loading'){
-      document.addEventListener('DOMContentLoaded', initializeFirebase);
-    } else {
-      initializeFirebase();
-    }
+    setTimeout(ensureFirebaseBooted, 1500);
   }
 
   // Export for external access

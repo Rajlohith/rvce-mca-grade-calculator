@@ -602,7 +602,7 @@ table.ledger input[type=checkbox]{
   display:flex;
   flex-wrap:wrap;
   justify-content:center;
-  gap:8px 22px;
+  gap:4px 10px;
   text-align:center;
   margin-top:24px;
   margin-bottom:22px;
@@ -611,10 +611,14 @@ table.ledger input[type=checkbox]{
 }
 
 .footer-links a{
+  display:inline-flex;
+  align-items:center;
   font-size:13px;
   font-weight:600;
   color:var(--ink-soft);
   text-decoration:none;
+  padding:12px 6px;
+  line-height:1.2;
 }
 
 .footer-links a:hover{
@@ -691,13 +695,14 @@ table.ledger input[type=checkbox]{
   .footer-links{
     justify-content:center;
     text-align:center;
-    gap:8px 16px;
+    gap:2px 12px;
     margin-top:20px;
     margin-bottom:18px;
   }
 
   .footer-links a{
     font-size:12px;
+    padding:10px 6px;
   }
 
   .site-footer .legal{
