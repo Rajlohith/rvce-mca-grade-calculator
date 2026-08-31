@@ -103,6 +103,20 @@ window.MCA = window.MCA || {};
     return el && el.tagName === 'INPUT' && el.type === 'number';
   }
 
+  /* Whether a numeric field should accept a decimal point at all. Every
+     integer-only field on the site (marks, credits, etc.) is left at the
+     HTML default step of 1; only the fields that are genuinely fractional
+     (SGPA/CGPA, step="0.01") opt in with an explicit non-integer step, or
+     step="any". This is also what decides the on-screen numeric keypad:
+     see applyKeypadHints() in input-guard.js. */
+  function allowsDecimal(el){
+    const step = el.getAttribute('step');
+    if(!step) return false;
+    if(step === 'any') return true;
+    const n = parseFloat(step);
+    return !isNaN(n) && n % 1 !== 0;
+  }
+
   function onKeydown(e){
     const el = e.target;
     if(!isNumericField(el)) return;
@@ -111,7 +125,7 @@ window.MCA = window.MCA || {};
 
     const allowMinus = parseFloat(el.getAttribute('min')) < 0;
     const isDigit = /^[0-9]$/.test(e.key);
-    const isDot = e.key === '.' && el.value.indexOf('.') === -1;
+    const isDot = e.key === '.' && allowsDecimal(el) && el.value.indexOf('.') === -1;
     const isMinus = e.key === '-' && allowMinus && el.selectionStart === 0 && el.value.indexOf('-') === -1;
 
     if(!(isDigit || isDot || isMinus)) e.preventDefault();
@@ -122,12 +136,13 @@ window.MCA = window.MCA || {};
     if(!isNumericField(el)) return;
     const text = (e.clipboardData || window.clipboardData).getData('text');
     const allowMinus = parseFloat(el.getAttribute('min')) < 0;
-    const pattern = allowMinus ? /^-?\d*\.?\d*$/ : /^\d*\.?\d*$/;
+    const decimalPart = allowsDecimal(el) ? '\\.?\\d*' : '';
+    const pattern = new RegExp('^' + (allowMinus ? '-?' : '') + '\\d*' + decimalPart + '$');
     if(!pattern.test(text)) e.preventDefault();
   }
 
   document.addEventListener('keydown', onKeydown, true);
   document.addEventListener('paste', onPaste, true);
 
-  window.MCA.util = { escapeHTML, safeInnerHTML, round2, toast, copyWithFeedback };
+  window.MCA.util = { escapeHTML, safeInnerHTML, round2, toast, copyWithFeedback, allowsDecimal };
 })();

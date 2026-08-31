@@ -32,12 +32,27 @@
     }
   }
 
+  /* Belt-and-braces decimal guard: util.js already blocks a "." keystroke
+     on integer-only fields, but that's a keydown-level check, and mobile
+     virtual keyboards / autofill / IME composition don't reliably fire
+     keydown for every character. Since this listener runs on 'input' (the
+     value has already changed, however it changed), it catches anything
+     that slips past the keystroke-level guard and truncates at the point
+     instead of rounding, so a half-typed "12." doesn't jump to "12" while
+     they're still about to type more digits. */
+  function stripDecimalIfNotAllowed(el){
+    if(window.MCA.util.allowsDecimal(el)) return;
+    const dot = el.value.indexOf('.');
+    if(dot !== -1) el.value = el.value.slice(0, dot);
+  }
+
   // Capture phase so this runs — and clamps the value — before any other
   // 'input' listener on the same field (e.g. a page's own recompute()) sees
   // the event, so downstream calculations always see the clamped value.
   document.addEventListener('input', function(e){
     const el = e.target;
     if(!(el.tagName === 'INPUT' && el.type === 'number')) return;
+    stripDecimalIfNotAllowed(el);
     if(el.value === '' || el.value === '-'){ hideWarning(el); return; }
 
     const num = parseFloat(el.value);
@@ -97,7 +112,9 @@
   }
 
   document.addEventListener('keydown', function(e){
-    if(e.key !== 'ArrowUp' && e.key !== 'ArrowDown') return;
+    const isPrev = e.key === 'ArrowUp';
+    const isNext = e.key === 'ArrowDown' || e.key === 'Enter';
+    if(!isPrev && !isNext) return;
     const el = e.target;
     if(!(el.tagName === 'INPUT' && el.type === 'number')) return;
     if(e.ctrlKey || e.metaKey || e.altKey || e.shiftKey) return;
@@ -106,7 +123,62 @@
     const list = navigableInputs(navGroup(el));
     const idx = list.indexOf(el);
     if(idx === -1) return;
-    const target = list[e.key === 'ArrowUp' ? idx - 1 : idx + 1];
-    if(target){ target.focus(); target.select(); }
+    const target = list[isPrev ? idx - 1 : idx + 1];
+    if(target){
+      target.focus();
+      target.select();
+    } else if(e.key === 'Enter'){
+      // Enter on the last field of the group: nothing to jump to, so
+      // dismiss the on-screen keyboard instead of doing nothing.
+      el.blur();
+    }
+  }, true);
+
+  /* ---------- Mobile numeric keypad + "next field" keyboard hint ----------
+     Two attributes drive the on-screen keyboard on phones:
+       - inputmode: "decimal" shows a numeric pad WITH a "." key, for
+         fields that allow a fractional value (SGPA/CGPA); "numeric" shows
+         digits only, with no "." key at all, for every mark/credit field
+         that's integer-only. type="number" alone doesn't reliably control
+         this across browsers, so we set inputmode explicitly.
+       - enterkeyhint: swaps the keyboard's action key for "Next"/"Go" (and
+         wires it, via the Enter handler above, to actually move to the
+         next field in the same group) or "Done" on the last field of a
+         group, which just closes the keyboard.
+     Every number input on this site is injected by page JS after this
+     script has already run (course cards, SGPA rows, etc.), so a
+     MutationObserver — rather than a one-off scan — is what actually
+     catches them. */
+  function applyKeypadHints(el){
+    if(!(el.tagName === 'INPUT' && el.type === 'number')) return;
+    el.setAttribute('inputmode', window.MCA.util.allowsDecimal(el) ? 'decimal' : 'numeric');
+  }
+
+  function refineEnterKeyHint(el){
+    const list = navigableInputs(navGroup(el));
+    const idx = list.indexOf(el);
+    const isLast = idx === -1 || idx === list.length - 1;
+    el.setAttribute('enterkeyhint', isLast ? 'done' : 'next');
+  }
+
+  function scanForNumberInputs(node){
+    if(!node || node.nodeType !== 1) return;
+    if(node.matches && node.matches('input[type="number"]')) applyKeypadHints(node);
+    if(node.querySelectorAll){
+      node.querySelectorAll('input[type="number"]').forEach(applyKeypadHints);
+    }
+  }
+
+  scanForNumberInputs(document.body);
+  new MutationObserver(function(mutations){
+    mutations.forEach(function(m){ m.addedNodes.forEach(scanForNumberInputs); });
+  }).observe(document.body, { childList: true, subtree: true });
+
+  // enterkeyhint depends on the field's position within its group, which
+  // can shift as cards/rows are added or removed — so it's (re)computed
+  // right as a field is focused rather than baked in once up front.
+  document.addEventListener('focusin', function(e){
+    const el = e.target;
+    if(el.tagName === 'INPUT' && el.type === 'number') refineEnterKeyHint(el);
   }, true);
 })();
