@@ -22,7 +22,7 @@
       <td class="check-col"><input type="checkbox" class="c-done"></td>
       <td>Semester ${s}</td>
       <td class="credit-col locked-credit">${credits}</td>
-      <td class="credit-col"><input type="number" class="c-sgpa" min="0" max="10" step="0.01" value="0" disabled></td>`;
+      <td class="sgpa-col"><input type="number" class="c-sgpa" min="0" max="10" step="0.01" value="0" disabled></td>`;
     tr.dataset.credits = credits;
     const done = tr.querySelector('.c-done');
     const sgpaInput = tr.querySelector('.c-sgpa');
