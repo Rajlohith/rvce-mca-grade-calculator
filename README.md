@@ -262,7 +262,7 @@ Course codes, titles, credits and CIE/SEE marks for all four semesters were tran
 Contributions are welcome!
 
 1. Fork the repository.
-2. Create a new branch: `git checkout -b feature-new-feature`
+2. Create a new branch: `git switch -c feature-new-feature`
 3. Make your changes and commit them: `git commit -m 'Add new feature'`
 4. Push to the branch: `git push origin feature-new-feature`
 5. Open a pull request.
@@ -273,7 +273,8 @@ Please follow consistent coding styles and include clear commit messages. Please
 
 - GitHub repository: <https://github.com/Rajlohith/rvce-mca-grade-calculator>
 - Email: <brlohithraj.mca25@rvce.edu.in>
-- Official RVCE scheme and syllabus: <https://rvce.edu.in/academics_and_examinations/rvce_scheme_syllabus/>
+- Official RVCE scheme and syllabus: <https://rvce.edu.in/academics_and_examinations/rvce_scheme_syllabus>
+- Official RVCE PG Handbook: <https://rvce.edu.in/handbook>
 
 ## License
 
