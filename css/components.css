@@ -795,3 +795,75 @@ table.ledger input[type=checkbox]{
     padding:6px 12px 6px 10px; font-size:11.5px; min-height:44px;
   }
 }
+/* ---------- Beat Yourself + MCA Journey (cgpa.html) ---------- */
+.bj-head{ display:flex; align-items:center; gap:12px; margin-top:16px; margin-bottom:4px; }
+.bj-section{ margin-top:20px; }
+.bj-label{
+  font-size:11px; font-weight:700; letter-spacing:.06em; text-transform:uppercase;
+  color:var(--ink-faint); display:block; margin-bottom:12px;
+}
+
+/* Progress stat row */
+.bj-stats{ display:grid; grid-template-columns:repeat(3,1fr); gap:10px; }
+.bj-stat{
+  background:var(--paper); border-radius:var(--radius-sm); padding:12px 14px;
+  display:flex; flex-direction:column; gap:4px; min-width:0;
+}
+.bj-stat-label{ font-size:11.5px; color:var(--ink-soft); font-weight:600; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.bj-stat-value{ font-size:18px; font-weight:800; color:var(--ink); letter-spacing:-.01em; }
+.bj-stat.bj-target .bj-stat-value{ color:var(--purple); }
+.bj-stat.bj-empty .bj-stat-value{ color:var(--ink-faint); }
+
+.bj-deltas{ display:flex; gap:10px; flex-wrap:wrap; margin-top:10px; }
+.bj-delta{
+  flex:1 1 190px; background:var(--card); border:1px solid var(--line); border-radius:var(--radius-sm);
+  padding:10px 14px; display:flex; justify-content:space-between; align-items:center; gap:10px;
+}
+.bj-delta-label{ font-size:12.5px; color:var(--ink-soft); font-weight:600; }
+.bj-delta-value{ font-size:15px; font-weight:700; font-variant-numeric:tabular-nums; white-space:nowrap; }
+.bj-delta-value.up{ color:var(--teal); }
+.bj-delta-value.down{ color:var(--crimson); }
+.bj-delta-value.flat{ color:var(--ink); }
+.bj-delta-value.accent{ color:var(--accent); }
+.bj-delta-value.na{ color:var(--ink-faint); font-weight:600; }
+
+.bj-challenge{
+  margin-top:12px; font-size:12.5px; color:var(--ink-soft); background:var(--paper);
+  border-radius:var(--radius-sm); padding:10px 14px; line-height:1.5;
+}
+.bj-challenge b{ color:var(--ink); }
+
+/* Journey track */
+.bj-track{ display:flex; align-items:flex-start; }
+.bj-node{ flex:0 0 auto; width:84px; display:flex; flex-direction:column; align-items:center; text-align:center; }
+.bj-connector{ flex:1 1 auto; height:2px; background:var(--line-strong); margin-top:16px; min-width:10px; }
+.bj-connector.done{ background:var(--teal); }
+.bj-node-dot{
+  width:34px; height:34px; border-radius:50%; display:flex; align-items:center; justify-content:center;
+  border:2px solid var(--line-strong); background:var(--card); color:var(--ink-faint); flex:0 0 auto;
+}
+.bj-node-dot svg{ width:16px; height:16px; }
+.bj-node-label{ font-size:12px; font-weight:700; color:var(--ink); margin-top:8px; line-height:1.3; }
+.bj-node-status{ font-size:10px; font-weight:700; text-transform:uppercase; letter-spacing:.04em; color:var(--ink-faint); margin-top:2px; }
+
+.bj-node.done .bj-node-dot{ background:var(--teal); border-color:var(--teal); color:#fff; }
+.bj-node.done .bj-node-status{ color:var(--teal); }
+
+.bj-node.current .bj-node-dot{ border-color:var(--accent); color:var(--accent); background:var(--accent-bg); box-shadow:0 0 0 4px var(--accent-bg); }
+.bj-node.current .bj-node-label{ color:var(--accent); }
+.bj-node.current .bj-node-status{ color:var(--accent); }
+
+.bj-node.upcoming .bj-node-dot{ border-style:dashed; }
+
+.bj-track-note{ font-size:12px; color:var(--ink-faint); margin-top:12px; font-weight:600; text-align:center; }
+
+@media(max-width:640px){
+  .bj-stats{ grid-template-columns:1fr 1fr; }
+  .bj-stats .bj-stat.bj-target{ grid-column:1 / -1; }
+
+  .bj-track{ flex-direction:column; align-items:stretch; }
+  .bj-node{ width:auto; flex-direction:row; text-align:left; align-items:center; gap:12px; }
+  .bj-node-label{ margin-top:0; }
+  .bj-node-text{ display:flex; flex-direction:column; text-align:left; }
+  .bj-connector{ width:2px; height:16px; margin:2px 0 2px 16px; flex:0 0 auto; }
+}
