@@ -27,6 +27,8 @@
   const courseCount = coursesFor(semester).length;
   document.getElementById('toolTitle').textContent = `Semester ${semester}`;
 
+  if(window.MCA.achievements) window.MCA.achievements.track('semester_tools_viewed', { semester });
+
   const params = { scheme, semester };
   const { calculator, bookOpen, award, arrowRight } = window.MCA.icons;
   const tools = [

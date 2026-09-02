@@ -85,6 +85,9 @@
         summaryHtml = `<div class="bj-summary ${met ? 'ok' : 'warn'}">Your CGPA through ${romanUpTo(requiredCount - 1)} is <b>${bjTwo(current.cgpa)}</b> &mdash; ${met
           ? `you've met your <b>${bjTwo(targetVal)}</b> target for Semester ${ROMAN[targetSem - 1]}.`
           : `that's <b>${bjTwo(Math.abs(diff))}</b> short of your <b>${bjTwo(targetVal)}</b> target for Semester ${ROMAN[targetSem - 1]}.`}</div>`;
+        if(met && window.MCA.achievements){
+          window.MCA.achievements.track('beat_target_met', { targetSem });
+        }
       } else {
         const avgNeeded = (targetVal * totalCreditsToTarget - current.totalCredits * current.cgpa) / pendingCredits;
         const pendingLabels = [];
@@ -184,6 +187,11 @@
           <div class="row"><span>Projected class</span><span>${r.cls}</span></div>
         </div>
       </div>`;
+    if(window.MCA.achievements){
+      window.MCA.achievements.track('cgpa_calculated', {
+        cgpa: r.cgpa, count: rows.length, total: Object.keys(DATA.semesters).length
+      });
+    }
     updateBeatJourney();
   }
 
@@ -209,6 +217,7 @@
       sgpaInput.disabled = true;
     });
     recompute();
+    if(window.MCA.achievements) window.MCA.achievements.track('reset_used', { page:'cgpa' });
   });
 
   recompute();

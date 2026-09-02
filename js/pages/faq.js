@@ -17,7 +17,11 @@
     </div>`).join('');
 
   document.querySelectorAll('.faq-item').forEach(item=>{
-    item.querySelector('.faq-q').addEventListener('click', ()=>item.classList.toggle('open'));
+    item.querySelector('.faq-q').addEventListener('click', ()=>{
+      const wasOpen = item.classList.contains('open');
+      item.classList.toggle('open');
+      if(!wasOpen && window.MCA.achievements) window.MCA.achievements.track('faq_opened', {});
+    });
   });
 
   document.getElementById('faqSearch').addEventListener('input', (e)=>{
@@ -26,5 +30,6 @@
       const text = item.textContent.toLowerCase();
       item.style.display = text.includes(q) ? '' : 'none';
     });
+    if(q.trim() && window.MCA.achievements) window.MCA.achievements.track('faq_searched', {});
   });
 })();

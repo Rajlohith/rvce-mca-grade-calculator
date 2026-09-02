@@ -21,11 +21,14 @@
   });
   document.getElementById('gradeScaleStrip').innerHTML = renderGradeScale();
 
+  if(window.MCA.achievements) window.MCA.achievements.track('tool_page_viewed', { tool:'cie-see', semester });
+
   // Semester I keeps the original Lab(/40)+Lab EL(/10) split. Semester II
   // and III use the PBL-merged breakdown instead.
   const labScheme = (semester === 'II' || semester === 'III') ? 'sem23' : 'sem1';
   const NON_STANDARD_NAMES = { project:'Project', internship:'Internship', nptel:'NPTEL / online course' };
   const courses = coursesFor(semester);
+  const standardCourseCount = courses.filter(c => !['project','internship','nptel'].includes(c.type)).length;
   const cardState = new Map(); // course code -> { total, max, type }
 
   const COPY_SVG = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>`;
@@ -202,6 +205,13 @@
     // computeCIE's finalTotal in engine.js.
     cardState.set(code, { total: r.finalTotal, rawTotal: r.total, max: r.max, type, dx: r.dx });
 
+    if(window.MCA.achievements){
+      window.MCA.achievements.track('cie_calculated', {
+        semester, code, finalPct: r.finalPct, dx: r.dx,
+        completed: cardState.size, total: standardCourseCount
+      });
+    }
+
     // Save CIE to Firestore if user is signed in
     if(window.MCA.isSignedIn()){
       window.MCA.saveMarks(`${code}:cie`, {
@@ -265,6 +275,13 @@
     grid.querySelectorAll('.course-result').forEach(r => r.innerHTML = '');
     grid.querySelectorAll('.see-btn').forEach(b => { b.disabled = true; b.classList.remove('ready'); b.textContent = 'SEE Marks Required'; });
     cardState.clear();
+    if(window.MCA.achievements) window.MCA.achievements.track('reset_used', { page:'cie-see' });
+  });
+
+  grid.addEventListener('change', (e)=>{
+    if(e.target.matches('.course-elective-pick') && window.MCA.achievements){
+      window.MCA.achievements.track('elective_selected', { semester, page:'cie-see' });
+    }
   });
 
   /* ---------- SEE Requirements modal ---------- */
@@ -282,6 +299,8 @@
     const state = cardState.get(code);
     if(!state) return;
     currentModalCode = code;
+
+    if(window.MCA.achievements) window.MCA.achievements.track('see_requirements_viewed', { semester, code });
 
     const course = courses.find(c => c.code === code);
     modalSubject.textContent = courseDisplayTitle(card, course);
@@ -341,6 +360,7 @@
     const btn = e.currentTarget;
     window.MCA.util.copyWithFeedback(text, 'All requirements copied', 'Could not copy — copy them manually').then(ok=>{
       if(!ok) return;
+      if(window.MCA.achievements) window.MCA.achievements.track('see_requirements_copied', { semester });
       const original = btn.textContent;
       btn.textContent = 'Copied';
       setTimeout(()=>{ btn.textContent = original; }, 1500);

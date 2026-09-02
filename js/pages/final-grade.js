@@ -21,6 +21,8 @@
   });
   document.getElementById('gradeScaleStrip').innerHTML = renderGradeScale();
 
+  if(window.MCA.achievements) window.MCA.achievements.track('tool_page_viewed', { tool:'final-grade', semester });
+
   const NON_STANDARD_NAMES = { project:'Project', internship:'Internship', nptel:'NPTEL / online course' };
   const MAX_BY_TYPE = {
     theory:      { cieMax:100, seeMax:100 },
@@ -28,6 +30,8 @@
     lab:         { cieMax:50,  seeMax:50 }
   };
   const courses = coursesFor(semester);
+  const standardCourseCount = courses.filter(c => !['project','internship','nptel'].includes(c.type)).length;
+  const calculatedCodes = new Set();
 
   function cardTitleHTML(course){
     if(course.electives && course.electives.length){
@@ -92,9 +96,18 @@
       return;
     }
     const type = card.dataset.type;
+    const code = card.dataset.code;
     const cie = card.querySelector('.f-cie').value;
     const see = card.querySelector('.f-see').value;
     const r = computeFinalGrade(type, { cie, see });
+
+    calculatedCodes.add(code);
+    if(window.MCA.achievements){
+      window.MCA.achievements.track('final_grade_calculated', {
+        semester, code, isPass: r.isPass, pct: r.finalPct,
+        completed: calculatedCodes.size, total: standardCourseCount
+      });
+    }
 
     card.querySelector('.course-result').innerHTML = `
       <div class="result" style="margin-top:0;">
@@ -123,5 +136,13 @@
   document.getElementById('resetAllBtn').addEventListener('click', ()=>{
     grid.querySelectorAll('input[type=number]').forEach(inp => { inp.value = ''; inp.classList.remove('error'); });
     grid.querySelectorAll('.course-result').forEach(r => r.innerHTML = '');
+    calculatedCodes.clear();
+    if(window.MCA.achievements) window.MCA.achievements.track('reset_used', { page:'final-grade' });
+  });
+
+  grid.addEventListener('change', (e)=>{
+    if(e.target.matches('.course-elective-pick') && window.MCA.achievements){
+      window.MCA.achievements.track('elective_selected', { semester, page:'final-grade' });
+    }
   });
 })();

@@ -855,3 +855,116 @@ table.ledger input[type=checkbox]{
   .bj-node-text{ display:flex; flex-direction:column; text-align:left; }
   .bj-connector{ width:2px; height:16px; margin:2px 0 2px 16px; flex:0 0 auto; }
 }
+
+/* ==========================================================================
+   Achievements page + unlock toast
+   ========================================================================== */
+
+/* ---------- Login-required banner (logged out) ----------
+   Reuses .disclaimer-banner (already the site's prominent red callout) —
+   no new visual language needed for "you must log in to unlock these". */
+.achv-login-banner{ margin-bottom:20px; }
+
+/* ---------- Summary strip: unlocked / total + progress bar ---------- */
+.achv-summary{ display:flex; align-items:center; justify-content:space-between; gap:16px; flex-wrap:wrap; margin-bottom:6px; }
+.achv-summary-count{ font-size:26px; font-weight:800; color:var(--ink); letter-spacing:-.01em; }
+.achv-summary-count span{ color:var(--ink-faint); font-weight:600; font-size:16px; }
+.achv-summary-label{ font-size:12.5px; color:var(--ink-soft); margin-top:2px; }
+
+/* ---------- Section headings ---------- */
+.achv-section{ margin-top:28px; }
+.achv-section:first-of-type{ margin-top:8px; }
+.achv-section-label{
+  font-size:12.5px; font-weight:700; letter-spacing:.04em; text-transform:uppercase;
+  color:var(--ink-faint); margin-bottom:14px; display:flex; align-items:center; gap:8px;
+}
+.achv-section-count{
+  font-size:11px; font-weight:700; color:var(--ink-soft); background:var(--paper);
+  border-radius:999px; padding:2px 9px;
+}
+.achv-section-empty{ font-size:13px; color:var(--ink-faint); padding:4px 0 6px; }
+
+/* ---------- Grid + card ---------- */
+.achv-grid{ display:grid; grid-template-columns:repeat(auto-fill,minmax(260px,1fr)); gap:14px; }
+
+.achv-card{
+  display:flex; align-items:flex-start; gap:14px;
+  background:var(--card); border:1px solid var(--line); border-radius:var(--radius-md);
+  padding:16px 18px; transition:box-shadow .2s ease, transform .2s ease, border-color .2s ease;
+}
+
+.achv-badge{
+  width:46px; height:46px; border-radius:14px; flex:0 0 auto;
+  display:flex; align-items:center; justify-content:center;
+}
+.achv-badge svg{ width:23px; height:23px; }
+
+.achv-body{ min-width:0; flex:1; }
+.achv-name{ font-weight:700; font-size:14.5px; color:var(--ink); line-height:1.3; }
+.achv-desc{ font-size:12.5px; color:var(--ink-soft); margin-top:4px; line-height:1.5; }
+.achv-date{ font-size:11px; color:var(--ink-faint); margin-top:7px; font-weight:600; }
+.achv-category-chip{
+  display:inline-block; font-size:10px; font-weight:700; letter-spacing:.03em; text-transform:uppercase;
+  color:var(--accent); background:var(--accent-bg); border-radius:999px; padding:2px 8px; margin-top:8px;
+}
+
+/* Unlocked: full colour, a little lift, coloured badge per category. */
+.achv-card.unlocked{ box-shadow:var(--shadow-sm); }
+.achv-card.unlocked:hover{ box-shadow:var(--shadow-lg); transform:translateY(-2px); border-color:var(--line-strong); }
+.achv-card.unlocked .achv-badge{ background:var(--teal-bg); color:var(--teal); }
+.achv-card.unlocked.cat-academic .achv-badge{ background:var(--accent-bg); color:var(--accent); }
+.achv-card.unlocked.cat-usage .achv-badge{ background:var(--purple-bg); color:var(--purple); }
+.achv-card.unlocked.cat-streak .achv-badge{ background:var(--orange-bg); color:var(--orange); }
+.achv-card.unlocked.cat-exploration .achv-badge{ background:var(--teal-bg); color:var(--teal); }
+.achv-card.unlocked.cat-hidden .achv-badge{ background:linear-gradient(135deg, var(--purple-bg), var(--accent-bg)); color:var(--purple); }
+.achv-card.unlocked .achv-category-chip.cat-hidden{ color:var(--purple); background:var(--purple-bg); }
+
+/* Locked: greyed out, desaturated badge, everything still legible. */
+.achv-card.locked{ opacity:.62; }
+.achv-card.locked .achv-badge{ background:var(--paper); color:var(--ink-faint); }
+.achv-card.locked .achv-name{ color:var(--ink-soft); }
+
+/* Hidden + still locked: mystery icon, name/description masked. */
+.achv-card.hidden-locked{ opacity:.55; }
+.achv-card.hidden-locked .achv-badge{ background:var(--paper); color:var(--ink-faint); border:1.5px dashed var(--line-strong); }
+.achv-card.hidden-locked .achv-name{ color:var(--ink-faint); font-style:italic; }
+.achv-card.hidden-locked .achv-desc{ color:var(--ink-faint); }
+
+@media(max-width:520px){
+  .achv-grid{ grid-template-columns:1fr; }
+}
+
+/* ---------- Unlock toast ----------
+   Deliberately its own element, not a reuse of #mca-toast: this needs to
+   be more prominent, hold an icon + name + description, and stay up long
+   enough to actually read (see the 4.2s timer in achievements.js). */
+#mca-achv-toast{
+  position:fixed; top:18px; left:50%; transform:translate(-50%, -140%);
+  z-index:400; display:flex; align-items:center; gap:14px;
+  max-width:min(420px, calc(100vw - 32px));
+  background:var(--card); color:var(--ink);
+  border:1.5px solid var(--line-strong); border-radius:var(--radius-lg);
+  box-shadow:var(--shadow-xl);
+  padding:14px 18px 14px 14px;
+  opacity:0; pointer-events:none;
+  transition:transform .35s cubic-bezier(.34,1.56,.64,1), opacity .25s ease;
+}
+#mca-achv-toast.show{ transform:translate(-50%, 0); opacity:1; }
+#mca-achv-toast .achv-toast-icon{
+  width:44px; height:44px; border-radius:13px; flex:0 0 auto;
+  display:flex; align-items:center; justify-content:center;
+  background:linear-gradient(135deg, var(--accent), var(--purple)); color:#fff;
+  box-shadow:var(--shadow);
+}
+#mca-achv-toast .achv-toast-icon svg{ width:22px; height:22px; }
+#mca-achv-toast .achv-toast-body{ min-width:0; }
+#mca-achv-toast .achv-toast-kicker{
+  font-size:10.5px; font-weight:800; letter-spacing:.06em; text-transform:uppercase; color:var(--accent);
+}
+#mca-achv-toast .achv-toast-name{ font-size:15px; font-weight:800; color:var(--ink); margin-top:1px; line-height:1.25; }
+#mca-achv-toast .achv-toast-desc{ font-size:12px; color:var(--ink-soft); margin-top:3px; line-height:1.4; }
+
+@media(max-width:640px){
+  #mca-achv-toast{ left:16px; right:16px; transform:translateY(-140%); max-width:none; }
+  #mca-achv-toast.show{ transform:translateY(0); }
+}

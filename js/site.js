@@ -58,6 +58,11 @@ window.MCA = window.MCA || {};
         href: PAGES + 'guide.html'
       },
       {
+        id: 'achievements',
+        label: 'Achievements',
+        href: PAGES + 'achievements.html'
+      },
+      {
         id: 'faq',
         label: 'FAQ',
         href: PAGES + 'faq.html'
@@ -130,11 +135,13 @@ window.MCA = window.MCA || {};
     sync();
 
     btn.addEventListener('click', () => {
-      applyTheme(
-        currentTheme() === 'dark' ? 'light' : 'dark'
-      );
-
+      const next = currentTheme() === 'dark' ? 'light' : 'dark';
+      applyTheme(next);
       sync();
+
+      if(window.MCA.achievements){
+        window.MCA.achievements.track('theme_toggled', { theme: next });
+      }
     });
   }
 
@@ -345,6 +352,22 @@ window.MCA = window.MCA || {};
       </div>
     `;
   }
+
+  /* ---------- Syllabus / handbook link tracking ----------
+     Delegated at document level (registered once per page load) rather
+     than wired per-link, since the same two URLs appear in the footer
+     on every page AND in the home page's own quick-links markup. */
+  document.addEventListener('click', e => {
+    if(!window.MCA.achievements) return;
+    const a = e.target.closest('a[href]');
+    if(!a) return;
+    const href = a.getAttribute('href') || '';
+    if(a.href === SYLLABUS_URL || href.indexOf('docs/') !== -1 && href.indexOf('Syllabus') !== -1){
+      window.MCA.achievements.track('syllabus_viewed', { which: 'syllabus' });
+    } else if(a.href === HANDBOOK_URL || href.indexOf('docs/') !== -1 && href.indexOf('Handbook') !== -1){
+      window.MCA.achievements.track('syllabus_viewed', { which: 'handbook' });
+    }
+  });
 
   /* ---------- Mount shared components ---------- */
 

@@ -76,6 +76,7 @@ window.MCA = window.MCA || {};
       savedAt: new Date().toISOString()
     }).then(()=>{
       window.MCA.util.toast('Progress saved to your account', 'ok');
+      if(window.MCA.achievements) window.MCA.achievements.track('progress_saved', { pageKey });
       return true;
     }).catch(()=>false);
   }

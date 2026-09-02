@@ -14,19 +14,19 @@
 <link rel="apple-touch-icon" sizes="167x167" href="../icons/icon-167.png">
 <link rel="apple-touch-icon" sizes="152x152" href="../icons/icon-152.png">
 <link rel="apple-touch-icon" sizes="120x120" href="../icons/icon-120.png">
-<title>Final SGPA Calculator - RVCE MCA Grade Calculator</title>
-<meta name="description" content="Compute SGPA for an RVCE MCA semester using its real course list and credits, then roll it into your CGPA.">
-<link rel="canonical" href="https://rvce-mca-grade-calc.web.app/pages/final-gpa.html">
+<title>Achievements - RVCE MCA Grade Calculator</title>
+<meta name="description" content="Unlock badges by using the RVCE MCA Grade Calculator — CIE, SEE, Final Grade, SGPA and CGPA tools all count.">
+<link rel="canonical" href="https://rvce-mca-grade-calc.web.app/pages/achievements.html">
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="RVCE MCA Grade Calculator">
-<meta property="og:title" content="Final SGPA Calculator - RVCE MCA Grade Calculator">
-<meta property="og:description" content="Compute SGPA for an RVCE MCA semester using its real course list and credits, then roll it into your CGPA.">
-<meta property="og:url" content="https://rvce-mca-grade-calc.web.app/pages/final-gpa.html">
+<meta property="og:title" content="Achievements - RVCE MCA Grade Calculator">
+<meta property="og:description" content="Unlock badges by using the RVCE MCA Grade Calculator — CIE, SEE, Final Grade, SGPA and CGPA tools all count.">
+<meta property="og:url" content="https://rvce-mca-grade-calc.web.app/pages/achievements.html">
 <meta property="og:image" content="https://rvce-mca-grade-calc.web.app/icons/social-preview.png">
 <meta property="og:image:alt" content="RVCE MCA Grade Calculator">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="Final SGPA Calculator - RVCE MCA Grade Calculator">
-<meta name="twitter:description" content="Compute SGPA for an RVCE MCA semester using its real course list and credits, then roll it into your CGPA.">
+<meta name="twitter:title" content="Achievements - RVCE MCA Grade Calculator">
+<meta name="twitter:description" content="Unlock badges by using the RVCE MCA Grade Calculator — CIE, SEE, Final Grade, SGPA and CGPA tools all count.">
 <meta name="twitter:image" content="https://rvce-mca-grade-calc.web.app/icons/social-preview.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -42,41 +42,33 @@
 
 <div class="wrap">
   <div class="page-hero">
-    <h1>Final SGPA Calculator</h1>
-    <p>Find out the semester SGPA for your grades.</p>
+    <h1>Achievements</h1>
+    <p>Complete activities across the calculator to unlock badges and build your collection.</p>
   </div>
 
   <div id="breadcrumb"></div>
 
   <main id="app">
+    <div id="achvLoginBanner"></div>
+
     <div class="card">
-      <div class="course-card-head">
-        <h2 id="sgpaCardTitle" style="font-size:17px;">Semester SGPA</h2>
-        <span class="credit-badge" id="sgpaCreditBadge"></span>
-      </div>
-      <div id="sgpaRows"></div>
-      <div class="toolbar">
-        <button type="button" class="btn accent full" id="computeSgpaBtn">Compute SGPA</button>
-      </div>
-      <div class="result" id="gpaResult" style="display:none;"></div>
+      <div id="achvSummary"></div>
+      <div class="progress-track" style="margin-top:14px;"><div class="progress-fill" id="achvProgressFill" style="width:0%;"></div></div>
     </div>
 
-    <div class="card" id="cgpaBlendCard">
-      <div class="course-card-head">
-        <h2 id="cgpaCardTitle" style="font-size:17px;"></h2>
-        <span class="credit-badge" id="cgpaCreditBadge"></span>
-      </div>
-      <div id="cgpaBlendBody"></div>
-      <div class="toolbar">
-        <button type="button" class="btn accent full" id="computeCgpaBtn">Compute CGPA</button>
-      </div>
-      <div class="result" id="cgpaResult" style="display:none;"></div>
-        <div class="callout">Need a full semester-by-semester breakdown? Use the <a href="cgpa.html">detailed CGPA Calculator</a>.</div>
-      </div>
+    <div class="card" id="achvUnlockedSection">
+      <div class="achv-section-label">Unlocked Achievements <span class="achv-section-count" id="achvUnlockedCount">0</span></div>
+      <div id="achvUnlockedGrid"></div>
+    </div>
 
-    <div class="toolbar" style="display:flex; gap:10px;">
-      <button type="button" class="btn accent full" id="saveProgressBtn">Save Progress</button>
-      <button type="button" class="btn ghost full" id="resetAllBtn">Reset All Grades</button>
+    <div class="card" id="achvLockedSection">
+      <div class="achv-section-label">Locked Achievements <span class="achv-section-count" id="achvLockedCount">0</span></div>
+      <div id="achvLockedGrid"></div>
+    </div>
+
+    <div class="card" id="achvHiddenSection">
+      <div class="achv-section-label">Hidden Achievements <span class="achv-section-count" id="achvHiddenCount">0</span></div>
+      <div id="achvHiddenGrid"></div>
     </div>
   </main>
 
@@ -89,13 +81,9 @@
 <script src="../js/data.js?v=2026082813" defer></script>
 <script src="../js/icons.js?v=2026082813" defer></script>
 <script src="../js/grading.js?v=2026082813" defer></script>
-<script src="../js/engine.js?v=2026082813" defer></script>
-<script src="../js/course-picker.js?v=2026082813" defer></script>
-<script src="../js/input-guard.js?v=2026082813" defer></script>
-<script src="../js/progress.js?v=2026082813" defer></script>
 <script src="../js/achievements.js?v=2026090201" defer></script>
 <script src="../js/site.js?v=2026090201" defer></script>
-<script src="../js/pages/final-gpa.js?v=2026082813" defer></script>
+<script src="../js/pages/achievements.js?v=2026090201" defer></script>
 <script src="../js/pwa-register.js?v=2026082813" defer></script>
 </body>
 </html>

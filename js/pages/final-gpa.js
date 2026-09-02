@@ -25,6 +25,8 @@
   document.getElementById('sgpaCardTitle').textContent = `Semester ${semester} SGPA`;
   document.getElementById('sgpaCreditBadge').textContent = `${totalCredits} Credits`;
 
+  if(window.MCA.achievements) window.MCA.achievements.track('tool_page_viewed', { tool:'final-gpa', semester });
+
   // Standard grades combine letter + point ("A+ (9)"); transitional grades
   // (W, I, X, DX, AB) don't carry a grade point, so they're shown plain.
   const gradeOptsHTML = () => {
@@ -50,6 +52,9 @@
 
   rowsEl.addEventListener('change', (e)=>{
     if(e.target.classList.contains('sgpa-grade-pick')) e.target.classList.remove('error');
+    if(e.target.matches('.sgpa-elective-pick') && window.MCA.achievements){
+      window.MCA.achievements.track('elective_selected', { semester, page:'final-gpa' });
+    }
   });
 
   let lastSgpa = null, lastCredits = null;
@@ -84,6 +89,10 @@
        rounding needs to happen once, right here, not after the blend. */
     const roundedSgpa = window.MCA.util.round2(r.sgpa);
     lastSgpa = roundedSgpa; lastCredits = r.countedCredits;
+
+    if(window.MCA.achievements){
+      window.MCA.achievements.track('sgpa_calculated', { semester, sgpa: roundedSgpa });
+    }
 
     const resultEl = document.getElementById('gpaResult');
     resultEl.style.display = '';
@@ -179,6 +188,10 @@
           <div class="row"><span>Projected class</span><span>${r.degreeClass}</span></div>
         </div>
       </div>`;
+
+    if(window.MCA.achievements){
+      window.MCA.achievements.track('cgpa_blended', { semester, cgpa: r.cgpa });
+    }
   });
 
   document.getElementById('resetAllBtn').addEventListener('click', ()=>{
@@ -194,5 +207,6 @@
     if(priorCgpaInput) priorCgpaInput.value = '';
     const priorCreditsInput = document.getElementById('priorCreditsInput');
     if(priorCreditsInput) priorCreditsInput.value = priorCredits;
+    if(window.MCA.achievements) window.MCA.achievements.track('reset_used', { page:'final-gpa' });
   });
 })();
