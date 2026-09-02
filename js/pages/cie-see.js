@@ -39,7 +39,7 @@
       <div class="field-row-2">
         <div class="field"><label>Quiz 3 <span class="hint">/10</span></label><input type="number" class="f-q3 quiz-field" min="0" max="10" value=""></div>
       </div>
-      <div class="hint qt-note">Enter any 2 of the 3 quiz marks &mdash; the best 2 count anyway.</div>
+      <div class="hint qt-note">Enter any 2 of the 3 quiz marks. The best 2 counts anyway.</div>
       <div class="field-row-2">
         <div class="field"><label>Test 1 <span class="hint">/50</span></label><input type="number" class="f-t1 test-field" min="0" max="50" value=""></div>
         <div class="field"><label>Test 2 <span class="hint">/50</span></label><input type="number" class="f-t2 test-field" min="0" max="50" value=""></div>
@@ -47,7 +47,7 @@
       <div class="field-row-2">
         <div class="field"><label>Test 3 <span class="hint">/50</span></label><input type="number" class="f-t3 test-field" min="0" max="50" value=""></div>
       </div>
-      <div class="hint qt-note">Enter any 2 of the 3 test marks &mdash; the best 2 count anyway.</div>`;
+      <div class="hint qt-note">Enter any 2 of the 3 test marks. The best 2 counts anyway.</div>`;
   }
 
   function fieldsHTML(type){

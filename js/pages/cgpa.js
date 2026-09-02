@@ -15,37 +15,105 @@
   document.getElementById('bjIconBadge').innerHTML = window.MCA.icons.layers;
 
   const body = document.querySelector('#cgTable tbody');
+  const SEM_KEYS = Object.keys(DATA.semesters); // e.g. ['I','II','III','IV']
+  const ROMAN = SEM_KEYS; // index 0 -> 'I', index 1 -> 'II', ...
 
   /* ---------- Beat Yourself + MCA Journey ---------- */
-  const BJ_TARGET_III = 9.10;
-  const BJ_SEM_LABELS = ['Semester I', 'Semester II', 'Semester III', 'Semester IV'];
+  const targetSemSelect = document.getElementById('bjTargetSem');
+  const targetValInput = document.getElementById('bjTargetVal');
   const BJ_CHECK_ICON = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>';
 
+  // Target semester: which semester you want a CGPA goal for. All
+  // semesters up to and including it factor into the projection.
+  targetSemSelect.innerHTML = SEM_KEYS.map((label, idx) =>
+    `<option value="${idx + 1}">Semester ${label}</option>`
+  ).join('');
+  targetSemSelect.value = Math.min(3, SEM_KEYS.length); // default: 3rd semester (or the last one, if fewer)
+
   function bjTwo(n){ return n.toFixed(2); }
-  function bjSigned(n){
-    // round to 2dp first so e.g. -0.004 doesn't print as "-0.00"
-    const v = Math.round(n * 100) / 100;
-    const sign = v < 0 ? '-' : '+';
-    return sign + Math.abs(v).toFixed(2);
+  function bjClamp(v){
+    v = parseFloat(v);
+    if(isNaN(v)) return 0;
+    return Math.max(0, Math.min(10, v));
   }
 
   function updateBeatJourney(){
     const rows = [...body.querySelectorAll('tr')];
     const doneFlags = rows.map(tr => tr.querySelector('.c-done').checked);
     const sgpas = rows.map(tr => parseFloat(tr.querySelector('.c-sgpa').value));
+    const credits = rows.map(tr => parseFloat(tr.dataset.credits));
+    const values = rows.map((tr, i) => (doneFlags[i] && !isNaN(sgpas[i])) ? sgpas[i] : null);
 
-    const sem1 = (doneFlags[0] && !isNaN(sgpas[0])) ? sgpas[0] : null;
-    const sem2 = (doneFlags[1] && !isNaN(sgpas[1])) ? sgpas[1] : null;
+    // Target semester (1-based, e.g. 3 = Semester III) and the semesters
+    // that factor into it: every semester up to and including the target.
+    const targetSem = Math.max(1, Math.min(SEM_KEYS.length, parseInt(targetSemSelect.value, 10) || 3));
+    const targetSet = targetValInput.value.trim() !== '';
+    const targetVal = bjClamp(targetValInput.value);
+    const requiredCount = targetSem;
 
-    const youNeed = sem2 !== null ? (BJ_TARGET_III - sem2) : null;
-    const lastChange = (sem1 !== null && sem2 !== null) ? (sem2 - sem1) : null;
+    const statsHtml = values.slice(0, requiredCount).map((v, i) => `
+      <div class="bj-stat${v === null ? ' bj-empty' : ''}">
+        <span class="bj-stat-label">Semester ${ROMAN[i]}</span>
+        <span class="bj-stat-value">${v === null ? '--' : bjTwo(v)}</span>
+      </div>`).join('') + `
+      <div class="bj-stat bj-target${targetSet ? '' : ' bj-empty'}">
+        <span class="bj-stat-label">Target (Sem ${ROMAN[targetSem - 1]})</span>
+        <span class="bj-stat-value">${targetSet ? bjTwo(targetVal) : '--'}</span>
+      </div>`;
 
-    const lastChangeClass = lastChange === null ? 'na' : (lastChange > 0 ? 'up' : (lastChange < 0 ? 'down' : 'flat'));
-    const youNeedClass = youNeed === null ? 'na' : (youNeed <= 0 ? 'up' : 'accent');
+    // Real, credit-weighted CGPA math (same computeCGPA() the ledger above
+    // uses) rather than a flat semester-to-semester approximation: the
+    // required semesters that are done tell us where things stand, and
+    // what's still needed from the ones that aren't.
+    const doneRows = [];
+    let pendingCredits = 0;
+    for(let i = 0; i < requiredCount; i++){
+      if(values[i] !== null) doneRows.push({ sgpa: values[i], credits: credits[i] });
+      else pendingCredits += credits[i];
+    }
+    const totalCreditsToTarget = credits.slice(0, requiredCount).reduce((a, b) => a + b, 0);
+    const current = computeCGPA(doneRows); // { totalCredits, cgpa }
+    const pendingCount = requiredCount - doneRows.length;
+
+    let summaryHtml = '';
+    if(requiredCount > 0 && targetSet){
+      const romanUpTo = i => `Semester ${ROMAN[i]}`;
+      if(pendingCount === 0){
+        // Every required semester is in: compare the real CGPA to the goal.
+        const diff = current.cgpa - targetVal;
+        const met = diff >= -0.0049; // guard against float noise right at the line
+        summaryHtml = `<div class="bj-summary ${met ? 'ok' : 'warn'}">Your CGPA through ${romanUpTo(requiredCount - 1)} is <b>${bjTwo(current.cgpa)}</b> &mdash; ${met
+          ? `you've met your <b>${bjTwo(targetVal)}</b> target for Semester ${ROMAN[targetSem - 1]}.`
+          : `that's <b>${bjTwo(Math.abs(diff))}</b> short of your <b>${bjTwo(targetVal)}</b> target for Semester ${ROMAN[targetSem - 1]}.`}</div>`;
+      } else {
+        const avgNeeded = (targetVal * totalCreditsToTarget - current.totalCredits * current.cgpa) / pendingCredits;
+        const pendingLabels = [];
+        let lastDoneIdx = -1;
+        for(let i = 0; i < requiredCount; i++){
+          if(values[i] === null) pendingLabels.push(ROMAN[i]);
+          else lastDoneIdx = i;
+        }
+        const nameList = pendingLabels.length === 1
+          ? `Semester ${pendingLabels[0]}`
+          : `Semesters ${pendingLabels.slice(0, -1).join(', ')} and ${pendingLabels[pendingLabels.length - 1]}`;
+        const soFar = lastDoneIdx >= 0
+          ? `Your CGPA through ${romanUpTo(lastDoneIdx)} is <b>${bjTwo(current.cgpa)}</b>. `
+          : '';
+        summaryHtml = `<div class="bj-summary">${soFar}You'll need to average <b>${bjTwo(avgNeeded)}</b> SGPA across ${nameList} to reach a CGPA of <b>${bjTwo(targetVal)}</b> by Semester ${ROMAN[targetSem - 1]}.</div>`;
+      }
+    }
 
     // Journey: first not-done semester is "current", earlier ones are "done", later ones are "upcoming".
     const firstIncomplete = doneFlags.indexOf(false);
     const allComplete = firstIncomplete === -1;
+
+    // Only celebrate a finished journey if it actually clears the minimum
+    // CGPA (5.00, Second Class) — computed across all four semesters.
+    let overallPass = false;
+    if(allComplete){
+      const allRows = rows.map((tr, i) => ({ sgpa: values[i], credits: credits[i] }));
+      overallPass = computeCGPA(allRows).cgpa >= 5;
+    }
 
     let trackHtml = '';
     doneFlags.forEach((done, i) => {
@@ -60,7 +128,7 @@
         <div class="bj-node ${stateClass}">
           <div class="bj-node-dot">${dotInner}</div>
           <div class="bj-node-text">
-            <span class="bj-node-label">${BJ_SEM_LABELS[i]}</span>
+            <span class="bj-node-label">Semester ${ROMAN[i]}</span>
             <span class="bj-node-status">${statusText}</span>
           </div>
         </div>`;
@@ -69,38 +137,18 @@
     document.getElementById('beatJourney').innerHTML = `
       <div class="bj-section">
         <span class="bj-label">Progress</span>
-        <div class="bj-stats">
-          <div class="bj-stat${sem1 === null ? ' bj-empty' : ''}">
-            <span class="bj-stat-label">Semester I</span>
-            <span class="bj-stat-value">${sem1 === null ? '--' : bjTwo(sem1)}</span>
-          </div>
-          <div class="bj-stat${sem2 === null ? ' bj-empty' : ''}">
-            <span class="bj-stat-label">Semester II</span>
-            <span class="bj-stat-value">${sem2 === null ? '--' : bjTwo(sem2)}</span>
-          </div>
-          <div class="bj-stat bj-target">
-            <span class="bj-stat-label">Semester III Target</span>
-            <span class="bj-stat-value">${bjTwo(BJ_TARGET_III)}</span>
-          </div>
-        </div>
-        <div class="bj-deltas">
-          <div class="bj-delta">
-            <span class="bj-delta-label">Last semester</span>
-            <span class="bj-delta-value ${lastChangeClass}">${lastChange === null ? '--' : bjSigned(lastChange)}</span>
-          </div>
-          <div class="bj-delta">
-            <span class="bj-delta-label">You need</span>
-            <span class="bj-delta-value ${youNeedClass}">${youNeed === null ? '--' : (bjSigned(youNeed) + ' SGPA')}</span>
-          </div>
-        </div>
-        <div class="bj-challenge"><b>Challenge:</b> Recover your SGPA this semester.</div>
+        <div class="bj-stats">${statsHtml}</div>
+        ${summaryHtml}
       </div>
       <div class="bj-section">
         <span class="bj-label">MCA Journey</span>
         <div class="bj-track">${trackHtml}</div>
-        ${allComplete ? '<div class="bj-track-note">MCA journey complete &mdash; all four semesters recorded.</div>' : ''}
+        ${allComplete && overallPass ? '<div class="bj-track-note">MCA journey complete &mdash; all four semesters recorded.</div>' : ''}
       </div>`;
   }
+
+  targetSemSelect.addEventListener('change', updateBeatJourney);
+  targetValInput.addEventListener('input', updateBeatJourney);
 
   Object.keys(DATA.semesters).forEach(s=>{
     const credits = DATA.semesters[s].totalCredits;
@@ -109,13 +157,13 @@
       <td class="check-col"><input type="checkbox" class="c-done"></td>
       <td>Semester ${s}</td>
       <td class="credit-col locked-credit">${credits}</td>
-      <td class="sgpa-col"><input type="number" class="c-sgpa" min="0" max="10" step="0.01" value="0" disabled></td>`;
+      <td class="sgpa-col"><input type="number" class="c-sgpa" min="0" max="10" step="0.01" placeholder="0.00" disabled></td>`;
     tr.dataset.credits = credits;
     const done = tr.querySelector('.c-done');
     const sgpaInput = tr.querySelector('.c-sgpa');
     done.addEventListener('change', ()=>{
       sgpaInput.disabled = !done.checked;
-      if(!done.checked) sgpaInput.value = 0;
+      if(!done.checked) sgpaInput.value = '';
       recompute();
     });
     sgpaInput.addEventListener('input', recompute);
@@ -157,7 +205,7 @@
       const done = tr.querySelector('.c-done');
       const sgpaInput = tr.querySelector('.c-sgpa');
       done.checked = false;
-      sgpaInput.value = 0;
+      sgpaInput.value = '';
       sgpaInput.disabled = true;
     });
     recompute();

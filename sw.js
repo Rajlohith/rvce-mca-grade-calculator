@@ -5,7 +5,7 @@
    All requests bypass the cache and go straight to the network.
    ========================================================================== */
 
-const CACHE_VERSION = 'mca-calc-v9';
+const CACHE_VERSION = 'mca-calc-v11';
 
 self.addEventListener('install', (event) => {
   // Immediately activate the new service worker without waiting

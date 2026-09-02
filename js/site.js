@@ -212,7 +212,7 @@ window.MCA = window.MCA || {};
           <img
             class="brand-mark"
             src="${ROOT}icons/brand-mark.png"
-            alt=""
+            alt="RVCE MCA Grade Calculator logo"
             width="36"
             height="36"
           >

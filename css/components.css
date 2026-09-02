@@ -545,8 +545,8 @@ table.ledger input[type=checkbox]{
    full width and sits centered on its own line, then the legal line,
    centered, at the very bottom. */
 .site-footer{
-  margin-top:32px;
-  padding-top:16px;
+  margin-top:24px;
+  padding-top:12px;
   border-top:1px solid var(--line);
 }
 
@@ -650,7 +650,7 @@ table.ledger input[type=checkbox]{
    single divider it needs, so this doesn't double up there. */
 .footer-links + .legal{
   border-top:1px solid var(--line);
-  padding-top:20px;
+  padding-top:14px;
 }
 
 @media(max-width:640px){
@@ -712,7 +712,7 @@ table.ledger input[type=checkbox]{
   }
 
   .site-footer .legal{
-    padding-top:16px;
+    padding-top:12px;
     text-align:center;
   }
 }
@@ -796,7 +796,7 @@ table.ledger input[type=checkbox]{
   }
 }
 /* ---------- Beat Yourself + MCA Journey (cgpa.html) ---------- */
-.bj-head{ display:flex; align-items:center; gap:12px; margin-top:16px; margin-bottom:4px; }
+.bj-head{ display:flex; align-items:center; gap:12px; margin-top:16px; margin-bottom:16px; }
 .bj-section{ margin-top:20px; }
 .bj-label{
   font-size:11px; font-weight:700; letter-spacing:.06em; text-transform:uppercase;
@@ -804,7 +804,7 @@ table.ledger input[type=checkbox]{
 }
 
 /* Progress stat row */
-.bj-stats{ display:grid; grid-template-columns:repeat(3,1fr); gap:10px; }
+.bj-stats{ display:grid; grid-template-columns:repeat(auto-fit, minmax(120px, 1fr)); gap:10px; }
 .bj-stat{
   background:var(--paper); border-radius:var(--radius-sm); padding:12px 14px;
   display:flex; flex-direction:column; gap:4px; min-width:0;
@@ -814,24 +814,14 @@ table.ledger input[type=checkbox]{
 .bj-stat.bj-target .bj-stat-value{ color:var(--purple); }
 .bj-stat.bj-empty .bj-stat-value{ color:var(--ink-faint); }
 
-.bj-deltas{ display:flex; gap:10px; flex-wrap:wrap; margin-top:10px; }
-.bj-delta{
-  flex:1 1 190px; background:var(--card); border:1px solid var(--line); border-radius:var(--radius-sm);
-  padding:10px 14px; display:flex; justify-content:space-between; align-items:center; gap:10px;
+.bj-summary{
+  margin-top:12px; font-size:12px; color:var(--ink-soft); line-height:1.6;
 }
-.bj-delta-label{ font-size:12.5px; color:var(--ink-soft); font-weight:600; }
-.bj-delta-value{ font-size:15px; font-weight:700; font-variant-numeric:tabular-nums; white-space:nowrap; }
-.bj-delta-value.up{ color:var(--teal); }
-.bj-delta-value.down{ color:var(--crimson); }
-.bj-delta-value.flat{ color:var(--ink); }
-.bj-delta-value.accent{ color:var(--accent); }
-.bj-delta-value.na{ color:var(--ink-faint); font-weight:600; }
-
-.bj-challenge{
-  margin-top:12px; font-size:12.5px; color:var(--ink-soft); background:var(--paper);
-  border-radius:var(--radius-sm); padding:10px 14px; line-height:1.5;
-}
-.bj-challenge b{ color:var(--ink); }
+.bj-summary b{ color:var(--ink); }
+.bj-summary.ok{ color:var(--teal); }
+.bj-summary.ok b{ color:var(--teal); }
+.bj-summary.warn{ color:var(--crimson); }
+.bj-summary.warn b{ color:var(--crimson); }
 
 /* Journey track */
 .bj-track{ display:flex; align-items:flex-start; }
@@ -858,12 +848,10 @@ table.ledger input[type=checkbox]{
 .bj-track-note{ font-size:12px; color:var(--ink-faint); margin-top:12px; font-weight:600; text-align:center; }
 
 @media(max-width:640px){
-  .bj-stats{ grid-template-columns:1fr 1fr; }
-  .bj-stats .bj-stat.bj-target{ grid-column:1 / -1; }
-
   .bj-track{ flex-direction:column; align-items:stretch; }
   .bj-node{ width:auto; flex-direction:row; text-align:left; align-items:center; gap:12px; }
   .bj-node-label{ margin-top:0; }
+  .bj-stat-label{ white-space:normal; overflow:visible; text-overflow:clip; line-height:1.3; }
   .bj-node-text{ display:flex; flex-direction:column; text-align:left; }
   .bj-connector{ width:2px; height:16px; margin:2px 0 2px 16px; flex:0 0 auto; }
 }

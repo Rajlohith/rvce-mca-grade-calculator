@@ -54,6 +54,7 @@ input[type=number]{ appearance: textfield; }
 hr.rule{ border:none; border-top:1px solid var(--line); margin:22px 0; }
 
 .hint{ font-size:12px; color:var(--ink-faint); font-weight:500; }
+.qt-note{ display:block; margin:2px 0 18px; }
 
 .sr-only{
   position:absolute; width:1px; height:1px; padding:0; margin:-1px;
