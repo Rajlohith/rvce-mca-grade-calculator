@@ -46,9 +46,13 @@ function minifyCss(css) {
     // Collapse all runs of whitespace (including newlines) to one space.
     .replace(/\s+/g, ' ')
     // Drop the space on either side of punctuation that never needs it
-    // in plain selectors/declarations (no calc() anywhere in this file,
-    // so tightening " + " / " > " combinators is safe here).
-    .replace(/\s*([{}:;,>+~])\s*/g, '$1')
+    // in plain selectors/declarations. '+' is deliberately excluded:
+    // this file's journey-track rules now use calc(50% + Npx + Mpx), and
+    // calc() requires whitespace around a binary + or - or the whole
+    // declaration is invalid CSS (and silently dropped by the browser).
+    // Tightening " + " is only ever cosmetic outside calc(), so leaving
+    // it alone costs nothing.
+    .replace(/\s*([{}:;,>~])\s*/g, '$1')
     // A trailing semicolon right before a closing brace is redundant.
     .replace(/;}/g, '}')
     .trim();

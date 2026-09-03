@@ -144,5 +144,59 @@ window.MCA = window.MCA || {};
   document.addEventListener('keydown', onKeydown, true);
   document.addEventListener('paste', onPaste, true);
 
-  window.MCA.util = { escapeHTML, safeInnerHTML, round2, toast, copyWithFeedback, allowsDecimal };
+  /* ---------- Equal-height course cards ----------
+     The CIE&SEE and Final Grade pages group course cards by evaluation
+     type (Theory+Lab / Theory Only / Lab Only), each in its own
+     `.course-grid` under a shared label. Those groups have very
+     different field counts (Theory+Lab has Quiz/Test/EL/Lab, Lab Only
+     just has a couple of fields), so matching every card on the whole
+     page to the single tallest one bloated the short groups with empty
+     space. Instead, this equalizes heights independently within each
+     `.course-grid` — cards stay uniform next to their own group's
+     siblings (desktop/tablet only; mobile stacks full-width and needs
+     no equalizing), while a short group like Lab Only stays compact.
+
+     `container` can be the page-level wrapper holding several
+     `.semester-group > .course-grid` blocks, or a single `.course-grid`
+     directly — either way every group inside is measured on its own.
+
+     Called once after initial render, and again whenever a card's own
+     content changes size (result appears, error text, elective picker
+     swap) or the viewport is resized, via the returned re-run function. */
+  function equalizeCardHeights(container){
+    if(!container) return function(){};
+    const MOBILE_QUERY = '(max-width: 860px)';
+
+    function run(){
+      const groups = container.matches('.course-grid')
+        ? [container]
+        : Array.from(container.querySelectorAll('.course-grid'));
+      if(!groups.length) return;
+      const isMobile = window.matchMedia(MOBILE_QUERY).matches;
+      groups.forEach(function(group){
+        const cards = Array.from(group.querySelectorAll('.course-card'));
+        if(!cards.length) return;
+        cards.forEach(function(c){ c.style.minHeight = ''; });
+        if(isMobile) return; // single-column: natural height is fine
+        let max = 0;
+        cards.forEach(function(c){ max = Math.max(max, c.offsetHeight); });
+        cards.forEach(function(c){ c.style.minHeight = max + 'px'; });
+      });
+    }
+
+    let raf = null;
+    function schedule(){
+      if(raf) cancelAnimationFrame(raf);
+      raf = requestAnimationFrame(run);
+    }
+
+    schedule();
+    window.addEventListener('resize', schedule);
+    const observer = new MutationObserver(schedule);
+    observer.observe(container, { childList:true, subtree:true, characterData:true });
+
+    return schedule;
+  }
+
+  window.MCA.util = { escapeHTML, safeInnerHTML, round2, toast, copyWithFeedback, allowsDecimal, equalizeCardHeights };
 })();

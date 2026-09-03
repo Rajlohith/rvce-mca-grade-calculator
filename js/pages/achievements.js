@@ -57,16 +57,19 @@
     const signedIn = window.MCA.isSignedIn();
     renderLoginBanner(signedIn);
 
-    const all = engine.list();
-    const unlocked = [];
-    const locked = [];
-    const hiddenLocked = [];
+    const all = engine.list().map(a=>{
+      const unlocked = signedIn && engine.isUnlocked(a.id);
+      const isHiddenLocked = a.hidden && !unlocked;
+      return { a, unlocked, isHiddenLocked, at: unlocked ? engine.unlockedAt(a.id) : null };
+    });
 
-    all.forEach(a=>{
-      const isUnlocked = signedIn && engine.isUnlocked(a.id);
-      if(isUnlocked) unlocked.push(a);
-      else if(a.hidden) hiddenLocked.push(a);
-      else locked.push(a);
+    // Unlocked first (most recent first), then everything still locked
+    // (hidden or not) in catalog order — one collection, greyscale by
+    // default, colour the instant it's earned.
+    all.sort((x, y)=>{
+      if(x.unlocked !== y.unlocked) return x.unlocked ? -1 : 1;
+      if(x.unlocked) return new Date(y.at) - new Date(x.at);
+      return 0;
     });
 
     const unlockedCount = signedIn ? engine.unlockedCount() : 0;
@@ -81,25 +84,14 @@
       </div>`;
     document.getElementById('achvProgressFill').style.width = (total ? (unlockedCount / total * 100) : 0) + '%';
 
-    document.getElementById('achvUnlockedCount').textContent = unlockedCount;
-    document.getElementById('achvLockedCount').textContent = locked.length;
-    document.getElementById('achvHiddenCount').textContent = hiddenLocked.length;
-
-    const unlockedGrid = document.getElementById('achvUnlockedGrid');
-    const unlockedSection = document.getElementById('achvUnlockedSection');
-    if(unlocked.length){
-      unlockedSection.style.display = '';
-      unlockedGrid.className = 'achv-grid';
-      unlockedGrid.innerHTML = unlocked
-        .sort((a,b)=> new Date(engine.unlockedAt(b.id)) - new Date(engine.unlockedAt(a.id)))
-        .map(a=>cardHTML(a, true, false)).join('');
-    } else {
-      unlockedGrid.className = '';
-      unlockedGrid.innerHTML = `<div class="achv-section-empty">${signedIn ? "Nothing unlocked yet — go calculate something." : 'Sign in to start collecting.'}</div>`;
+    const grid = document.getElementById('achvGrid');
+    if(!all.length){
+      grid.className = '';
+      grid.innerHTML = '';
+      return;
     }
-
-    document.getElementById('achvLockedGrid').innerHTML = locked.map(a=>cardHTML(a, false, false)).join('');
-    document.getElementById('achvHiddenGrid').innerHTML = hiddenLocked.map(a=>cardHTML(a, false, true)).join('');
+    grid.className = 'achv-grid';
+    grid.innerHTML = all.map(x => cardHTML(x.a, x.unlocked, x.isHiddenLocked)).join('');
   }
 
   window.MCA.achievements.ready().then(render);

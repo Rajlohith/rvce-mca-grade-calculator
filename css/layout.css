@@ -42,17 +42,17 @@
 
 /* Wide screens: everything inline in the one header row ("content menu"). */
 .site-nav{
-  display:flex; align-items:center; gap:18px; flex-wrap:wrap;
+  display:flex; align-items:center; gap:14px; flex-wrap:wrap;
 }
-.site-nav-links{ display:flex; align-items:center; gap:6px; flex-wrap:wrap; }
+.site-nav-links{ display:flex; align-items:center; gap:3px; flex-wrap:wrap; }
 .site-nav-links a{
-  font-size:13.5px; font-weight:500; color:var(--ink-soft); text-decoration:none;
-  border-radius:999px; padding:8px 15px; transition: background .15s ease, color .15s ease;
+  font-size:13px; font-weight:500; color:var(--ink-soft); text-decoration:none;
+  border-radius:999px; padding:8px 12px; transition: background .15s ease, color .15s ease;
   white-space:nowrap;
 }
 .site-nav-links a:hover{ background: var(--paper); color:var(--ink); }
 .site-nav-links a.current{ background: var(--ink); color:var(--btn-fg); font-weight:600; }
-.site-nav-controls{ display:flex; align-items:center; gap:12px; }
+.site-nav-controls{ display:flex; align-items:center; gap:10px; }
 
 /* Hamburger button: hidden on wide screens, shown only in the mobile
    media query below. */
@@ -64,7 +64,15 @@
 .nav-toggle-bars{ display:flex; flex-direction:column; gap:4px; width:18px; }
 .nav-toggle-bars span{ display:block; height:2px; border-radius:1px; background:var(--ink); }
 
-@media(max-width: 768px){
+/* Breakpoint intentionally wider than a typical phone (768px): once the
+   header grew a 6th nav pill (Achievements) plus the sign-in control and
+   theme toggle, that combined row no longer reliably fit next to the
+   brand at "tablet" and smaller-laptop widths — it wrapped onto an ugly
+   second line instead of collapsing cleanly. Handing that whole range
+   over to the hamburger dropdown avoids ever trying to cram it into a
+   row that isn't wide enough, rather than continuing to shrink text to
+   chase whatever the content happens to require. */
+@media(max-width: 1100px){
   .nav-toggle{ display:flex; }
 
   /* Below the breakpoint, .site-nav becomes a dropdown panel anchored

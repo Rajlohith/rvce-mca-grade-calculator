@@ -21,15 +21,14 @@
      "G-5XMZFH8N1M" is the value Firebase's own console reported as the
      real one for this project, confirmed from a live browser console log,
      not a placeholder.
-   - The Firestore SDK is loaded only on pages that actually use Save
-     Progress (set via a `data-needs-firestore="true"` attribute on this
-     script's own <script> tag). Pages like the home page, scheme picker,
-     or FAQ never call saveMarks/getMarks, so there's no reason to make
-     every visitor download and parse the Firestore bundle — this alone
-     removes a large chunk of "unused JavaScript" on 5 of the site's 9
-     pages, per Lighthouse. It stays on the critical chain (unlike
-     Analytics) on the pages that do need it, since a visitor can start
-     typing marks and hit Save before an idle callback would've fired.
+   - The Firestore SDK is loaded on every page (see NEEDS_FIRESTORE below,
+     via each page's own `data-needs-firestore="true"` attribute) —
+     Achievements needs to read/write a student's unlocked badges no
+     matter which page they're on, not just the Save Progress pages. It
+     used to be conditional per-page to skip the download on pages that
+     had no use for it; now that every page has a legitimate use for it,
+     that branching was just adding latency for no benefit — see the
+     comment above ensureFirebaseBooted() further down for the full story.
    - authDomain is this project's own Hosting domain
      (rvce-mca-grade-calc.web.app), not the default *.firebaseapp.com one.
      Firebase Hosting automatically proxies the reserved /__/auth/* paths
@@ -335,57 +334,22 @@ window.MCA = window.MCA || {};
 
   // ========================================================================
   // Load the Firebase SDK from the CDN, if it isn't already on the page.
-  // Firestore is only pulled in when this page's script tag opted in via
-  // data-needs-firestore="true".
   //
-  // This no longer kicks off at parse time on every page. Booting Auth
-  // pulls in the auth-compat bundle *and* triggers Firebase Hosting's
-  // /__/auth/iframe.js sign-in helper — together the largest chunk of
-  // unused JS on first load (~130 KiB) and the longest link in the
-  // critical request chain (~1.6s), on every single page, even though
-  // most visits never touch "Sign in".
+  // This USED to branch on NEEDS_FIRESTORE: pages that saved marks booted
+  // on browser-idle, everything else (home, pickers, FAQ, guide...)
+  // deferred booting until the visitor's first scroll/tap/click/keypress
+  // (an 8s-fallback), specifically to avoid downloading the ~130 KiB
+  // Auth(+Firestore) bundle on pages that would never use it.
   //
-  // A plain requestIdleCallback isn't enough to keep this out of a
-  // Lighthouse/PSI run, though: in an automated run there's no real
-  // visitor, so the main thread genuinely does go idle within a second
-  // or two of paint regardless of the `timeout` passed — the SDK still
-  // downloads and parses inside the audited trace either way, and still
-  // gets flagged as unused JS / main-thread work on every page, even
-  // pages that don't need Firestore at all.
-  //
-  // So booting now branches on whether this page actually needs
-  // Firestore (see NEEDS_FIRESTORE above):
-  //   - Save-Progress pages (data-needs-firestore="true"): unchanged —
-  //     boot on browser-idle, same as before. A signed-in visitor's
-  //     saved marks need to be fetched and applied to the form as soon
-  //     as the page is ready, not after they've done something, so
-  //     these pages keep paying the eager-load cost.
-  //   - every other page (home, scheme/semester pickers, tools, guide,
-  //     FAQ, 404 — the pages most visits land on and Lighthouse/PSI
-  //     actually scores): boot is deferred until the first real sign of
-  //     a visitor — a scroll, tap, click, or keypress — with an 8s
-  //     fallback timer for the rare case none of those fire. The only
-  //     thing gated on this is the header swapping the generic
-  //     "Sign in" button for a signed-in user's name; nothing
-  //     functionally breaks by that happening a beat later. A click
-  //     straight on "Sign in with Google" is already covered separately
-  //     by ensureFirebaseBooted() inside signInWithGoogle() above, and
-  //     resolves at the same speed either way.
+  // That distinction no longer exists: every page now sets
+  // data-needs-firestore="true" (Achievements needs to read/write a
+  // student's unlocked badges from anywhere on the site, not just the
+  // calculator pages), so NEEDS_FIRESTORE is true everywhere. Gating an
+  // unconditional need behind "wait for idle, or wait for the visitor to
+  // do something first" was only ever adding latency before the sign-in
+  // button could turn into a name — so this now boots immediately, on
+  // every page, same as it always did before that optimization existed.
   // ========================================================================
-  function bootOnFirstInteraction(){
-    const INTERACTION_EVENTS = ['pointerdown', 'touchstart', 'keydown', 'scroll'];
-    let done = false;
-    let fallback;
-    const trigger = () => {
-      if(done) return;
-      done = true;
-      INTERACTION_EVENTS.forEach(evt => window.removeEventListener(evt, trigger));
-      clearTimeout(fallback);
-      ensureFirebaseBooted();
-    };
-    INTERACTION_EVENTS.forEach(evt => window.addEventListener(evt, trigger, { passive: true, once: true }));
-    fallback = setTimeout(trigger, 8000);
-  }
   function loadScript(src){
     return new Promise((resolve, reject) => {
       const el = document.createElement('script');
@@ -441,9 +405,16 @@ window.MCA = window.MCA || {};
       return bootPromise;
     }
 
+    // firebase-auth-compat.js and firebase-firestore-compat.js only both
+    // depend on firebase-app-compat.js having loaded first — not on each
+    // other — so once app-compat is in, fetch them in parallel instead of
+    // one after the other. That's one fewer network round-trip on the
+    // critical path to knowing whether someone's signed in.
     bootPromise = loadScript(SDK_BASE + 'firebase-app-compat.js')
-      .then(() => loadScript(SDK_BASE + 'firebase-auth-compat.js'))
-      .then(() => NEEDS_FIRESTORE ? loadScript(SDK_BASE + 'firebase-firestore-compat.js') : Promise.resolve())
+      .then(() => Promise.all([
+        loadScript(SDK_BASE + 'firebase-auth-compat.js'),
+        NEEDS_FIRESTORE ? loadScript(SDK_BASE + 'firebase-firestore-compat.js') : Promise.resolve()
+      ]))
       .then(() => {
         initializeFirebase();
         dispatchAuthEvent('firebase-ready');
@@ -458,15 +429,9 @@ window.MCA = window.MCA || {};
     return bootPromise;
   }
 
-  if(NEEDS_FIRESTORE){
-    if('requestIdleCallback' in window){
-      requestIdleCallback(() => ensureFirebaseBooted(), { timeout: 2500 });
-    } else {
-      setTimeout(ensureFirebaseBooted, 1500);
-    }
-  } else {
-    bootOnFirstInteraction();
-  }
+  // Kick off immediately — see the comment above this block for why this
+  // is no longer conditional on idle time or a first interaction.
+  ensureFirebaseBooted();
 
   // Export for external access
   window.MCA.isSignedIn = () => !!window.MCA.currentUser;

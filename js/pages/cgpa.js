@@ -51,16 +51,6 @@
     const targetVal = bjClamp(targetValInput.value);
     const requiredCount = targetSem;
 
-    const statsHtml = values.slice(0, requiredCount).map((v, i) => `
-      <div class="bj-stat${v === null ? ' bj-empty' : ''}">
-        <span class="bj-stat-label">Semester ${ROMAN[i]}</span>
-        <span class="bj-stat-value">${v === null ? '--' : bjTwo(v)}</span>
-      </div>`).join('') + `
-      <div class="bj-stat bj-target${targetSet ? '' : ' bj-empty'}">
-        <span class="bj-stat-label">Target (Sem ${ROMAN[targetSem - 1]})</span>
-        <span class="bj-stat-value">${targetSet ? bjTwo(targetVal) : '--'}</span>
-      </div>`;
-
     // Real, credit-weighted CGPA math (same computeCGPA() the ledger above
     // uses) rather than a flat semester-to-semester approximation: the
     // required semesters that are done tell us where things stand, and
@@ -119,30 +109,38 @@
     }
 
     let trackHtml = '';
+    const lastIdx = doneFlags.length - 1;
     doneFlags.forEach((done, i) => {
-      if(i > 0){
-        trackHtml += `<div class="bj-connector${doneFlags[i-1] ? ' done' : ''}"></div>`;
-      }
       let stateClass, statusText, dotInner;
       if(done){ stateClass = 'done'; statusText = 'Done'; dotInner = BJ_CHECK_ICON; }
       else if(i === firstIncomplete){ stateClass = 'current'; statusText = 'Current'; dotInner = String(i + 1); }
       else { stateClass = 'upcoming'; statusText = 'Upcoming'; dotInner = String(i + 1); }
+      // Alternates left/right (mobile) and above/below (desktop) starting
+      // with Semester I on the "a" side — a zigzag roadmap instead of one
+      // long straight list. The box itself reuses the same "Progress"
+      // stat-card look (label + big SGPA value) from higher up the page.
+      const side = i % 2 === 0 ? 'alt-a' : 'alt-b';
+      // The spine line is drawn per-node (see .bj-node::before in
+      // components.css), split at the node's own dot into an incoming
+      // half (from the previous dot) and an outgoing half (to the next
+      // dot). Each half is colored teal only if the semester it comes
+      // FROM is done; the very first/last half is clipped away entirely
+      // by the CSS, so its color here is irrelevant.
+      const lineLeft = i > 0 ? (doneFlags[i - 1] ? 'var(--teal)' : 'var(--line-strong)') : 'transparent';
+      const lineRight = i < lastIdx ? (done ? 'var(--teal)' : 'var(--line-strong)') : 'transparent';
       trackHtml += `
-        <div class="bj-node ${stateClass}">
+        <div class="bj-node ${stateClass} ${side}" style="--bj-line-left:${lineLeft};--bj-line-right:${lineRight}">
           <div class="bj-node-dot">${dotInner}</div>
-          <div class="bj-node-text">
-            <span class="bj-node-label">Semester ${ROMAN[i]}</span>
+          <div class="bj-node-box bj-stat${values[i] === null ? ' bj-empty' : ''}">
+            <span class="bj-stat-label">Semester ${ROMAN[i]}</span>
+            <span class="bj-stat-value">${values[i] === null ? '--' : bjTwo(values[i])}</span>
             <span class="bj-node-status">${statusText}</span>
           </div>
         </div>`;
     });
 
+    document.getElementById('bjSummary').innerHTML = summaryHtml;
     document.getElementById('beatJourney').innerHTML = `
-      <div class="bj-section">
-        <span class="bj-label">Progress</span>
-        <div class="bj-stats">${statsHtml}</div>
-        ${summaryHtml}
-      </div>
       <div class="bj-section">
         <span class="bj-label">MCA Journey</span>
         <div class="bj-track">${trackHtml}</div>

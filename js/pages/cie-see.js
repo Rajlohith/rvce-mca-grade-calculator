@@ -26,10 +26,21 @@
   // Semester I keeps the original Lab(/40)+Lab EL(/10) split. Semester II
   // and III use the PBL-merged breakdown instead.
   const labScheme = (semester === 'II' || semester === 'III') ? 'sem23' : 'sem1';
-  const NON_STANDARD_NAMES = { project:'Project', internship:'Internship', nptel:'NPTEL / online course' };
-  const courses = coursesFor(semester);
-  const standardCourseCount = courses.filter(c => !['project','internship','nptel'].includes(c.type)).length;
+  // Project, Internship and NPTEL/online courses aren't evaluated through
+  // CIE+SEE at all (see FAQ: "Why don't I see every course on the CIE and
+  // Final Grade pages?") — they're graded a different way entirely, so a
+  // card here would never do anything. Left out of both this page and the
+  // Final Grade Calculator; still counted normally on the SGPA/CGPA tools.
+  const courses = coursesFor(semester).filter(c => !['project','internship','nptel'].includes(c.type));
+  const standardCourseCount = courses.length;
   const cardState = new Map(); // course code -> { total, max, type }
+
+  const GROUP_LABELS = {
+    'theory-lab': 'Theory + Lab',
+    'theory': 'Theory Only',
+    'lab': 'Lab Only'
+  };
+  const GROUP_ORDER = ['theory-lab', 'theory', 'lab'];
 
   const COPY_SVG = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>`;
 
@@ -95,19 +106,11 @@
   }
 
   function cardHTML(course){
-    const isNonStandard = ['project','internship','nptel'].includes(course.type);
     const head = `
       <div class="course-card-head">
         <div>${cardTitleHTML(course)}</div>
         <span class="credit-badge">${course.credits} Credit</span>
       </div>`;
-
-    if(isNonStandard){
-      return `<div class="course-card" data-code="${course.code}" data-type="${course.type}">
-        ${head}
-        <div class="callout locked">${NON_STANDARD_NAMES[course.type] || 'This course'} isn't modeled here &mdash; check your syllabus or course coordinator for how it's evaluated.</div>
-      </div>`;
-    }
 
     return `<div class="course-card" data-code="${course.code}" data-type="${course.type}">
       ${head}
@@ -121,7 +124,23 @@
   }
 
   const grid = document.getElementById('courseGrid');
-  grid.innerHTML = courses.map(cardHTML).join('');
+  // Grouped by evaluation type (Theory + Lab / Theory Only / Lab Only)
+  // rather than one flat grid — courses with very different field counts
+  // sitting side by side made for an uneven, gappy-looking grid.
+  grid.innerHTML = GROUP_ORDER.map(type => {
+    const groupCourses = courses.filter(c => c.type === type);
+    if(!groupCourses.length) return '';
+    return `
+      <div class="semester-group">
+        <div class="semester-group-label">${GROUP_LABELS[type]}</div>
+        <div class="course-grid">${groupCourses.map(cardHTML).join('')}</div>
+      </div>`;
+  }).join('');
+
+  // Keep every course card the same height (matched to the tallest —
+  // Theory+Lab) on desktop/tablet layouts, regardless of which
+  // evaluation-type group it belongs to. See util.js for details.
+  window.MCA.util.equalizeCardHeights(grid);
 
   // Restore any previously saved progress for this semester's CIE page.
   // Firebase's auth state resolves asynchronously (it loads its SDK from

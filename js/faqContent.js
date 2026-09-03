@@ -309,7 +309,7 @@ window.MCA.FAQ = [
   {
     q: "Does this calculator work for Internship, Project, or NPTEL courses?",
     a: `
-      <p><b>Not for CIE/SEE calculation.</b></p>
+      <p><b>Not for CIE/SEE calculation — and you won't find cards for them on the CIE &amp; SEE or Final Grade pages.</b></p>
 
       <ul>
         <li>The CIE/SEE tools are designed specifically for standard <b>theory and lab course structures</b>.</li>
@@ -324,7 +324,18 @@ window.MCA.FAQ = [
         <li><b>NPTEL courses</b> are conducted and evaluated through their online system.</li>
       </ul>
 
-      <p><b>However:</b> Once you receive the final letter grade for one of these courses, you can enter it directly into the SGPA/CGPA calculators.</p>
+      <p>Since none of these follow the CIE quiz/test/EL/lab structure, a card for them on the CIE &amp; SEE or Final Grade Calculator would never actually do anything — so they're left out of those two pages' course lists entirely, to keep the grid focused on courses you can actually calculate there.</p>
+
+      <p><b>However:</b> Once you receive the final letter grade for one of these courses, you can enter it directly into the SGPA/CGPA calculators — they're still counted normally there.</p>
+    `
+  },
+
+  {
+    q: "Why are the courses on the CIE & SEE and Final Grade pages split into Theory + Lab, Theory Only, and Lab Only groups?",
+    a: `
+      <p>Each course type needs a different set of input fields — a Theory + Lab course has quizzes, tests, EL, <i>and</i> a lab component, while a Lab Only course has just the lab fields. Mixed together in one grid, cards of very different heights left uneven, gappy rows.</p>
+
+      <p>Grouping courses by type keeps cards of similar height and shape next to each other, so the grid lines up cleanly. The grouping is purely visual — it doesn't change how any course is calculated.</p>
     `
   },
 

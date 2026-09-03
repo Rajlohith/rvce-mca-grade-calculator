@@ -53,14 +53,14 @@ window.MCA = window.MCA || {};
         href: PAGES + 'cgpa.html'
       },
       {
-        id: 'guide',
-        label: 'Guide',
-        href: PAGES + 'guide.html'
-      },
-      {
         id: 'achievements',
         label: 'Achievements',
         href: PAGES + 'achievements.html'
+      },
+      {
+        id: 'guide',
+        label: 'Guide',
+        href: PAGES + 'guide.html'
       },
       {
         id: 'faq',

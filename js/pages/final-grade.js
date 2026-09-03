@@ -23,15 +23,26 @@
 
   if(window.MCA.achievements) window.MCA.achievements.track('tool_page_viewed', { tool:'final-grade', semester });
 
-  const NON_STANDARD_NAMES = { project:'Project', internship:'Internship', nptel:'NPTEL / online course' };
+  // Project, Internship and NPTEL/online courses aren't evaluated through
+  // CIE+SEE at all (see FAQ: "Why don't I see every course on the CIE and
+  // Final Grade pages?") — they're graded a different way entirely, so a
+  // card here would never do anything. Left out of both this page and the
+  // CIE & SEE Calculator; still counted normally on the SGPA/CGPA tools.
   const MAX_BY_TYPE = {
     theory:      { cieMax:100, seeMax:100 },
     'theory-lab':{ cieMax:150, seeMax:150 },
     lab:         { cieMax:50,  seeMax:50 }
   };
-  const courses = coursesFor(semester);
-  const standardCourseCount = courses.filter(c => !['project','internship','nptel'].includes(c.type)).length;
+  const courses = coursesFor(semester).filter(c => !['project','internship','nptel'].includes(c.type));
+  const standardCourseCount = courses.length;
   const calculatedCodes = new Set();
+
+  const GROUP_LABELS = {
+    'theory-lab': 'Theory + Lab',
+    'theory': 'Theory Only',
+    'lab': 'Lab Only'
+  };
+  const GROUP_ORDER = ['theory-lab', 'theory', 'lab'];
 
   function cardTitleHTML(course){
     if(course.electives && course.electives.length){
@@ -42,24 +53,16 @@
   }
 
   function cardHTML(course){
-    const isNonStandard = ['project','internship','nptel'].includes(course.type);
     const head = `
       <div class="course-card-head">
         <div>${cardTitleHTML(course)}</div>
         <span class="credit-badge">${course.credits} Credit</span>
       </div>`;
 
-    if(isNonStandard){
-      return `<div class="course-card" data-code="${course.code}" data-type="${course.type}">
-        ${head}
-        <div class="callout locked">${NON_STANDARD_NAMES[course.type] || 'This course'} isn't modeled here &mdash; check your syllabus or course coordinator for how it's evaluated.</div>
-      </div>`;
-    }
-
     const { cieMax, seeMax } = MAX_BY_TYPE[course.type];
     return `<div class="course-card" data-code="${course.code}" data-type="${course.type}">
       ${head}
-      <div class="field-row">
+      <div class="field-row stacked">
         <div class="field"><label>CIE total <span class="hint">/${cieMax}</span></label><input type="number" class="f-cie req" min="0" max="${cieMax}" value=""></div>
         <div class="field"><label>SEE total <span class="hint">/${seeMax}</span></label><input type="number" class="f-see req" min="0" max="${seeMax}" value=""></div>
       </div>
@@ -69,7 +72,23 @@
   }
 
   const grid = document.getElementById('courseGrid');
-  grid.innerHTML = courses.map(cardHTML).join('');
+  // Grouped by evaluation type (Theory + Lab / Theory Only / Lab Only)
+  // rather than one flat grid — courses with very different field counts
+  // sitting side by side made for an uneven, gappy-looking grid.
+  grid.innerHTML = GROUP_ORDER.map(type => {
+    const groupCourses = courses.filter(c => c.type === type);
+    if(!groupCourses.length) return '';
+    return `
+      <div class="semester-group">
+        <div class="semester-group-label">${GROUP_LABELS[type]}</div>
+        <div class="course-grid">${groupCourses.map(cardHTML).join('')}</div>
+      </div>`;
+  }).join('');
+
+  // Keep every course card the same height (matched to the tallest) on
+  // desktop/tablet layouts, regardless of which evaluation-type group it
+  // belongs to. See util.js for details.
+  window.MCA.util.equalizeCardHeights(grid);
 
   function restoreProgress(){
     window.MCA.progress.loadProgress(`final-grade:${semester}`, grid);

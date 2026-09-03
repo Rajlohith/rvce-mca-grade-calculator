@@ -275,15 +275,35 @@ table.ledger input[type=checkbox]{
 }
 
 /* ---------- Per-semester course grid (CIE / Final Grade pages) ---------- */
-.course-grid{ display:grid; grid-template-columns:repeat(auto-fit,minmax(300px,1fr)); gap:18px; align-items:start; }
+.course-grid{ display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:18px; align-items:start; }
 .course-card{
+  width:100%; max-width:335px;
   background:var(--card); border:1px solid var(--line); border-radius:var(--radius-lg);
   box-shadow:var(--shadow-sm); padding:22px;
+  display:flex; flex-direction:column;
 }
 .course-card-head{ display:flex; justify-content:space-between; align-items:flex-start; gap:10px; margin-bottom:16px; }
 .course-card-head h3{ font-size:16px; font-weight:700; line-height:1.35; }
 .course-card-head .course-elective-pick{ margin-top:6px; font-size:12px; }
 .course-card .callout{ margin-top:10px; margin-bottom:0; }
+
+/* Keep three subject cards together on desktop/tablet widths. Each card
+   can shrink with the grid when the viewport is narrower, but never grows
+   beyond the established ~335px card width. On phones, switch to one column
+   so the fields remain comfortably usable. */
+@media(max-width:700px){
+  .course-grid{ grid-template-columns:1fr; }
+  .course-card{ max-width:none; }
+}
+
+/* Always-stacked field pair (used by the Final Grade page's CIE total /
+   SEE total fields): unlike .field-row's auto-fit columns — which quietly
+   switch between 1 and 2 columns depending on how many cards happen to
+   share a row at the current viewport width — this always stacks the two
+   fields vertically, so every course card (Theory+Lab / Theory Only / Lab
+   Only alike) lays out its fields the same way and ends up the same
+   height, instead of the height varying by how wide its group's row was. */
+.field-row.stacked{ grid-template-columns:1fr; }
 
 .locked-btn{
   width:100%; text-align:center; padding:10px; border-radius:var(--radius-sm); font-size:13px; font-weight:600;
@@ -612,7 +632,7 @@ table.ledger input[type=checkbox]{
   display:flex;
   flex-wrap:wrap;
   justify-content:center;
-  gap:4px 10px;
+  gap:2px 4px;
   text-align:center;
   margin-bottom:14px;
 }
@@ -624,13 +644,15 @@ table.ledger input[type=checkbox]{
   font-weight:600;
   color:var(--ink-soft);
   text-decoration:none;
-  padding:12px 6px;
+  padding:12px 8px;
   line-height:1.2;
+  border-bottom:1.5px solid transparent;
+  transition:color .15s ease, border-color .15s ease;
 }
 
 .footer-links a:hover{
   color:var(--link);
-  text-decoration:underline;
+  border-color:var(--link);
 }
 
 
@@ -702,13 +724,13 @@ table.ledger input[type=checkbox]{
   .footer-links{
     justify-content:center;
     text-align:center;
-    gap:2px 12px;
+    gap:2px 4px;
     margin-bottom:12px;
   }
 
   .footer-links a{
     font-size:12px;
-    padding:10px 6px;
+    padding:10px 7px;
   }
 
   .site-footer .legal{
@@ -803,8 +825,11 @@ table.ledger input[type=checkbox]{
   color:var(--ink-faint); display:block; margin-bottom:12px;
 }
 
-/* Progress stat row */
-.bj-stats{ display:grid; grid-template-columns:repeat(auto-fit, minmax(120px, 1fr)); gap:10px; }
+/* Progress stat row — the small "Semester I / II / ... / Target" tiles.
+   Kept for anything else that still wants the .bj-stat look (the journey
+   node boxes below reuse it), but the standalone Progress section on the
+   CGPA page has been removed; its one-line summary now sits right under
+   the target-semester/target-CGPA row instead (#bjSummary in cgpa.html). */
 .bj-stat{
   background:var(--paper); border-radius:var(--radius-sm); padding:12px 14px;
   display:flex; flex-direction:column; gap:4px; min-width:0;
@@ -823,37 +848,100 @@ table.ledger input[type=checkbox]{
 .bj-summary.warn{ color:var(--crimson); }
 .bj-summary.warn b{ color:var(--crimson); }
 
-/* Journey track */
-.bj-track{ display:flex; align-items:flex-start; }
-.bj-node{ flex:0 0 auto; width:84px; display:flex; flex-direction:column; align-items:center; text-align:center; }
-.bj-connector{ flex:1 1 auto; height:2px; background:var(--line-strong); margin-top:16px; min-width:10px; }
-.bj-connector.done{ background:var(--teal); }
+/* ---------- Journey track ----------
+   A zigzag roadmap rather than one straight line of dots: the box for
+   each semester alternates sides around a single spine — left/right of a
+   vertical line on mobile, above/below a horizontal line on desktop
+   (see the .alt-a / .alt-b classes cgpa.js assigns per node, i % 2).
+
+   The spine itself is drawn as a ::before on every node, spanning that
+   node's *full* width (not a separate fixed-width connector element) so
+   it always reaches exactly from one dot's center to the next — nodes
+   are equal-width flex children (flex:1 1 0), so a full-width line per
+   node butts up perfectly against its neighbour's with no gap. Each
+   node's line is a hard-stop two-color gradient at its own midpoint (the
+   dot's center): the left/top half reflects whether the *previous* dot
+   is done, the right/bottom half whether *this* dot is done — cgpa.js
+   sets those two colors per node via the --bj-line-left/--bj-line-right
+   custom properties. The first node has no incoming half, the last node
+   no outgoing half — cgpa.js sets that side's color to `transparent`
+   rather than the pseudo-element being narrowed/clipped: narrowing the
+   box would shift the gradient's own 50% stop off the dot's centre
+   (it's relative to the box's own width) and leave a visible gap before
+   the dot, instead of the line simply not being painted right up to it. */
+.bj-track{ display:flex; position:relative; height:230px; }
+.bj-node{ flex:1 1 0; min-width:0; height:100%; position:relative; }
+
+.bj-node::before{
+  content:''; position:absolute; z-index:0;
+  top:50%; left:0; right:0; height:2px; transform:translateY(-50%);
+  background:linear-gradient(to right,
+    var(--bj-line-left, var(--line-strong)) 50%,
+    var(--bj-line-right, var(--line-strong)) 50%);
+}
+
 .bj-node-dot{
+  position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); z-index:1;
   width:34px; height:34px; border-radius:50%; display:flex; align-items:center; justify-content:center;
   border:2px solid var(--line-strong); background:var(--card); color:var(--ink-faint); flex:0 0 auto;
 }
 .bj-node-dot svg{ width:16px; height:16px; }
-.bj-node-label{ font-size:12px; font-weight:700; color:var(--ink); margin-top:8px; line-height:1.3; }
-.bj-node-status{ font-size:10px; font-weight:700; text-transform:uppercase; letter-spacing:.04em; color:var(--ink-faint); margin-top:2px; }
+
+/* The per-node box reuses the .bj-stat "Progress" card look (label + big
+   value) from higher up the same panel, so the roadmap reads as the same
+   component repeated rather than a different, plainer style. */
+.bj-node-box{
+  position:absolute; left:50%; transform:translateX(-50%); z-index:1;
+  width:132px; text-align:center; box-shadow:var(--shadow-sm);
+}
+.bj-node-box .bj-stat-value{ font-size:17px; }
+.bj-node-box .bj-node-status{ margin-top:0; }
+/* alt-a (Semester I, III, ...) sits above the line; alt-b (Semester II, IV, ...) below it. */
+.bj-node.alt-a .bj-node-box{ bottom:calc(50% + 17px + 10px); }
+.bj-node.alt-b .bj-node-box{ top:calc(50% + 17px + 10px); }
+
+.bj-node-status{ font-size:10px; font-weight:700; text-transform:uppercase; letter-spacing:.04em; color:var(--ink-faint); }
 
 .bj-node.done .bj-node-dot{ background:var(--teal); border-color:var(--teal); color:#fff; }
+.bj-node.done .bj-node-box .bj-stat-value{ color:var(--teal); }
 .bj-node.done .bj-node-status{ color:var(--teal); }
 
 .bj-node.current .bj-node-dot{ border-color:var(--accent); color:var(--accent); background:var(--accent-bg); box-shadow:0 0 0 4px var(--accent-bg); }
-.bj-node.current .bj-node-label{ color:var(--accent); }
+.bj-node.current .bj-node-box{ box-shadow:0 0 0 1.5px var(--accent), var(--shadow-sm); }
+.bj-node.current .bj-node-box .bj-stat-label{ color:var(--accent); }
 .bj-node.current .bj-node-status{ color:var(--accent); }
 
 .bj-node.upcoming .bj-node-dot{ border-style:dashed; }
 
-.bj-track-note{ font-size:12px; color:var(--ink-faint); margin-top:12px; font-weight:600; text-align:center; }
+.bj-track-note{ font-size:12px; color:var(--ink-faint); margin-top:16px; font-weight:600; text-align:center; }
 
-@media(max-width:640px){
-  .bj-track{ flex-direction:column; align-items:stretch; }
-  .bj-node{ width:auto; flex-direction:row; text-align:left; align-items:center; gap:12px; }
-  .bj-node-label{ margin-top:0; }
+@media(max-width:800px){
+  /* Same zigzag idea, rotated 90°: a vertical spine down the centre,
+     dots stacked top to bottom, boxes alternating left/right of the dot
+     instead of above/below it. alt-a (Sem I, III, ...) sits to the left
+     of the line, alt-b (Sem II, IV, ...) to the right. */
+  .bj-track{ flex-direction:column; height:auto; padding:6px 0; }
+  .bj-node{ width:100%; height:136px; flex:0 0 auto; }
+  .bj-node::before{
+    top:0; bottom:0; left:50%; right:auto; width:2px; height:auto; transform:translateX(-50%);
+    background:linear-gradient(to bottom,
+      var(--bj-line-left, var(--line-strong)) 50%,
+      var(--bj-line-right, var(--line-strong)) 50%);
+  }
+  .bj-node-box{
+    left:auto; top:50%; transform:translateY(-50%); width:150px; text-align:left;
+  }
+  .bj-node.alt-a .bj-node-box{ right:calc(50% + 17px + 12px); top:50%; bottom:auto; }
+  .bj-node.alt-b .bj-node-box{ left:calc(50% + 17px + 12px); top:50%; bottom:auto; }
   .bj-stat-label{ white-space:normal; overflow:visible; text-overflow:clip; line-height:1.3; }
-  .bj-node-text{ display:flex; flex-direction:column; text-align:left; }
-  .bj-connector{ width:2px; height:16px; margin:2px 0 2px 16px; flex:0 0 auto; }
+}
+
+@media(max-width:400px){
+  /* Very narrow phones: the 150px side box plus a centred spine can get
+     tight next to the screen edge — shrink the box and tuck it closer. */
+  .bj-node-box{ width:124px; }
+  .bj-node.alt-a .bj-node-box{ right:calc(50% + 17px + 8px); }
+  .bj-node.alt-b .bj-node-box{ left:calc(50% + 17px + 8px); }
 }
 
 /* ==========================================================================
@@ -871,64 +959,54 @@ table.ledger input[type=checkbox]{
 .achv-summary-count span{ color:var(--ink-faint); font-weight:600; font-size:16px; }
 .achv-summary-label{ font-size:12.5px; color:var(--ink-soft); margin-top:2px; }
 
-/* ---------- Section headings ---------- */
-.achv-section{ margin-top:28px; }
-.achv-section:first-of-type{ margin-top:8px; }
-.achv-section-label{
-  font-size:12.5px; font-weight:700; letter-spacing:.04em; text-transform:uppercase;
-  color:var(--ink-faint); margin-bottom:14px; display:flex; align-items:center; gap:8px;
-}
-.achv-section-count{
-  font-size:11px; font-weight:700; color:var(--ink-soft); background:var(--paper);
-  border-radius:999px; padding:2px 9px;
-}
-.achv-section-empty{ font-size:13px; color:var(--ink-faint); padding:4px 0 6px; }
-
-/* ---------- Grid + card ---------- */
+/* ---------- Grid + card ----------
+   One unified collection: every card starts locked (greyscale badge,
+   greyscale chip) and only picks up its category colour the instant
+   it's actually unlocked — nothing is pre-coloured. */
 .achv-grid{ display:grid; grid-template-columns:repeat(auto-fill,minmax(260px,1fr)); gap:14px; }
 
 .achv-card{
   display:flex; align-items:flex-start; gap:14px;
   background:var(--card); border:1px solid var(--line); border-radius:var(--radius-md);
-  padding:16px 18px; transition:box-shadow .2s ease, transform .2s ease, border-color .2s ease;
+  padding:16px 18px; transition:box-shadow .2s ease, transform .2s ease, border-color .2s ease, opacity .2s ease;
 }
 
 .achv-badge{
   width:46px; height:46px; border-radius:14px; flex:0 0 auto;
   display:flex; align-items:center; justify-content:center;
+  background:var(--paper); color:var(--ink-faint); /* locked default: b/w */
 }
 .achv-badge svg{ width:23px; height:23px; }
 
 .achv-body{ min-width:0; flex:1; }
-.achv-name{ font-weight:700; font-size:14.5px; color:var(--ink); line-height:1.3; }
+.achv-name{ font-weight:700; font-size:14.5px; color:var(--ink-soft); line-height:1.3; }
 .achv-desc{ font-size:12.5px; color:var(--ink-soft); margin-top:4px; line-height:1.5; }
 .achv-date{ font-size:11px; color:var(--ink-faint); margin-top:7px; font-weight:600; }
 .achv-category-chip{
   display:inline-block; font-size:10px; font-weight:700; letter-spacing:.03em; text-transform:uppercase;
-  color:var(--accent); background:var(--accent-bg); border-radius:999px; padding:2px 8px; margin-top:8px;
+  color:var(--ink-faint); background:var(--paper); border-radius:999px; padding:2px 8px; margin-top:8px;
 }
 
-/* Unlocked: full colour, a little lift, coloured badge per category. */
-.achv-card.unlocked{ box-shadow:var(--shadow-sm); }
+/* Locked (default state for every card, hidden or not): greyed out. */
+.achv-card.locked{ opacity:.62; }
+.achv-card.hidden-locked{ opacity:.55; }
+.achv-card.hidden-locked .achv-badge{ border:1.5px dashed var(--line-strong); }
+.achv-card.hidden-locked .achv-name{ color:var(--ink-faint); font-style:italic; }
+.achv-card.hidden-locked .achv-desc{ color:var(--ink-faint); }
+
+/* Unlocked: the only state that gets colour — a little lift, coloured
+   badge + chip per category. */
+.achv-card.unlocked{ box-shadow:var(--shadow-sm); opacity:1; }
 .achv-card.unlocked:hover{ box-shadow:var(--shadow-lg); transform:translateY(-2px); border-color:var(--line-strong); }
+.achv-card.unlocked .achv-name{ color:var(--ink); }
 .achv-card.unlocked .achv-badge{ background:var(--teal-bg); color:var(--teal); }
+.achv-card.unlocked .achv-category-chip{ color:var(--accent); background:var(--accent-bg); }
 .achv-card.unlocked.cat-academic .achv-badge{ background:var(--accent-bg); color:var(--accent); }
 .achv-card.unlocked.cat-usage .achv-badge{ background:var(--purple-bg); color:var(--purple); }
 .achv-card.unlocked.cat-streak .achv-badge{ background:var(--orange-bg); color:var(--orange); }
 .achv-card.unlocked.cat-exploration .achv-badge{ background:var(--teal-bg); color:var(--teal); }
 .achv-card.unlocked.cat-hidden .achv-badge{ background:linear-gradient(135deg, var(--purple-bg), var(--accent-bg)); color:var(--purple); }
-.achv-card.unlocked .achv-category-chip.cat-hidden{ color:var(--purple); background:var(--purple-bg); }
-
-/* Locked: greyed out, desaturated badge, everything still legible. */
-.achv-card.locked{ opacity:.62; }
-.achv-card.locked .achv-badge{ background:var(--paper); color:var(--ink-faint); }
-.achv-card.locked .achv-name{ color:var(--ink-soft); }
-
-/* Hidden + still locked: mystery icon, name/description masked. */
-.achv-card.hidden-locked{ opacity:.55; }
-.achv-card.hidden-locked .achv-badge{ background:var(--paper); color:var(--ink-faint); border:1.5px dashed var(--line-strong); }
-.achv-card.hidden-locked .achv-name{ color:var(--ink-faint); font-style:italic; }
-.achv-card.hidden-locked .achv-desc{ color:var(--ink-faint); }
+.achv-card.unlocked.cat-hidden .achv-category-chip{ color:var(--purple); background:var(--purple-bg); }
 
 @media(max-width:520px){
   .achv-grid{ grid-template-columns:1fr; }

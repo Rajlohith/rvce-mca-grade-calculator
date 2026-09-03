@@ -416,10 +416,15 @@ window.MCA = window.MCA || {};
 
   /* ---------- Public: track() ----------
      Per the spec, achievements are never tracked or stored for a signed-
-     out visitor — so this is a no-op unless someone is actually signed
-     in. The one exception is the 'login' event itself, which by
-     definition only fires the instant sign-in resolves. */
+     out visitor. But "signed out" here means confirmed signed out, not
+     "we don't know yet" — Firebase auth resolution is async (up to a
+     couple seconds), and events like guide_viewed / faq_opened can fire
+     within milliseconds of page load, well before that resolves. Events
+     that arrive before we know either way are queued and only decided
+     once authResolved is true, so a genuinely signed-in visitor never
+     silently loses an early event to the race. */
   function track(eventName, detail){
+    if(!authResolved){ pendingEvents.push([eventName, detail]); return; }
     if(!window.MCA.isSignedIn() && eventName !== 'login') return;
     if(!stateLoaded){ pendingEvents.push([eventName, detail]); return; }
     evaluate(eventName, detail);
@@ -440,7 +445,6 @@ window.MCA = window.MCA || {};
       authResolved = true;
       flushPending();
       evaluate('login', {});
-      checkPwaLaunch(); // re-check now that isSignedIn() can actually return true
     });
   });
 
