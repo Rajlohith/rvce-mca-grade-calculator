@@ -775,7 +775,11 @@ table.ledger input[type=checkbox]{
     grid-column:1 / -1;
     justify-content:center;
     flex-wrap:wrap;
-    gap:32px;
+    gap:6px;
+  }
+
+  .footer-links-secondary a:last-child{
+    margin-left:55px; /* pushes Official Handbook right, Syllabus stays put */
   }
 
   .footer-links a{
