@@ -4,6 +4,13 @@
 *{ box-sizing: border-box; }
 html,body{ margin:0; padding:0; }
 
+/* Desktop renders a touch large at 100%; 90% matches how the app is
+   actually meant to look. Mobile/tablet are left at native scale —
+   this is a desktop-only adjustment. */
+@media (min-width: 861px){
+  html{ zoom: 0.95; }
+}
+
 body{
   background:
     linear-gradient(to right, rgba(148,163,184,.08) 1px, transparent 1px) 0 0/40px 40px,

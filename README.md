@@ -107,17 +107,15 @@ Only the 2024 scheme is implemented today. A 2026 scheme option is visible on th
 ### Navigation Flow
 
 ```mermaid
-flowchart TD
-    A["index.html<br/>Home"] --> B["pages/scheme.html<br/>Step 1: Scheme"]
-    B --> C["pages/semester.html<br/>Step 2: Semester"]
-    C --> E["pages/tools.html<br/>Step 3: Tool picker"]
-    E --> F["pages/cie-see.html<br/>CIE Finalization & SEE Marks Required"]
-    E --> G["pages/final-grade.html<br/>Final Grade Calculator"]
-    E --> H["pages/final-gpa.html<br/>Final SGPA Calculator"]
-    I["pages/cgpa.html<br/>CGPA Calculator"]
-    J["pages/faq.html<br/>FAQ"]
-    A -.reachable anytime.-> I
-    A -.reachable anytime.-> J
+flowchart LR
+    Home --> Scheme --> Semester --> Tools
+
+    Tools --> CieSee["CIE & SEE"]
+    Tools --> FinalGrade["Final Grade"]
+    Tools --> FinalGpa["Final SGPA"]
+
+    Home -.-> Cgpa["CGPA Calculator"]
+    Home -.-> Faq["FAQ"]
 ```
 
 Scheme is chosen before semester because it is what actually determines everything downstream. The course list, credit structure and CIE/SEE weightage for all four semesters are fixed once per scheme, so locking that choice in first keeps the rest of the wizard consistent. Semester selection groups the four semesters under Year 1 / Year 2 headings on one page, rather than a separate year-selection step, since knowing the semester number is all any calculator downstream actually needs.
@@ -126,17 +124,13 @@ Scheme is chosen before semester because it is what actually determines everythi
 
 ```mermaid
 flowchart LR
-    A["data/courses.json<br/>canonical source"] --> B["js/data.js<br/>mirrored JS object"]
-    B --> C["js/course-picker.js<br/>selectable entries, no manual entry"]
-    C --> D["CIE & SEE cards"]
-    C --> E["Final Grade cards"]
-    C --> F["Final SGPA rows"]
-    B --> G["js/grading.js<br/>bands, floors, degree classes"]
-    G --> H["js/engine.js<br/>pure calculation functions"]
-    H --> D
-    H --> E
-    H --> F
-    H --> I["pages/cgpa.html"]
+    Json["courses.json"] --> Data["data.js"]
+    Data --> Picker["course-picker.js"]
+    Data --> Grading["grading.js"]
+
+    Grading --> Engine["engine.js"]
+    Picker --> Pages["Calculator pages"]
+    Engine --> Pages
 ```
 
 `js/engine.js` contains no DOM code at all; it is a set of pure functions that take plain values in and return plain result objects out. Every page-level script in `js/pages/` calls into the same engine and renders the result itself, so the CIE math, the SEE math and the grading math can never drift out of sync between pages.

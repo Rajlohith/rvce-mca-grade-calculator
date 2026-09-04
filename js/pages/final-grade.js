@@ -85,10 +85,8 @@
       </div>`;
   }).join('');
 
-  // Keep every course card the same height (matched to the tallest) on
-  // desktop/tablet layouts, regardless of which evaluation-type group it
-  // belongs to. See util.js for details.
-  window.MCA.util.equalizeCardHeights(grid);
+  // Cards are left at their natural height — a card that grows once its
+  // result renders no longer stretches its still-empty siblings to match.
 
   function restoreProgress(){
     window.MCA.progress.loadProgress(`final-grade:${semester}`, grid);
@@ -132,13 +130,12 @@
       <div class="result" style="margin-top:0;">
         <div class="stamp ${r.isPass?'pass':'fail'}"><span class="g">${r.letter}</span><span class="t">${r.isPass?'PASS':'FAIL'}</span></div>
         <div class="result-detail">
-          <div class="big">${Math.round(r.total)} / ${r.max} (${Math.round(r.pct)}%) &middot; Grade point ${r.gp}</div>
-          <div class="note">${r.isPass ? `Meets every passing condition &mdash; grade ${r.letter} stands.` : `A passing condition isn't met, so this is recorded as F.`}</div>
+          <div class="big">Marks: ${Math.round(r.total)} / ${r.max} (${r.pct.toFixed(2)}%)</div>
+          <div class="big">Grade point: ${r.gp}</div>
+          ${r.isPass ? '' : `<div class="note">A passing condition isn't met, so this is recorded as F.</div>`}
           <div class="badge-list">
             ${r.badges.map(b=>`<span class="badge ${b[1]?'ok':'no'}">${b[1]?'\u2713':'\u2715'} ${b[0]}</span>`).join('')}
           </div>
-          <div class="callout" style="margin-top:10px;">Department rounds up to the next whole mark &mdash; ${Math.round(r.total)} becomes <b>${r.finalTotal}</b>/${r.max} (${r.finalPct}%). ${r.componentCaveat ? `Theory/Lab SEE sub-floors (&ge;40/100, &ge;25/50) aren't checked separately &mdash; verify them if borderline.` : ''}</div>
-          <div class="rounding-note">Marks and percentages above are rounded for display.</div>
         </div>
       </div>`;
   }

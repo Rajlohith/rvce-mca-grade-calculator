@@ -137,10 +137,8 @@
       </div>`;
   }).join('');
 
-  // Keep every course card the same height (matched to the tallest —
-  // Theory+Lab) on desktop/tablet layouts, regardless of which
-  // evaluation-type group it belongs to. See util.js for details.
-  window.MCA.util.equalizeCardHeights(grid);
+  // Cards are left at their natural height — a card that grows once its
+  // result renders no longer stretches its still-empty siblings to match.
 
   // Restore any previously saved progress for this semester's CIE page.
   // Firebase's auth state resolves asynchronously (it loads its SDK from
@@ -248,18 +246,15 @@
       });
     }
 
-    const roundingNote = `<div class="rounding-note">Marks shown to 2 decimals (nearest hundredth).</div>`;
-    const finalNote = `<div class="callout" style="margin-top:10px;">Department rounds CIE <b>up</b> to the next whole mark &mdash; ${fmt(r.total)} becomes <b>${r.finalTotal}</b>. This finalized value is used for the SEE requirements below.</div>`;
+    const finalNote = `<div class="callout" style="margin-top:10px;">MCA department rounds this up to <b>${r.finalTotal}</b> using ciel function for SEE.</div>`;
 
     card.querySelector('.course-result').innerHTML = `
       <div class="breakdown">
         ${r.rows.map(row=>`<div class="row"><span>${row[0]}</span><span>${row[1]}</span></div>`).join('')}
-        <div class="row total"><span>Finalized CIE</span><span>${fmt(r.total)} / ${r.max} (${fmt(r.pct)}%)</span></div>
-        <div class="row total"><span>Final CIE (used for SEE)</span><span>${r.finalTotal} / ${r.max} (${r.finalPct}%)</span></div>
+        <div class="row total"><span>Finalized CIE</span><span>${fmt(r.total)} / ${r.max}</span></div>
+        <div class="row total"><span>Final CIE (used for SEE): <b>${r.finalTotal} / ${r.max} (${r.finalPct.toFixed(2)}%)</b></span></div>
       </div>
-      <div class="callout${r.dx ? ' dx' : ''}" style="margin-top:10px;">${r.note}</div>
-      ${finalNote}
-      ${roundingNote}`;
+      ${finalNote}`;
 
     const seeBtn = card.querySelector('.see-btn');
     if(r.dx){
@@ -358,8 +353,7 @@
           <div class="gr-marks">${r.label}${r.achievable ? '' : ' &mdash; not reachable'}</div>
         </div>
         <button type="button" class="gr-copy" title="Copy" data-copy="Grade ${r.grade}: ${r.label}">${COPY_SVG}</button>
-      </div>`).join('') +
-      `<div class="rounding-note">Figures shown to 2 decimals (nearest hundredth).</div>`;
+      </div>`).join('');
   }
 
   modalRows.addEventListener('click', (e)=>{

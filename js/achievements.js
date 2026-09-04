@@ -91,6 +91,14 @@ window.MCA = window.MCA || {};
      single matching event (see `check`); `kind: 'set'` achievements
      accumulate distinct values from matching events into a named set
      and unlock once that set reaches `target`. */
+  /* Hidden-achievement copy (name/description) is stored base64-encoded
+     and decoded here at runtime — not for security (this is a static
+     site; nothing client-side can be truly secret), just so the source
+     isn't a spoiler list for anyone skimming the public GitHub repo. The
+     Achievements page still does the real masking (js/pages/achievements.js
+     never puts these strings in the DOM until the achievement unlocks). */
+  function _b64d(s){ try{ return decodeURIComponent(escape(atob(s))); }catch(e){ return ''; } }
+
   const ACHIEVEMENTS = [
 
     /* ---------- academic ---------- */
@@ -230,36 +238,36 @@ window.MCA = window.MCA || {};
       events:['elective_selected'], check:()=>true },
 
     /* ---------- hidden ---------- */
-    { id:'night-owl', name:'Night Owl', icon:'moonStars', category:'hidden',
+    { id:'night-owl', name:_b64d('TmlnaHQgT3ds'), icon:'moonStars', category:'hidden',
       unlockType:'performance_based', hidden:true, kind:'instant',
-      description:'Ran a calculation between midnight and 4 AM, local time.',
+      description:_b64d('UmFuIGEgY2FsY3VsYXRpb24gYmV0d2VlbiBtaWRuaWdodCBhbmQgNCBBTSwgbG9jYWwgdGltZS4='),
       events:['cie_calculated','final_grade_calculated','sgpa_calculated','cgpa_calculated','see_requirements_viewed'],
       check:()=>{ const h = new Date().getHours(); return h>=0 && h<4; } },
 
-    { id:'early-bird', name:'Early Bird', icon:'sunrise', category:'hidden',
+    { id:'early-bird', name:_b64d('RWFybHkgQmlyZA=='), icon:'sunrise', category:'hidden',
       unlockType:'performance_based', hidden:true, kind:'instant',
-      description:'Ran a calculation before 6 AM, local time.',
+      description:_b64d('UmFuIGEgY2FsY3VsYXRpb24gYmVmb3JlIDYgQU0sIGxvY2FsIHRpbWUu'),
       events:['cie_calculated','final_grade_calculated','sgpa_calculated','cgpa_calculated','see_requirements_viewed'],
       check:()=>{ const h = new Date().getHours(); return h>=4 && h<6; } },
 
-    { id:'silver-lining', name:'Silver Lining', icon:'lifeBuoy', category:'hidden',
+    { id:'silver-lining', name:_b64d('U2lsdmVyIExpbmluZw=='), icon:'lifeBuoy', category:'hidden',
       unlockType:'one_time', hidden:true, kind:'instant',
-      description:"Found out a course didn't clear the CIE floor — now you know exactly where you stand.",
+      description:_b64d('Rm91bmQgb3V0IGEgY291cnNlIGRpZG4ndCBjbGVhciB0aGUgQ0lFIGZsb29yIOKAlCBub3cgeW91IGtub3cgZXhhY3RseSB3aGVyZSB5b3Ugc3RhbmQu'),
       events:['cie_calculated'], check:(d)=> !!d.dx },
 
-    { id:'clean-slate', name:'Clean Slate', icon:'refresh', category:'hidden',
+    { id:'clean-slate', name:_b64d('Q2xlYW4gU2xhdGU='), icon:'refresh', category:'hidden',
       unlockType:'one_time', hidden:true, kind:'instant',
-      description:'Used Reset All to start a calculator over from scratch.',
+      description:_b64d('VXNlZCBSZXNldCBBbGwgdG8gc3RhcnQgYSBjYWxjdWxhdG9yIG92ZXIgZnJvbSBzY3JhdGNoLg=='),
       events:['reset_used'], check:()=>true },
 
-    { id:'secret-handshake', name:'Secret Handshake', icon:'sparkles', category:'hidden',
+    { id:'secret-handshake', name:_b64d('U2VjcmV0IEhhbmRzaGFrZQ=='), icon:'sparkles', category:'hidden',
       unlockType:'activity_based', hidden:true, kind:'instant',
-      description:'Flicked the theme switch back and forth like you meant it.',
+      description:_b64d('RmxpY2tlZCB0aGUgdGhlbWUgc3dpdGNoIGJhY2sgYW5kIGZvcnRoIGxpa2UgeW91IG1lYW50IGl0Lg=='),
       events:['theme_toggled'], check:(d,ctx)=> ctx.rapidToggleCount>=8 },
 
-    { id:'distinction-territory', name:'Distinction Territory', icon:'crown', category:'hidden',
+    { id:'distinction-territory', name:_b64d('RGlzdGluY3Rpb24gVGVycml0b3J5'), icon:'crown', category:'hidden',
       unlockType:'performance_based', hidden:true, kind:'instant',
-      description:'Reached First Class with Distinction CGPA territory on the CGPA Calculator.',
+      description:_b64d('UmVhY2hlZCBGaXJzdCBDbGFzcyB3aXRoIERpc3RpbmN0aW9uIENHUEEgdGVycml0b3J5IG9uIHRoZSBDR1BBIENhbGN1bGF0b3Iu'),
       events:['cgpa_calculated'], check:(d,ctx)=>{
         let min = 7.0;
         try{

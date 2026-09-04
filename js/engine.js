@@ -120,7 +120,7 @@ window.MCA = window.MCA || {};
        because that's the number your department will use once the
        semester is finalized. */
     const finalTotal = Math.ceil(fmt(total));
-    const finalPct = max ? Math.ceil(fmt(finalTotal/max*100)) : 0;
+    const finalPct = max ? fmt(finalTotal/max*10000)/100 : 0;
     return { rows, total, max, pct, note, passesFloor, dx: !passesFloor, finalTotal, finalPct };
   }
 
@@ -234,7 +234,7 @@ window.MCA = window.MCA || {};
     /* Same department ceiling convention as the CIE Finalizer (see
        computeCIE above) applied to the finalized aggregate here too. */
     const finalTotal = Math.ceil(fmt(total));
-    const finalPct = max ? Math.ceil(fmt(finalTotal/max*100)) : 0;
+    const finalPct = max ? fmt(finalTotal/max*10000)/100 : 0;
     return {
       total, max, pct, cie, cieMax, see, seeMax, badges, isPass,
       letter: allOk?band.grade:'F', gp: allOk?band.gp:0,

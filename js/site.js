@@ -337,10 +337,6 @@ window.MCA = window.MCA || {};
         >
           Official Handbook
         </a>
-
-        <a href="${PAGES}guide.html">
-          Guide
-        </a>
       </div>
 
       <div class="legal">

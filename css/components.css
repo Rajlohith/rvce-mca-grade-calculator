@@ -50,9 +50,10 @@
 .badge.no{ background:var(--crimson-bg); color:var(--crimson); }
 
 .breakdown{ font-size:13.5px; display:flex; flex-direction:column; gap:6px; margin-top:8px; }
-.breakdown .row{ display:flex; justify-content:space-between; gap:12px; }
-.breakdown .row.total{ border-top:1px solid var(--line-strong); padding-top:8px; margin-top:4px; font-weight:700; font-size:15px; flex-wrap:nowrap; }
+.breakdown .row{ display:flex; justify-content:space-between; gap:12px; color:var(--ink-faint); }
+.breakdown .row.total{ border-top:1px solid var(--line-strong); padding-top:8px; margin-top:4px; font-weight:700; font-size:13px; flex-wrap:nowrap; color:var(--ink-faint); }
 .breakdown .row.total span:first-child{ color:var(--ink-soft); font-weight:500; white-space:nowrap; }
+.breakdown .row.total b{ color:#fff; }
 
 /* ---------- Tables (SGPA / CGPA) ---------- */
 table.ledger{ width:100%; border-collapse:collapse; margin-top:8px; }
@@ -282,10 +283,14 @@ table.ledger input[type=checkbox]{
   box-shadow:var(--shadow-sm); padding:22px;
   display:flex; flex-direction:column;
 }
-.course-card-head{ display:flex; justify-content:space-between; align-items:flex-start; gap:10px; margin-bottom:16px; }
-.course-card-head h3{ font-size:16px; font-weight:700; line-height:1.35; }
-.course-card-head .course-elective-pick{ margin-top:6px; font-size:12px; }
-.course-card .callout{ margin-top:10px; margin-bottom:0; }
+/* min-height keeps a plain course-title head (h3 + code hint) the same
+   footprint as an elective head (h3 + a full select dropdown), so cards
+   in the same row line up at the fields instead of the elective card
+   simply reading as bigger. */
+.course-card-head{ display:flex; justify-content:space-between; align-items:flex-start; gap:10px; margin-bottom:16px; min-height:82px; }
+.course-card-head h3{ font-size:14.5px; font-weight:700; line-height:1.3; }
+.course-card-head .course-elective-pick{ margin-top:6px; font-size:11.5px; padding:7px 10px; }
+.course-card .callout{ margin-top:10px; margin-bottom:0; font-size:12px; line-height:1.5; }
 
 /* Keep three subject cards together on desktop/tablet widths. Each card
    can shrink with the grid when the viewport is narrower, but never grows
