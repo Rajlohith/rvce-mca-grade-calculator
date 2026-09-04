@@ -40,7 +40,7 @@
   rowsEl.innerHTML = courses.map(c=>{
     const info = c.electives && c.electives.length
       ? `<div class="sgpa-title">${c.title}</div>
-         <select class="sgpa-elective-pick">${c.electives.map(e=>`<option value="${e.code}">${e.code} \u2014 ${e.title}</option>`).join('')}</select>`
+         <select class="sgpa-elective-pick">${c.electives.map(e=>`<option value="${e.code}">${e.code} - ${e.title}</option>`).join('')}</select>`
       : `<div class="sgpa-title">${c.title}</div><div class="sgpa-code">${c.code}</div>`;
     return `
       <div class="sgpa-row" data-credits="${c.credits}">
@@ -140,7 +140,7 @@
   if(semester === 'I'){
     cgpaTitle.textContent = 'Your CGPA';
     cgpaBadge.textContent = `${totalCredits} Credits`;
-    cgpaBody.innerHTML = `<div class="callout">No prior CGPA to blend &mdash; your CGPA is just this semester's SGPA once computed above.</div>`;
+    cgpaBody.innerHTML = `<div class="callout">No prior CGPA to blend - your CGPA is just this semester's SGPA once computed above.</div>`;
     computeCgpaBtn.style.display = 'none';
   } else {
     cgpaTitle.textContent = `CGPA Through Semester ${semester}`;

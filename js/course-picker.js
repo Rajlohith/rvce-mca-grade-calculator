@@ -77,8 +77,8 @@ window.MCA = window.MCA || {};
     const entries = selectableEntries(semesterKey);
     selectEl.innerHTML = entries.map(e=>{
       const label = e.groupTitle
-        ? `${e.code} \u2014 ${e.title} (${e.groupTitle})`
-        : `${e.code} \u2014 ${e.title}`;
+        ? `${e.code} - ${e.title} (${e.groupTitle})`
+        : `${e.code} - ${e.title}`;
       const nonStandard = ['project','internship','nptel'].includes(e.type);
       return `<option value="${e.code}" data-type="${e.type}" data-nonstandard="${nonStandard}">${label}</option>`;
     }).join('');

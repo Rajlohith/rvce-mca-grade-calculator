@@ -7,8 +7,8 @@ window.MCA.DATA = {
     "scheme": "2024 Scheme",
     "institution": "R V College of Engineering, Bengaluru (Autonomous, affiliated to VTU Belagavi)",
     "totalProgramCredits": 80,
-    "source": "2024 Scheme and Syllabus \u2014 Master of Computer Applications, RVCE",
-    "handbookSource": "Academic Planning, Assessment & Evaluation Handbook \u2014 Guidelines and Information of Postgraduate Programs (w.e.f. 2024-25)"
+    "source": "2024 Scheme and Syllabus - Master of Computer Applications, RVCE",
+    "handbookSource": "Academic Planning, Assessment & Evaluation Handbook - Guidelines and Information of Postgraduate Programs (w.e.f. 2024-25)"
   },
   "grading": {
     "bands": [

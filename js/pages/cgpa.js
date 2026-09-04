@@ -72,7 +72,7 @@
         // Every required semester is in: compare the real CGPA to the goal.
         const diff = current.cgpa - targetVal;
         const met = diff >= -0.0049; // guard against float noise right at the line
-        summaryHtml = `<div class="bj-summary ${met ? 'ok' : 'warn'}">Your CGPA through ${romanUpTo(requiredCount - 1)} is <b>${bjTwo(current.cgpa)}</b> &mdash; ${met
+        summaryHtml = `<div class="bj-summary ${met ? 'ok' : 'warn'}">Your CGPA through ${romanUpTo(requiredCount - 1)} is <b>${bjTwo(current.cgpa)}</b> - ${met
           ? `you've met your <b>${bjTwo(targetVal)}</b> target for Semester ${ROMAN[targetSem - 1]}.`
           : `that's <b>${bjTwo(Math.abs(diff))}</b> short of your <b>${bjTwo(targetVal)}</b> target for Semester ${ROMAN[targetSem - 1]}.`}</div>`;
         if(met && window.MCA.achievements){
@@ -144,7 +144,7 @@
       <div class="bj-section">
         <span class="bj-label">MCA Journey</span>
         <div class="bj-track">${trackHtml}</div>
-        ${allComplete && overallPass ? '<div class="bj-track-note">MCA journey complete &mdash; all four semesters recorded.</div>' : ''}
+        ${allComplete && overallPass ? '<div class="bj-track-note">MCA journey complete - all four semesters recorded.</div>' : ''}
       </div>`;
   }
 

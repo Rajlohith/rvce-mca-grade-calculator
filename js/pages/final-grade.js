@@ -46,7 +46,7 @@
 
   function cardTitleHTML(course){
     if(course.electives && course.electives.length){
-      const opts = course.electives.map(e=>`<option value="${e.code}">${e.code} \u2014 ${e.title}</option>`).join('');
+      const opts = course.electives.map(e=>`<option value="${e.code}">${e.code} - ${e.title}</option>`).join('');
       return `<h3>${course.title}</h3><select class="course-elective-pick">${opts}</select>`;
     }
     return `<h3>${course.title}</h3><span class="hint">${course.code}</span>`;

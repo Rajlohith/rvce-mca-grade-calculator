@@ -288,6 +288,12 @@ table.ledger input[type=checkbox]{
    in the same row line up at the fields instead of the elective card
    simply reading as bigger. */
 .course-card-head{ display:flex; justify-content:space-between; align-items:flex-start; gap:10px; margin-bottom:16px; min-height:82px; }
+/* Standalone card-section headers (a single title + badge, not part of the
+   course-grid where min-height:82px keeps sibling cards' titles aligned).
+   Reusing .course-card-head here left a fixed 82px-tall header box with
+   only ~24px of actual content in it - an empty gap before the card body
+   that had nothing to do with card-grid alignment. */
+.section-head{ display:flex; justify-content:space-between; align-items:center; gap:10px; margin-bottom:16px; }
 .course-card-head h3{ font-size:14.5px; font-weight:700; line-height:1.3; }
 .course-card-head .course-elective-pick{ margin-top:6px; font-size:11.5px; padding:7px 10px; }
 .course-card .callout{ margin-top:10px; margin-bottom:0; font-size:12px; line-height:1.5; }
@@ -725,15 +731,22 @@ table.ledger input[type=checkbox]{
     gap:6px;
   }
 
-  /* Center footer navigation links */
+  /* Footer navigation links: fixed 2-column grid instead of centered
+     flex-wrap. Flex-wrap let "Official Syllabus" (the widest label) push
+     "Official Handbook" down onto its own line instead of sitting next to
+     it, so the four links didn't read as a tidy pair of rows. A 2-column
+     grid always pairs them GitHub/Contact, Official Syllabus/Official
+     Handbook, regardless of label width. */
   .footer-links{
-    justify-content:center;
-    text-align:center;
+    display:grid;
+    grid-template-columns:1fr 1fr;
     gap:2px 4px;
+    text-align:center;
     margin-bottom:12px;
   }
 
   .footer-links a{
+    justify-content:center;
     font-size:12px;
     padding:10px 7px;
   }

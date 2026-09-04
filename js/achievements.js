@@ -221,7 +221,7 @@ window.MCA = window.MCA || {};
     /* ---------- exploration ---------- */
     { id:'toolbox-complete', name:'Toolbox Complete', icon:'puzzle', category:'exploration',
       unlockType:'activity_based', hidden:false, kind:'set',
-      description:'Use all three calculators — CIE, Final Grade and SGPA — at least once.',
+      description:'Use all three calculators: CIE, Final Grade and SGPA, at least once.',
       events:['tool_page_viewed'], setKey:'toolsSeen', target:3,
       valueFor:(d)=> d.tool },
 
@@ -253,7 +253,7 @@ window.MCA = window.MCA || {};
     { id:'silver-lining', name:_b64d('U2lsdmVyIExpbmluZw=='), icon:'lifeBuoy', category:'hidden',
       unlockType:'one_time', hidden:true, kind:'instant',
       description:_b64d('Rm91bmQgb3V0IGEgY291cnNlIGRpZG4ndCBjbGVhciB0aGUgQ0lFIGZsb29yIOKAlCBub3cgeW91IGtub3cgZXhhY3RseSB3aGVyZSB5b3Ugc3RhbmQu'),
-      events:['cie_calculated'], check:(d)=> !!d.dx },
+      events:['cie_calculated'], check:(d)=> !!d.isDx },
 
     { id:'clean-slate', name:_b64d('Q2xlYW4gU2xhdGU='), icon:'refresh', category:'hidden',
       unlockType:'one_time', hidden:true, kind:'instant',

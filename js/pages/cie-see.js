@@ -99,7 +99,7 @@
 
   function cardTitleHTML(course){
     if(course.electives && course.electives.length){
-      const opts = course.electives.map(e=>`<option value="${e.code}">${e.code} \u2014 ${e.title}</option>`).join('');
+      const opts = course.electives.map(e=>`<option value="${e.code}">${e.code} - ${e.title}</option>`).join('');
       return `<h3>${course.title}</h3><select class="course-elective-pick">${opts}</select>`;
     }
     return `<h3>${course.title}</h3><span class="hint">${course.code}</span>`;
@@ -177,10 +177,17 @@
     const missing = reqInputs.filter(inp => !isFilled(inp));
     reqInputs.forEach(inp => inp.classList.toggle('error', missing.includes(inp)));
 
+    // Lab-only cards (type 'lab', e.g. Skill Lab, Technical English,
+    // Design Thinking Lab, Technical Seminar) have no Quiz/Test fields at
+    // all — fieldsHTML() never renders them for that type. So these
+    // arrays are legitimately empty there, and "fewer than 2 filled"
+    // must not be treated as "still missing marks" or the card could
+    // never be calculated. Only enforce the 2-of-3 rule when the group
+    // actually exists on this card.
     const quizInputs = [...card.querySelectorAll('input.quiz-field')];
     const testInputs = [...card.querySelectorAll('input.test-field')];
-    const quizShort = quizInputs.filter(isFilled).length < 2;
-    const testShort = testInputs.filter(isFilled).length < 2;
+    const quizShort = quizInputs.length > 0 && quizInputs.filter(isFilled).length < 2;
+    const testShort = testInputs.length > 0 && testInputs.filter(isFilled).length < 2;
     // Only mark the still-empty ones in a short group as errors.
     quizInputs.forEach(inp => inp.classList.toggle('error', quizShort && !isFilled(inp)));
     testInputs.forEach(inp => inp.classList.toggle('error', testShort && !isFilled(inp)));
@@ -350,7 +357,7 @@
         <div class="gp-circle">${r.gp}</div>
         <div class="gr-body">
           <div class="gr-name">Grade ${r.grade}</div>
-          <div class="gr-marks">${r.label}${r.achievable ? '' : ' &mdash; not reachable'}</div>
+          <div class="gr-marks">${r.label}${r.achievable ? '' : ' - not reachable'}</div>
         </div>
         <button type="button" class="gr-copy" title="Copy" data-copy="Grade ${r.grade}: ${r.label}">${COPY_SVG}</button>
       </div>`).join('');
@@ -359,7 +366,7 @@
   modalRows.addEventListener('click', (e)=>{
     const btn = e.target.closest('.gr-copy');
     if(!btn) return;
-    window.MCA.util.copyWithFeedback(btn.dataset.copy, 'Requirement copied', 'Could not copy — copy it manually');
+    window.MCA.util.copyWithFeedback(btn.dataset.copy, 'Requirement copied', 'Could not copy - copy it manually');
   });
 
   document.getElementById('copyAllBtn').addEventListener('click', (e)=>{
@@ -368,10 +375,10 @@
     const labInput = document.getElementById('labSeeFixedInput');
     const labSeeFixed = (labInput && labInput.value !== '') ? parseFloat(labInput.value) : null;
     const reqs = allGradeRequirements(state.type, state.total, state.max, labSeeFixed);
-    const text = `${modalSubject.textContent} \u2014 CIE ${modalCie.textContent}\n` +
+    const text = `${modalSubject.textContent} - CIE ${modalCie.textContent}\n` +
       reqs.map(r => `Grade ${r.grade} (${r.gp}): ${r.label}${r.achievable ? '' : ' - not reachable'}`).join('\n');
     const btn = e.currentTarget;
-    window.MCA.util.copyWithFeedback(text, 'All requirements copied', 'Could not copy — copy them manually').then(ok=>{
+    window.MCA.util.copyWithFeedback(text, 'All requirements copied', 'Could not copy - copy them manually').then(ok=>{
       if(!ok) return;
       if(window.MCA.achievements) window.MCA.achievements.track('see_requirements_copied', { semester });
       const original = btn.textContent;

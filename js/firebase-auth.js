@@ -236,7 +236,7 @@ window.MCA = window.MCA || {};
         window.MCA.util.toast('Sign-in failed: ' + err.message, 'error');
       });
     }).catch(() => {
-      window.MCA.util.toast('Could not load sign-in — check your connection and try again', 'error');
+      window.MCA.util.toast('Could not load sign-in - check your connection and try again', 'error');
     });
   };
 

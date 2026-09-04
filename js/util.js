@@ -71,7 +71,7 @@ window.MCA = window.MCA || {};
      is never mistaken for a successful copy. */
   function copyWithFeedback(text, successMsg, failMsg){
     successMsg = successMsg || 'Copied to clipboard';
-    failMsg = failMsg || 'Could not copy — copy it manually instead';
+    failMsg = failMsg || 'Could not copy - copy it manually instead';
     if(!navigator.clipboard || !navigator.clipboard.writeText){
       toast(failMsg, 'error');
       return Promise.resolve(false);

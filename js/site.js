@@ -367,6 +367,34 @@ window.MCA = window.MCA || {};
 
   /* ---------- Mount shared components ---------- */
 
+  /* ---------- Breadcrumb structured data ----------
+     Reuses the exact same trail already passed to renderBreadcrumb(), so
+     search engines see the same navigation path shown on the page -
+     helps pages like the CIE & SEE and Final Grade calculators surface
+     with breadcrumb rich results for RVCE MCA-related searches. Skipped
+     for single-item trails (nothing meaningful to chain). */
+  function injectBreadcrumbSchema(trail){
+    const existing = document.getElementById('mca-breadcrumb-schema');
+    if(existing) existing.remove();
+    if(!trail || trail.length < 2) return;
+
+    const itemListElement = trail.map((c, i) => {
+      const entry = { '@type': 'ListItem', position: i + 1, name: c.label };
+      if(c.href) entry.item = new URL(c.href, window.location.href).href;
+      return entry;
+    });
+
+    const script = document.createElement('script');
+    script.type = 'application/ld+json';
+    script.id = 'mca-breadcrumb-schema';
+    script.textContent = JSON.stringify({
+      '@context': 'https://schema.org',
+      '@type': 'BreadcrumbList',
+      itemListElement
+    });
+    document.head.appendChild(script);
+  }
+
   function mount(opts){
     opts = opts || {};
 
@@ -385,6 +413,8 @@ window.MCA = window.MCA || {};
     if(footerEl){
       footerEl.innerHTML = renderFooter();
     }
+
+    injectBreadcrumbSchema(opts.trail);
 
     wireThemeToggle();
     wireNavToggle();
