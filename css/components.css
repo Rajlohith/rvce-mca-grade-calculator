@@ -648,6 +648,15 @@ table.ledger input[type=checkbox]{
   margin-bottom:14px;
 }
 
+/* On wide screens the four links already sit inline in one row, so this
+   wrapper (added only to keep GitHub/Contact pairable on their own row
+   on narrow screens — see the mobile grid below) should be invisible to
+   the layout here: display:contents lets GitHub and Contact keep acting
+   as two independent flex children of .footer-links, unchanged from
+   before this wrapper existed. */
+.footer-links-primary{ display:contents; }
+.footer-links-secondary{ display:contents; }
+
 .footer-links a{
   display:inline-flex;
   align-items:center;
@@ -743,6 +752,30 @@ table.ledger input[type=checkbox]{
     gap:2px 4px;
     text-align:center;
     margin-bottom:12px;
+  }
+
+  /* GitHub/Contact sat in the two 1fr columns above, each centered in
+     half the row's width — reading as two far-apart headings. Spanning
+     both columns and switching to a tight inline flex row pulls the
+     pair close together without touching the grid that still places
+     Official Syllabus / Official Handbook in their existing cells. */
+  .footer-links-primary{
+    display:flex;
+    grid-column:1 / -1;
+    justify-content:center;
+    flex-wrap:wrap;
+    gap:6px;
+  }
+
+  /* Same treatment for Official Syllabus / Official Handbook: span both
+     grid columns and pull the pair together with a small flex gap,
+     instead of letting each sit centered in its own half-width column. */
+  .footer-links-secondary{
+    display:flex;
+    grid-column:1 / -1;
+    justify-content:center;
+    flex-wrap:wrap;
+    gap:32px;
   }
 
   .footer-links a{

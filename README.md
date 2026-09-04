@@ -82,6 +82,10 @@ The site is a plain set of statically linked HTML pages: `index.html` at the pro
 - Every calculator has a Save Progress button, gated behind Google Sign-In restricted to RVCE MCA student emails (the `<name>.mca<YY>@rvce.edu.in` format, `YY` being the enrollment year). Signed out, every calculator works identically — nothing is gated behind sign-in except persisting your entries between visits.
 - Data is stored in Firestore, scoped so a signed-in student can only ever read or write their own document (enforced server-side in `firestore.rules`, not just hidden in the UI). There is currently no automatic expiry on this data — it persists indefinitely until the student explicitly clears it or the project's Firestore data is manually purged; there is no scheduled deletion job.
 
+**Achievements & Badges**
+- A collectible set of badges (`pages/achievements.html`) that unlock as a signed-in student actually uses the site — calculating a CIE, sweeping every course in a semester, hitting a perfect CIE, saving progress, toggling dark mode, reading the FAQ or Guide, and more. Some badges are hidden until unlocked and shown only as "Hidden Achievement" until then.
+- Like Save Progress, this is entirely opt-in: nothing is tracked or stored for a signed-out visitor. Unlocked state is stored in the same per-student Firestore document as saved marks and progress (`userMarks/{uid}`, under an `achievements` field) — no separate collection or rules.
+
 **Installable, Works Offline**
 - A PWA manifest and service worker mean the site can be installed to a home screen / as a desktop app, and previously visited pages keep working without a connection. Firebase Auth and Firestore requests always go straight to the network — offline mode covers browsing the calculators, not saving new data while offline.
 
@@ -95,7 +99,7 @@ Only the 2024 scheme is implemented today. A 2026 scheme option is visible on th
 | Styling | Plain CSS, no preprocessor, split into `variables.css`, `base.css`, `layout.css`, `components.css` |
 | Logic | Vanilla JavaScript, ES5-style function scoping, no framework |
 | Data | A single `data/courses.json` file, mirrored as a plain JS object in `js/data.js` |
-| Persistence & Auth | Firebase Authentication (Google Sign-In, restricted to RVCE MCA emails) + Firestore, used only for the optional Save Progress feature |
+| Persistence & Auth | Firebase Authentication (Google Sign-In, restricted to RVCE MCA emails) + Firestore, used only for the optional Save Progress and Achievements features |
 | Offline / Installable | A web app manifest (`manifest.webmanifest`) + service worker (`sw.js`) for offline browsing and home-screen installation |
 | Fonts | Google Fonts (Inter and JetBrains Mono), loaded via a standard `<link>` tag |
 | Build tooling | None. There is no bundler, transpiler or install step of any kind |
@@ -181,52 +185,116 @@ The footer is intentionally minimal: one short paragraph, one row of links, the 
 ```
 rvce-mca-grade-calculator/
 │
-├── index.html                    Home (must stay at the project root)
-├── 404.html                       Custom not-found page
-├── manifest.webmanifest           PWA manifest
-├── sw.js                          Service worker (offline + caching)
-├── robots.txt, sitemap.xml        SEO
-├── firebase.json                  Firebase Hosting config, security headers, CSP
-├── firestore.rules                Firestore access rules (RVCE MCA emails only, own-document only)
-├── firestore.indexes.json         Firestore index config (currently empty — no composite queries)
-├── icons/                         PWA icon set + favicon source
+├── .github/
+│   └── workflows/
+│       ├── ci.yml                            Continuous integration workflow
+│       ├── firebase-hosting-merge.yml        Firebase Hosting deployment on merge
+│       └── firebase-hosting-pull-request.yml Firebase Hosting preview deployment for pull requests
+│
+├── .firebaseignore                           Firebase CLI deployment ignore rules
+├── .firebaserc                               Firebase project configuration
+├── .gitignore                                Git ignore rules
+├── LICENSE                                   Project license
+├── NOTICE                                    License and attribution notices
+├── README.md                                 Project documentation
+├── package.json                              Node.js project and build configuration
+│
+├── index.html                                Home page (must stay at the project root)
+├── 404.html                                  Custom not-found page
+├── manifest.webmanifest                      PWA manifest
+├── sw.js                                     Service worker for offline support and caching
+├── robots.txt                                Search-engine crawler instructions
+├── sitemap.xml                               SEO sitemap
+│
+├── apple-touch-icon.png                      Apple device home-screen icon
+├── favicon.ico                               Browser favicon
+│
+├── firebase.json                             Firebase Hosting configuration, security headers and CSP
+├── firestore.rules                           Firestore access rules
+├── firestore.indexes.json                    Firestore index configuration
+│
+├── icons/
+│   ├── brand-mark.png                        Application brand mark
+│   ├── icon-16.png                           PWA/application icon
+│   ├── icon-32.png                           PWA/application icon
+│   ├── icon-48.png                           PWA/application icon
+│   ├── icon-72.png                           PWA/application icon
+│   ├── icon-96.png                           PWA/application icon
+│   ├── icon-120.png                          PWA/application icon
+│   ├── icon-128.png                          PWA/application icon
+│   ├── icon-144.png                          PWA/application icon
+│   ├── icon-152.png                          PWA/application icon
+│   ├── icon-167.png                          PWA/application icon
+│   ├── icon-180.png                          PWA/application icon
+│   ├── icon-192.png                          PWA/application icon
+│   ├── icon-256.png                          PWA/application icon
+│   ├── icon-384.png                          PWA/application icon
+│   ├── icon-512.png                          PWA/application icon
+│   ├── icon-maskable-192.png                 Maskable PWA icon
+│   ├── icon-maskable-512.png                 Maskable PWA icon
+│   ├── icon.svg                              Scalable application icon
+│   └── social-preview.png                    Social sharing preview image
+│
 ├── pages/
-│   ├── scheme.html                 Step 1: scheme selection
-│   ├── semester.html               Step 2: semester selection (Year 1 / Year 2 grouped)
-│   ├── tools.html                  Step 3: calculator picker for a semester
-│   ├── cie-see.html                CIE Finalization & SEE Marks Required
-│   ├── final-grade.html            Final Grade Calculator
-│   ├── final-gpa.html              Final SGPA Calculator (+ CGPA blend)
-│   ├── cgpa.html                   CGPA Calculator (all semesters)
-│   ├── guide.html                  What each calculator is for and when to use it
-│   └── faq.html                    FAQ
+│   ├── scheme.html                           Step 1: scheme selection
+│   ├── year.html                             Step 2: academic year selection
+│   ├── semester.html                         Step 3: semester selection
+│   ├── tools.html                            Step 4: calculator picker for a semester
+│   ├── cie-see.html                          CIE Finalization and SEE Marks Required calculator
+│   ├── final-grade.html                      Final Grade Calculator
+│   ├── final-gpa.html                        Final SGPA Calculator and CGPA blend
+│   ├── cgpa.html                             CGPA Calculator for all semesters
+│   ├── achievements.html                     Achievements and Badges collection
+│   ├── guide.html                            Calculator usage guide
+│   └── faq.html                              Frequently Asked Questions
+│
 ├── css/
-│   ├── variables.css               design tokens: colors, type, radii
-│   ├── base.css                    resets and base typography
-│   ├── layout.css                  site header (single-row + hamburger), page hero, breadcrumb
-│   └── components.css              cards, forms, tables, buttons, FAQ, footer, guide page
+│   ├── variables.css                         Design tokens: colors, typography and radii
+│   ├── base.css                              Resets and base typography
+│   ├── layout.css                            Header, navigation, page layout and breadcrumb
+│   ├── components.css                        Cards, forms, tables, buttons, FAQ, footer and components
+│   └── app.css                               Generated or bundled application stylesheet
+│
 ├── js/
-│   ├── data.js                     MCA course data and grading constants (mirrors data/courses.json)
-│   ├── grading.js                  shared grading-table helpers (letter to grade point, etc.)
-│   ├── engine.js                   pure calculation functions: CIE, SEE, final grade, SGPA, CGPA
-│   ├── course-picker.js            restricts every course dropdown to data.js, no manual entry
-│   ├── input-guard.js              clamps every numeric field to its min/max, shows a warning
-│   ├── util.js                     shared escaping/formatting/toast helpers
-│   ├── firebase-auth.js            Google Sign-In (RVCE MCA emails only) + Firestore save/load
-│   ├── progress.js                 generic Save Progress serialization used by every calculator page
-│   ├── pwa-register.js             registers the service worker
-│   ├── icons.js                    shared inline-SVG icon set for the colored badges
-│   ├── faqContent.js               FAQ question and answer content
-│   ├── site.js                     shared header, footer, breadcrumb, path and query-string helpers
-│   └── pages/                      one small script per HTML page, wiring that page only
-│       ├── scheme.js, semester.js, tools.js
-│       ├── cie-see.js, final-grade.js, final-gpa.js
-│       └── cgpa.js, faq.js, guide.js
+│   ├── data.js                               MCA course data and grading constants
+│   ├── grading.js                            Shared grading-table and grade-point helpers
+│   ├── engine.js                             Pure CIE, SEE, grade, SGPA and CGPA calculation functions
+│   ├── course-picker.js                      Restricts course dropdowns to defined course data
+│   ├── input-guard.js                        Validates and clamps numeric input values
+│   ├── util.js                               Shared escaping, formatting and toast helpers
+│   ├── firebase-auth.js                      Google Sign-In and Firestore save/load functionality
+│   ├── progress.js                           Shared Save Progress serialization
+│   ├── achievements.js                       Achievement catalog, unlock rules and Firestore persistence
+│   ├── pwa-register.js                       Registers the service worker
+│   ├── splash.js                             Splash/loading screen functionality
+│   ├── icons.js                              Shared inline-SVG icon definitions
+│   ├── faqContent.js                         FAQ questions and answers
+│   ├── site.js                               Shared header, footer, breadcrumb and URL helpers
+│   │
+│   └── pages/
+│       ├── home.js                           Home page logic
+│       ├── scheme.js                         Scheme selection logic
+│       ├── year.js                           Academic year selection logic
+│       ├── semester.js                       Semester selection logic
+│       ├── tools.js                          Calculator picker logic
+│       ├── cie-see.js                        CIE finalization and SEE requirement calculator logic
+│       ├── final-grade.js                    Final grade calculator logic
+│       ├── final-gpa.js                      Final SGPA and CGPA blend calculator logic
+│       ├── cgpa.js                           CGPA calculator logic
+│       ├── achievements.js                   Achievements page logic
+│       ├── faq.js                            FAQ page logic
+│       ├── guide.js                          Guide page logic
+│       └── notfound.js                       Custom 404 page logic
+│
 ├── data/
-│   └── courses.json                canonical course data: semester to courses, credits, CIE/SEE max, syllabus page
-└── docs/
-    ├── MCA-2024-Scheme-Syllabus.pdf   the source syllabus, linked from the app
-    └── PG-2024-Scheme-Handbook.pdf    the source academic handbook, linked from the app
+│   └── courses.json                          Canonical course, credit, marks and syllabus-page data
+│
+├── docs/
+│   ├── MCA-2024-Scheme-Syllabus.pdf          Source MCA 2024 Scheme syllabus
+│   └── PG-2024-Scheme-Handbook.pdf           Source PG 2024 Scheme academic handbook
+│
+└── scripts/
+    └── build-css.mjs                         CSS build script
 ```
 
 `index.html` has to stay at the project root for the site to open correctly at its root URL (for example, on GitHub Pages); every other page lives one level down in `pages/`. `js/site.js` works out which of the two contexts it is running in and adjusts every link it generates accordingly, so nothing else needs to know or care where a given page physically lives.

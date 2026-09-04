@@ -140,6 +140,7 @@ window.MCA = window.MCA || {};
 
         } else {
           window.MCA.currentUser = null;
+          invalidateUserDoc();
           dispatchAuthEvent('signed-out');
           updateAuthUI();
         }
@@ -220,10 +221,11 @@ window.MCA = window.MCA || {};
 
   // Public API
   window.MCA.signInWithGoogle = function(){
-    // The SDK is usually already booted in the background by the idle
-    // callback below. On the rare click that beats it there, this just
-    // finishes booting first — see ensureFirebaseBooted() at the bottom
-    // of this file.
+    // Booting already kicked off immediately when this file first ran (see
+    // ensureFirebaseBooted() at the bottom of this file) — by the time a
+    // visitor can actually click this button it's usually already
+    // resolved. This just makes sure booting has finished (or starts it,
+    // on the rare chance it somehow hasn't yet) before attempting sign-in.
     ensureFirebaseBooted().then(() => {
       if(!window.firebase || !window.MCA.auth){
         window.MCA.util.toast('Firebase not ready yet, try again', 'error');
@@ -253,6 +255,48 @@ window.MCA = window.MCA || {};
       return Promise.reject(new Error('Firestore is not loaded on this page'));
     }
     return Promise.resolve(window.MCA.firestore);
+  }
+
+  // ==========================================================================
+  // Shared read cache for the signed-in student's userMarks/{uid} document.
+  //
+  // Every calculator's saved marks, every page's Save Progress state AND
+  // the Achievements engine's unlocked-badges state all live as different
+  // fields on that SAME single document (see the module comment at the top
+  // of this file) — so, without this, a single page load could easily
+  // trigger two or more separate reads of the exact identical document
+  // (e.g. a calculator page restoring Save Progress via getMarks() below,
+  // while achievements.js separately loads its own state on 'signed-in').
+  // That was genuinely happening before this cache existed.
+  //
+  // Callers now fetch the whole document once per page load (memoized —
+  // concurrent callers share the same in-flight request) and each picks
+  // out only the field it needs. The cache is invalidated after any write
+  // to the document, so a read that happens later in the same page load
+  // never sees data that a save/delete has since made stale.
+  // ==========================================================================
+  let userDocPromise = null;
+  let userDocUid = null;
+
+  function loadUserDoc(){
+    if(!window.MCA.currentUser) return Promise.resolve(null);
+    const uid = window.MCA.currentUser.uid;
+    if(userDocPromise && userDocUid === uid) return userDocPromise;
+
+    userDocUid = uid;
+    userDocPromise = requireFirestore()
+      .then(firestore => firestore.collection('userMarks').doc(uid).get())
+      .then(doc => doc.exists ? doc.data() : null)
+      .catch(err => {
+        console.error('Load user data failed:', err);
+        userDocPromise = null; // don't cache a failure — let a later call retry
+        return null;
+      });
+    return userDocPromise;
+  }
+
+  function invalidateUserDoc(){
+    userDocPromise = null;
   }
 
   /* Save marks to Firestore under current user's document.
@@ -293,6 +337,9 @@ window.MCA = window.MCA || {};
         .doc(userId)
         .set(data, { merge: true });
 
+    }).then(result => {
+      invalidateUserDoc();
+      return result;
     }).catch(err => {
       console.error('Save marks failed:', err);
       window.MCA.util.toast('Could not save marks', 'error');
@@ -302,18 +349,13 @@ window.MCA = window.MCA || {};
 
   /* Load marks from Firestore for current user.
      courseCode: e.g., "MCA121A" or "MCA121A:cie"
-     Returns a Promise that resolves to the value or null if not found */
+     Returns a Promise that resolves to the value or null if not found.
+     Shares the single per-page-load document read with every other
+     caller (see loadUserDoc() above) instead of issuing its own. */
   window.MCA.getMarks = function(courseCode){
     if(!window.MCA.currentUser) return Promise.resolve(null);
-    return requireFirestore().then(firestore => {
-      const userId = window.MCA.currentUser.uid;
-      return firestore.collection('userMarks').doc(userId).get().then(doc => {
-        const data = doc.exists ? doc.data() : null;
-        return (data && Object.prototype.hasOwnProperty.call(data, courseCode)) ? data[courseCode] : null;
-      });
-    }).catch(err => {
-      console.error('Load marks failed:', err);
-      return null;
+    return loadUserDoc().then(data => {
+      return (data && Object.prototype.hasOwnProperty.call(data, courseCode)) ? data[courseCode] : null;
     });
   };
 
@@ -326,6 +368,9 @@ window.MCA = window.MCA || {};
       return firestore.collection('userMarks').doc(userId).update({
         [courseCode]: window.firebase.firestore.FieldValue.delete()
       });
+    }).then(result => {
+      invalidateUserDoc();
+      return result;
     }).catch(err => {
       console.error('Delete marks failed:', err);
       return null;
@@ -436,4 +481,11 @@ window.MCA = window.MCA || {};
   // Export for external access
   window.MCA.isSignedIn = () => !!window.MCA.currentUser;
   window.MCA.currentUser = null;
+
+  // Shared per-page-load document cache (see the block above) — exposed so
+  // other modules that also read fields off userMarks/{uid}, namely
+  // achievements.js, reuse this same cached read instead of issuing their
+  // own separate one.
+  window.MCA.loadUserDoc = loadUserDoc;
+  window.MCA.invalidateUserDoc = invalidateUserDoc;
 })();

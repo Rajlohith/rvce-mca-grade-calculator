@@ -302,17 +302,26 @@ window.MCA = window.MCA || {};
     const doc = firestoreDoc();
     if(!doc){ pendingSave = true; return; }
     pendingSave = false;
-    doc.set({ achievements: state }, { merge:true }).catch(err=>{
+    doc.set({ achievements: state }, { merge:true }).then(()=>{
+      // Keep the shared read cache (js/firebase-auth.js) from serving a
+      // now-stale copy of this document to any later read this page load.
+      if(window.MCA.invalidateUserDoc) window.MCA.invalidateUserDoc();
+    }).catch(err=>{
       console.error('Achievements save failed:', err);
       pendingSave = true; // try again on the next event
     });
   }
 
+  /* Reads through window.MCA.loadUserDoc() — the same per-page-load,
+     per-document read cache that saveMarks()/getMarks() use — rather than
+     issuing this achievement state its own separate .get() of the exact
+     same userMarks/{uid} document that a calculator page may already be
+     reading (e.g. via Save Progress) on the very same page load. */
   function loadFromCloud(){
-    const doc = firestoreDoc();
-    if(!doc) return Promise.resolve();
-    return doc.get().then(snap=>{
-      const data = snap.exists ? snap.data() : null;
+    if(!window.MCA.currentUser || !window.MCA.firestore || !window.MCA.loadUserDoc){
+      return Promise.resolve();
+    }
+    return window.MCA.loadUserDoc().then(data=>{
       const saved = (data && data.achievements) ? data.achievements : null;
       if(saved){
         state.unlocked = Object.assign({}, saved.unlocked, state.unlocked);

@@ -310,33 +310,37 @@ window.MCA = window.MCA || {};
 
     return `
       <div class="footer-links">
-        <a
-          href="${REPO_URL}"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          GitHub
-        </a>
+        <div class="footer-links-primary">
+          <a
+            href="${REPO_URL}"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            GitHub
+          </a>
 
-        <a href="mailto:${EMAIL}">
-          Contact
-        </a>
+          <a href="mailto:${EMAIL}">
+            Contact
+          </a>
+        </div>
 
-        <a
-          href="${SYLLABUS_URL}"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Official Syllabus
-        </a>
+        <div class="footer-links-secondary">
+          <a
+            href="${SYLLABUS_URL}"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            Official Syllabus
+          </a>
 
-        <a
-          href="${HANDBOOK_URL}"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Official Handbook
-        </a>
+          <a
+            href="${HANDBOOK_URL}"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            Official Handbook
+          </a>
+        </div>
       </div>
 
       <div class="legal">
