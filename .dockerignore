@@ -1,0 +1,15 @@
+.git
+.github
+.firebase
+node_modules
+*.md
+LICENSE
+NOTICE
+.gitignore
+.firebaserc
+.firebaseignore
+firebase.json
+firestore.rules
+firestore.indexes.json
+scripts
+package.json
