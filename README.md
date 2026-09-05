@@ -119,7 +119,9 @@ flowchart LR
     Tools --> FinalGpa["Final SGPA"]
 
     Home -.-> Cgpa["CGPA Calculator"]
+    Home -.-> Achievements["Achievements"]
     Home -.-> Faq["FAQ"]
+    Home -.-> Guide["Guide"]
 ```
 
 Scheme is chosen before semester because it is what actually determines everything downstream. The course list, credit structure and CIE/SEE weightage for all four semesters are fixed once per scheme, so locking that choice in first keeps the rest of the wizard consistent. Semester selection groups the four semesters under Year 1 / Year 2 headings on one page, rather than a separate year-selection step, since knowing the semester number is all any calculator downstream actually needs.
