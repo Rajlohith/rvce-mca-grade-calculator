@@ -27,7 +27,7 @@ The two documents this app is built from:
 - [System Architecture](#system-architecture)
   - [Navigation Flow](#navigation-flow)
   - [Course Data Flow](#course-data-flow)
-- [The Five Calculators](#the-five-calculators)
+- [The Four Calculators](#the-four-calculators)
 - [CIE Breakdown by Semester](#cie-breakdown-by-semester)
 - [Input Validation](#input-validation)
 - [Course Data Is Fixed, Not Freehand](#course-data-is-fixed-not-freehand)
@@ -82,7 +82,7 @@ The site is a plain set of statically linked HTML pages: `index.html` at the pro
 - Every calculator has a Save Progress button, gated behind Google Sign-In restricted to RVCE MCA student emails (the `<name>.mca<YY>@rvce.edu.in` format, `YY` being the enrollment year). Signed out, every calculator works identically — nothing is gated behind sign-in except persisting your entries between visits.
 - Data is stored in Firestore, scoped so a signed-in student can only ever read or write their own document (enforced server-side in `firestore.rules`, not just hidden in the UI). There is currently no automatic expiry on this data — it persists indefinitely until the student explicitly clears it or the project's Firestore data is manually purged; there is no scheduled deletion job.
 
-**Achievements & Badges**
+**Achievements**
 - A collectible set of badges (`pages/achievements.html`) that unlock as a signed-in student actually uses the site — calculating a CIE, sweeping every course in a semester, hitting a perfect CIE, saving progress, toggling dark mode, reading the FAQ or Guide, and more. Some badges are hidden until unlocked and shown only as "Hidden Achievement" until then.
 - Like Save Progress, this is entirely opt-in: nothing is tracked or stored for a signed-out visitor. Unlocked state is stored in the same per-student Firestore document as saved marks and progress (`userMarks/{uid}`, under an `achievements` field) — no separate collection or rules.
 
@@ -120,8 +120,8 @@ flowchart LR
 
     Home -.-> Cgpa["CGPA Calculator"]
     Home -.-> Achievements["Achievements"]
-    Home -.-> Faq["FAQ"]
     Home -.-> Guide["Guide"]
+    Home -.-> Faq["FAQ"]
 ```
 
 Scheme is chosen before semester because it is what actually determines everything downstream. The course list, credit structure and CIE/SEE weightage for all four semesters are fixed once per scheme, so locking that choice in first keeps the rest of the wizard consistent. Semester selection groups the four semesters under Year 1 / Year 2 headings on one page, rather than a separate year-selection step, since knowing the semester number is all any calculator downstream actually needs.
@@ -141,15 +141,14 @@ flowchart LR
 
 `js/engine.js` contains no DOM code at all; it is a set of pure functions that take plain values in and return plain result objects out. Every page-level script in `js/pages/` calls into the same engine and renders the result itself, so the CIE math, the SEE math and the grading math can never drift out of sync between pages.
 
-## The Five Calculators
+## The Four Calculators
 
 | Tool | File | What it needs | What it returns |
 | ----- | ----- | ----- | ----- |
 | CIE Finalization & SEE Marks Required | `pages/cie-see.html` | Quiz I-III, Test I-III, EL/PBL, Lab marks | Finalized CIE, plus SEE needed for every grade band |
 | Final Grade Calculator | `pages/final-grade.html` | Finalized CIE total, SEE total | Letter grade, grade point, pass/fail against Table 4.4 |
 | Final SGPA Calculator | `pages/final-gpa.html` | A grade for every course in the semester | SGPA, plus an optional CGPA blend with a prior CGPA |
-| CGPA Calculator | `pages/cgpa.html` | SGPA for each completed semester | CGPA, credit progress bar, projected degree class |
-| FAQ | `pages/faq.html` | Nothing, reference only | Plain-language explanation of every formula above |
+| CGPA Calculator | `pages/cgpa.html` | SGPA for each completed semester | CGPA, credit progress bar, projected degree class 
 
 ## CIE Breakdown by Semester
 
