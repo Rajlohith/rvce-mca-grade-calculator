@@ -26,7 +26,7 @@
      refresh — never indefinitely.
    ========================================================================== */
 
-const CACHE_VERSION = 'mca-calc-v16';
+const CACHE_VERSION = 'mca-calc-v17';
 
 // Extensions this service worker will cache. Everything same-origin that
 // doesn't match this and isn't a page navigation (there currently isn't

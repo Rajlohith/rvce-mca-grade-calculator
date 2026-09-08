@@ -298,7 +298,41 @@ window.MCA = window.MCA || {};
     return window.MCA.firestore.collection('userMarks').doc(window.MCA.currentUser.uid);
   }
 
+  /* ---------- Local (per-uid) cache of last-known unlocked state ----------
+     Firestore is the source of truth, but the very first read of it on a
+     given page load can fail outright when the app is opened with no
+     connection at all (a launch offline never had a chance to reach the
+     server, and there's nothing in Firestore's own in-memory cache yet
+     either — see loadFromCloud() below). Without a local fallback, that
+     failure used to be indistinguishable from "this student has never
+     unlocked anything": the in-memory `state` had already been reset to
+     empty right before the failed read, so it stayed empty, and any
+     already-earned achievement whose event fires again on its own (most
+     notably Home Screen Hero's `pwa_launch`, checked on every standalone
+     launch) would re-unlock and pop its "Achievement Unlocked!" toast a
+     second time. Mirroring the last successful read/write here — and
+     seeding `state` from it before the network round-trip even starts —
+     means an offline launch still knows what was already unlocked. */
+  function cacheKey(uid){ return 'mca-achv-cache:' + uid; }
+
+  function loadLocalCache(uid){
+    try{
+      const raw = localStorage.getItem(cacheKey(uid));
+      if(!raw) return null;
+      const parsed = JSON.parse(raw);
+      return (parsed && typeof parsed === 'object') ? parsed : null;
+    }catch(e){ return null; } // storage disabled/unavailable — just skip the cache
+  }
+
+  function saveLocalCache(){
+    const user = window.MCA.currentUser;
+    if(!user) return;
+    try{ localStorage.setItem(cacheKey(user.uid), JSON.stringify(state)); }
+    catch(e){ /* storage full/disabled — cloud sync still works, non-fatal */ }
+  }
+
   function persist(){
+    saveLocalCache();
     const doc = firestoreDoc();
     if(!doc){ pendingSave = true; return; }
     pendingSave = false;
@@ -333,10 +367,14 @@ window.MCA = window.MCA || {};
         state.sets = mergedSets;
       }
       stateLoaded = true;
+      saveLocalCache(); // refresh the offline fallback with what the cloud just confirmed
       if(pendingSave) persist();
     }).catch(err=>{
       console.error('Achievements load failed:', err);
-      stateLoaded = true; // don't block forever — degrade to session-only
+      // Degrade to whatever `state` already holds (seeded from the local
+      // cache on 'signed-in', below) instead of wiping it — an offline
+      // read failure must never look like "nothing unlocked yet".
+      stateLoaded = true;
     });
   }
 
@@ -455,9 +493,18 @@ window.MCA = window.MCA || {};
   }
 
   /* ---------- Wiring ---------- */
-  document.addEventListener('signed-in', ()=>{
+  document.addEventListener('signed-in', (e)=>{
     stateLoaded = false;
-    state = { unlocked:{}, sets:{} };
+    // Seed from the last-known local cache for this specific student
+    // (see loadLocalCache above) rather than a blank slate, so that if
+    // the Firestore read below never completes — no connection at
+    // launch — already-unlocked achievements are still recognized as
+    // already-unlocked instead of firing all over again.
+    const uid = e.detail && e.detail.uid;
+    const cached = uid ? loadLocalCache(uid) : null;
+    state = cached
+      ? { unlocked: Object.assign({}, cached.unlocked), sets: Object.assign({}, cached.sets) }
+      : { unlocked:{}, sets:{} };
     loadFromCloud().then(()=>{
       authResolved = true;
       flushPending();

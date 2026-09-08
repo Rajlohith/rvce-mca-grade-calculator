@@ -16,6 +16,30 @@
    0px and then jump to its real height once site.js renders the nav —
    that collapse/expand was a major Cumulative Layout Shift contributor
    in Lighthouse audits. */
+/* ---------- Offline indicator ----------
+   Sits above the header, sticky to the very top of the viewport, and
+   only ever takes up space (display:none otherwise) when the browser
+   reports no connection — see the 'online'/'offline' wiring in
+   site.js. Its own z-index is one above the header's so it's never
+   hidden behind it, and .mca-offline nudges the header's own sticky
+   offset down by the banner's height so the two never overlap while
+   scrolling. */
+#mca-offline-banner{
+  display: none;
+  position: sticky;
+  top: 0;
+  z-index: 21;
+  background: var(--crimson);
+  color: #fff;
+  text-align: center;
+  font-size: 12.5px;
+  font-weight: 700;
+  padding: 9px 16px;
+  line-height: 1.4;
+}
+#mca-offline-banner.show{ display: block; }
+html.mca-offline .site-header{ top: 38px; }
+
 .site-header{
   background: var(--header-bg);
   backdrop-filter: blur(8px);

@@ -424,6 +424,41 @@ window.MCA = window.MCA || {};
     wireNavToggle();
   }
 
+  /* ---------- Offline indicator ----------
+     A slim banner at the very top of the page, above the header, that
+     appears the instant the browser has no connection (whether that's a
+     mid-visit drop or the PWA being opened offline to begin with) and
+     disappears the instant it's back. The calculators themselves already
+     keep working fully offline (that's the point of the service worker —
+     see sw.js) — this only ever informs, it never blocks or disables
+     anything. Self-contained and independent of mount(): it renders once
+     per page load and isn't re-created by later mount() calls. */
+  function ensureOfflineBanner(){
+    let el = document.getElementById('mca-offline-banner');
+    if(el) return el;
+    el = document.createElement('div');
+    el.id = 'mca-offline-banner';
+    el.setAttribute('role', 'status');
+    el.setAttribute('aria-live', 'polite');
+    el.textContent = "You're offline. The calculators will still work, but you'll need an internet connection to sign in or save your progress.";
+    document.body.insertBefore(el, document.body.firstChild);
+    return el;
+  }
+
+  function updateOfflineBanner(){
+    const offline = !navigator.onLine;
+    ensureOfflineBanner().classList.toggle('show', offline);
+    document.documentElement.classList.toggle('mca-offline', offline);
+  }
+
+  window.addEventListener('online', updateOfflineBanner);
+  window.addEventListener('offline', updateOfflineBanner);
+  if(document.readyState === 'loading'){
+    document.addEventListener('DOMContentLoaded', updateOfflineBanner);
+  } else {
+    updateOfflineBanner();
+  }
+
   /* ---------- Public API ---------- */
 
   window.MCA.site = {
