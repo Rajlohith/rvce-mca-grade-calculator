@@ -150,6 +150,30 @@ flowchart LR
 | Final SGPA Calculator | `pages/final-gpa.html` | A grade for every course in the semester | SGPA, plus an optional CGPA blend with a prior CGPA |
 | CGPA Calculator | `pages/cgpa.html` | SGPA for each completed semester | CGPA, credit progress bar, projected degree class 
 
+## Beat Yourself & MCA Journey
+
+The CGPA Calculator includes two additional features designed to help students look beyond their current CGPA and understand their progress toward completing the MCA program.
+
+### Beat Yourself
+
+A goal-setting feature that lets students set a target CGPA and the semester by which they want to reach it.
+
+- Set a target CGPA and target semester.
+- See the average SGPA needed across the remaining semesters to reach that goal.
+- Compare the required performance against completed semesters.
+- Track progress visually as more semester results are added.
+
+This makes it easier to turn a long-term CGPA goal into a clear semester-by-semester performance target.
+
+### MCA Journey
+
+A visual timeline on the CGPA Calculator that represents the complete four-semester MCA journey as connected nodes on a single path.
+
+- All four semesters are shown as milestones in the MCA program.
+- Completed semesters display their entered SGPA and resulting CGPA progress.
+- The selected target semester can show a projected CGPA based on the student's goal.
+- The timeline provides an overall visual indication of progress toward completing all four semesters and the MCA program.
+
 ## CIE Breakdown by Semester
 
 The Quiz and Test split is identical in every semester: three quizzes out of 10 each (best two count, out of 20), and three tests out of 50 each (best two count, scaled down to 40). What sits alongside that, for a course with an integrated lab, changes by semester:
