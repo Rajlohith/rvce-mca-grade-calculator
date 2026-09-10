@@ -28,6 +28,7 @@ The two documents this app is built from:
   - [Navigation Flow](#navigation-flow)
   - [Course Data Flow](#course-data-flow)
 - [The Four Calculators](#the-four-calculators)
+- [Beat Yourself & MCA Journey](#beat-yourself--mca-journey)
 - [CIE Breakdown by Semester](#cie-breakdown-by-semester)
 - [Input Validation](#input-validation)
 - [Course Data Is Fixed, Not Freehand](#course-data-is-fixed-not-freehand)
