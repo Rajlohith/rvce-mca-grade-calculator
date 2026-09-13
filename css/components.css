@@ -767,6 +767,10 @@ table.ledger input[type=checkbox]{
     gap:6px;
   }
 
+  .footer-links-primary a:last-child{
+    padding-left:4px; /* pushes Official Syllabus left, Handbook stays put */
+  }
+
   /* Same treatment for Official Syllabus / Official Handbook: span both
      grid columns and pull the pair together with a small flex gap,
      instead of letting each sit centered in its own half-width column. */
@@ -775,11 +779,12 @@ table.ledger input[type=checkbox]{
     grid-column:1 / -1;
     justify-content:center;
     flex-wrap:wrap;
-    gap:6px;
+    gap:0.9px;
   }
 
   .footer-links-secondary a:last-child{
-    margin-left:55px; /* pushes Official Handbook right, Syllabus stays put */
+    left:2.6px; /* pushes Official Handbook right, Syllabus stays put */
+    position:relative;
   }
 
   .footer-links a{

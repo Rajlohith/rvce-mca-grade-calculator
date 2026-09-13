@@ -310,6 +310,23 @@ window.MCA = window.MCA || {};
 
     return `
       <div class="footer-links">
+      <div class="footer-links-secondary">
+        <a
+          href="${SYLLABUS_URL}"
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          Official Syllabus
+        </a>
+
+        <a
+          href="${HANDBOOK_URL}"
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          Official Handbook
+        </a>
+      </div>
         <div class="footer-links-primary">
           <a
             href="${REPO_URL}"
@@ -324,23 +341,6 @@ window.MCA = window.MCA || {};
           </a>
         </div>
 
-        <div class="footer-links-secondary">
-          <a
-            href="${SYLLABUS_URL}"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Official Syllabus
-          </a>
-
-          <a
-            href="${HANDBOOK_URL}"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Official Handbook
-          </a>
-        </div>
       </div>
 
       <div class="legal">
