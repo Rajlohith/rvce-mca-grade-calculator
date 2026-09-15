@@ -29,6 +29,14 @@
      had no use for it; now that every page has a legitimate use for it,
      that branching was just adding latency for no benefit — see the
      comment above ensureFirebaseBooted() further down for the full story.
+   - ensureFirebaseBooted() is triggered on browser-idle (see bootWhenIdle()
+     near the bottom of this file), not the instant this script runs.
+     Firing it synchronously used to compete with the browser's first
+     paint for main-thread time on slow mobile CPUs, which Lighthouse
+     surfaced as a large "element render delay" contribution to LCP even
+     though the hero text itself needs no JS to render. Sign-in and
+     Save-progress actions still boot on demand immediately regardless of
+     idle timing — see signInWithGoogle() and requireFirestore().
    - authDomain is this project's own Hosting domain
      (rvce-mca-grade-calc.web.app), not the default *.firebaseapp.com one.
      Firebase Hosting automatically proxies the reserved /__/auth/* paths
@@ -251,10 +259,16 @@ window.MCA = window.MCA || {};
   };
 
   function requireFirestore(){
-    if(!window.MCA.firestore){
-      return Promise.reject(new Error('Firestore is not loaded on this page'));
-    }
-    return Promise.resolve(window.MCA.firestore);
+    // ensureFirebaseBooted() is memoized and safe to call any number of
+    // times — this just guarantees booting has been kicked off (or is
+    // already done) before we check for window.MCA.firestore, rather than
+    // assuming something else already triggered it.
+    return ensureFirebaseBooted().then(() => {
+      if(!window.MCA.firestore){
+        throw new Error('Firestore is not loaded on this page');
+      }
+      return window.MCA.firestore;
+    });
   }
 
   // ==========================================================================
@@ -389,11 +403,14 @@ window.MCA = window.MCA || {};
   // That distinction no longer exists: every page now sets
   // data-needs-firestore="true" (Achievements needs to read/write a
   // student's unlocked badges from anywhere on the site, not just the
-  // calculator pages), so NEEDS_FIRESTORE is true everywhere. Gating an
-  // unconditional need behind "wait for idle, or wait for the visitor to
-  // do something first" was only ever adding latency before the sign-in
-  // button could turn into a name — so this now boots immediately, on
-  // every page, same as it always did before that optimization existed.
+  // calculator pages), so NEEDS_FIRESTORE is true everywhere — there's no
+  // more per-page branching on whether to load Firestore at all.
+  //
+  // Whether ensureFirebaseBooted() below is triggered immediately, on
+  // idle, or on first interaction is a separate question from that
+  // branching, and has changed again since the paragraph above was
+  // written — see the bootWhenIdle() comment near the bottom of this file
+  // for the current (idle-triggered) behavior and why.
   // ========================================================================
   function loadScript(src){
     return new Promise((resolve, reject) => {
@@ -474,9 +491,39 @@ window.MCA = window.MCA || {};
     return bootPromise;
   }
 
-  // Kick off immediately — see the comment above this block for why this
-  // is no longer conditional on idle time or a first interaction.
-  ensureFirebaseBooted();
+  // Kick off booting once the browser is idle, rather than the instant
+  // this script runs.
+  //
+  // Firing ensureFirebaseBooted() synchronously (as this used to do) meant
+  // the ~130 KiB Auth+Firestore compat bundle was fetched, parsed, and
+  // executed while the browser still had layout/paint work left for the
+  // very first view. On a throttled mobile CPU that main-thread
+  // contention was directly delaying First Contentful Paint and Largest
+  // Contentful Paint — Lighthouse's LCP breakdown showed multiple seconds
+  // of pure "element render delay" on a page whose hero text has no
+  // image/resource dependency of its own, which is the signature of the
+  // main thread being busy with something else instead of painting.
+  //
+  // requestIdleCallback lets the browser finish that first paint before
+  // this starts; the timeout is a safety net so it still fires promptly
+  // even on a page that never goes idle. This does NOT change when
+  // booting actually happens for anyone who needs it sooner: both
+  // signInWithGoogle() and requireFirestore() call ensureFirebaseBooted()
+  // themselves first, so a click on "Sign in" or a "Save progress" action
+  // still boots immediately on demand — this only removes the unconditional
+  // early trigger for visitors who haven't done either yet.
+  function bootWhenIdle(){
+    if('requestIdleCallback' in window){
+      requestIdleCallback(ensureFirebaseBooted, { timeout: 2000 });
+    } else {
+      setTimeout(ensureFirebaseBooted, 0);
+    }
+  }
+  if(document.readyState === 'complete'){
+    bootWhenIdle();
+  } else {
+    window.addEventListener('load', bootWhenIdle, { once: true });
+  }
 
   // Export for external access
   window.MCA.isSignedIn = () => !!window.MCA.currentUser;
