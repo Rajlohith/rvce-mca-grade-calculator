@@ -23,9 +23,9 @@
 
   if(window.MCA.achievements) window.MCA.achievements.track('tool_page_viewed', { tool:'cie-see', semester });
 
-  // Semester I keeps the original Lab(/40)+Lab EL(/10) split. Semester II
-  // and III use the PBL-merged breakdown instead.
-  const labScheme = (semester === 'II' || semester === 'III') ? 'sem23' : 'sem1';
+  // Semester I and II use the EL-based breakdown (THEORY-LAB-150 sub-category).
+  // Only Semester III uses the PBL-merged breakdown (MCA-THEORY-LAB-EL-150).
+  const labScheme = (semester === 'III') ? 'sem23' : 'sem1';
   // Project, Internship and NPTEL/online courses aren't evaluated through
   // CIE+SEE at all (see FAQ: "Why don't I see every course on the CIE and
   // Final Grade pages?") — they're graded a different way entirely, so a
@@ -38,9 +38,10 @@
   const GROUP_LABELS = {
     'theory-lab': 'Theory + Lab',
     'theory': 'Theory Only',
-    'lab': 'Lab Only'
+    'lab': 'Lab Only',
+    'seminar': 'Seminar'
   };
-  const GROUP_ORDER = ['theory-lab', 'theory', 'lab'];
+  const GROUP_ORDER = ['theory-lab', 'theory', 'lab', 'seminar'];
 
   const COPY_SVG = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>`;
 
@@ -94,6 +95,13 @@
           <div class="field"><label>Experiential Learning <span class="hint">/10</span></label><input type="number" class="f-ellab req" min="0" max="10" value=""></div>
         </div>`;
     }
+    if(type==='seminar'){
+      return `
+        <div class="field-row-2">
+          <div class="field"><label>Project Phase 1 <span class="hint">/50</span></label><input type="number" class="f-phase1 req" min="0" max="50" value=""></div>
+          <div class="field"><label>Project Phase 2 <span class="hint">/50</span></label><input type="number" class="f-phase2 req" min="0" max="50" value=""></div>
+        </div>`;
+    }
     return '';
   }
 
@@ -112,6 +120,12 @@
         <span class="credit-badge">${course.credits} Credit</span>
       </div>`;
 
+    // Seminar courses (Technical Seminar) use Phase 1 + Phase 2 as the
+    // complete assessment — there is no separate SEE component, so the
+    // SEE Requirements button is not shown for them.
+    const seeButtonHTML = course.type === 'seminar'
+      ? ''
+      : '<button type="button" class="locked-btn see-btn" disabled>SEE Marks Required</button>';
     return `<div class="course-card" data-code="${course.code}" data-type="${course.type}">
       ${head}
       ${fieldsHTML(course.type)}
@@ -119,7 +133,7 @@
         <button type="button" class="btn amber full calc-btn">Calculate CIE</button>
       </div>
       <div class="course-result"></div>
-      <button type="button" class="locked-btn see-btn" disabled>SEE Marks Required</button>
+      ${seeButtonHTML}
     </div>`;
   }
 
@@ -204,8 +218,7 @@
       if(missing.length) parts.push(`${missing.length} other field${missing.length===1?'':'s'}`);
       card.querySelector('.course-result').innerHTML = `<div class="callout error">Still need: ${parts.join(', ')}.</div>`;
       const seeBtn = card.querySelector('.see-btn');
-      seeBtn.disabled = true;
-      seeBtn.classList.remove('ready');
+      if(seeBtn){ seeBtn.disabled = true; seeBtn.classList.remove('ready'); }
       const firstBad = (quizShort && quizInputs.find(i=>!isFilled(i)))
         || (testShort && testInputs.find(i=>!isFilled(i)))
         || missing[0];
@@ -220,7 +233,9 @@
       el: readVal(card,'f-el'),
       elLab: readVal(card,'f-ellab'),
       lab: (type==='theory-lab' && labScheme==='sem23') ? readVal(card,'f-labsem23') : readVal(card,'f-lab'),
-      pbl: readVal(card,'f-pbl')
+      pbl: readVal(card,'f-pbl'),
+      phase1: readVal(card,'f-phase1'),
+      phase2: readVal(card,'f-phase2')
     };
     const cieLabScheme = type==='theory-lab' ? labScheme : undefined;
     const r = computeCIE(type, vals, cieLabScheme);
@@ -264,19 +279,22 @@
       ${finalNote}`;
 
     const seeBtn = card.querySelector('.see-btn');
-    if(r.dx){
-      // Section 4.2: falling short of the CIE floor means the course is
-      // marked 'DX' — the student isn't eligible to sit the SEE for it at
-      // all, so the SEE Marks Required tool would be showing a meaningless
-      // "what SEE do I need" projection. Keep the button disabled and say
-      // why, instead of letting them proceed. See Bug #3.
-      seeBtn.disabled = true;
-      seeBtn.classList.remove('ready');
-      seeBtn.textContent = 'Not Eligible for SEE (DX)';
-    } else {
-      seeBtn.disabled = false;
-      seeBtn.classList.add('ready');
-      seeBtn.textContent = 'SEE Marks Required';
+    // Seminar courses don't render the SEE button (no separate SEE component).
+    if(seeBtn){
+      if(r.dx){
+        // Section 4.2: falling short of the CIE floor means the course is
+        // marked 'DX' — the student isn't eligible to sit the SEE for it at
+        // all, so the SEE Marks Required tool would be showing a meaningless
+        // "what SEE do I need" projection. Keep the button disabled and say
+        // why, instead of letting them proceed. See Bug #3.
+        seeBtn.disabled = true;
+        seeBtn.classList.remove('ready');
+        seeBtn.textContent = 'Not Eligible for SEE (DX)';
+      } else {
+        seeBtn.disabled = false;
+        seeBtn.classList.add('ready');
+        seeBtn.textContent = 'SEE Marks Required';
+      }
     }
   }
 
@@ -351,7 +369,8 @@
     if(!state) return;
     const labInput = document.getElementById('labSeeFixedInput');
     const labSeeFixed = (labInput && labInput.value !== '') ? parseFloat(labInput.value) : null;
-    const reqs = allGradeRequirements(state.type, state.total, state.max, labSeeFixed);
+    const modalCourse = courses.find(c => c.code === currentModalCode);
+    const reqs = allGradeRequirements(state.type, state.total, state.max, labSeeFixed, modalCourse);
     modalRows.innerHTML = reqs.map(r => `
       <div class="grade-req-row ${r.achievable ? '' : 'unreachable'}">
         <div class="gp-circle">${r.gp}</div>
@@ -374,7 +393,8 @@
     if(!state) return;
     const labInput = document.getElementById('labSeeFixedInput');
     const labSeeFixed = (labInput && labInput.value !== '') ? parseFloat(labInput.value) : null;
-    const reqs = allGradeRequirements(state.type, state.total, state.max, labSeeFixed);
+    const copyAllCourse = courses.find(c => c.code === currentModalCode);
+    const reqs = allGradeRequirements(state.type, state.total, state.max, labSeeFixed, copyAllCourse);
     const text = `${modalSubject.textContent} - CIE ${modalCie.textContent}\n` +
       reqs.map(r => `Grade ${r.grade} (${r.gp}): ${r.label}${r.achievable ? '' : ' - not reachable'}`).join('\n');
     const btn = e.currentTarget;
