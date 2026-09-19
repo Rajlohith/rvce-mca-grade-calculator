@@ -372,6 +372,6 @@ Licensed under the [Apache License, Version 2.0](LICENSE). See `NOTICE` for the 
 
 Major inspiration drawn for creating this project from an existing live project facilitating UG programs at RVCE.
 
-Repo: https://github.com/Vidisha231106/rvce-grade-calculator
+Repo: https://github.com/VivaanHooda/rvce-grade-calculator
 
 Site: https://rvce-grade-calculator.vercel.app/
