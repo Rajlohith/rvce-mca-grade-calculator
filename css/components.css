@@ -50,10 +50,18 @@
 .badge.no{ background:var(--crimson-bg); color:var(--crimson); }
 
 .breakdown{ font-size:13.5px; display:flex; flex-direction:column; gap:6px; margin-top:8px; }
-.breakdown .row{ display:flex; justify-content:space-between; gap:12px; color:var(--ink-faint); }
+.breakdown .row{ display:flex; justify-content:space-between; align-items:baseline; gap:12px; color:var(--ink-faint); }
+.breakdown .row span:first-child{ white-space:nowrap; }
+.breakdown .row span:last-child{ text-align:right; }
 .breakdown .row.total{ border-top:1px solid var(--line-strong); padding-top:8px; margin-top:4px; font-weight:700; font-size:13px; flex-wrap:nowrap; color:var(--ink-faint); }
 .breakdown .row.total span:first-child{ color:var(--ink-soft); font-weight:500; white-space:nowrap; }
 .breakdown .row.total b{ color:#fff; }
+@media (max-width:480px){
+  .breakdown .row{ flex-wrap:nowrap; align-items:baseline; gap:8px; }
+  .breakdown .row span:first-child{ font-size:12px; color:var(--ink-faint); flex:0 0 auto; }
+  .breakdown .row span:last-child{ font-size:clamp(10.5px,3.4vw,13px); font-weight:700; color:var(--ink); text-align:right; white-space:nowrap; min-width:0; }
+  .breakdown .row.total span:last-child{ font-size:clamp(10.5px,3.4vw,13px); font-weight:700; color:inherit; }
+}
 
 /* ---------- Tables (SGPA / CGPA) ---------- */
 table.ledger{ width:100%; border-collapse:collapse; margin-top:8px; }

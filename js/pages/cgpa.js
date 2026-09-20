@@ -180,7 +180,7 @@
     document.getElementById('cgResult').innerHTML = `
       <div style="flex:1">
         <div class="breakdown">
-          <div class="row"><span>Completed semesters counted</span><span>${rows.length} / ${Object.keys(DATA.semesters).length}</span></div>
+          <div class="row"><span>Semesters counted</span><span>${rows.length} of ${Object.keys(DATA.semesters).length}</span></div>
           <div class="row total"><span>CGPA</span><span>${fmt(r.cgpa)}</span></div>
           <div class="row"><span>Projected class</span><span>${r.cls}</span></div>
         </div>
