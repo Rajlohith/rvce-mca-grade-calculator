@@ -31,18 +31,24 @@
   const MAX_BY_TYPE = {
     theory:      { cieMax:100, seeMax:100 },
     'theory-lab':{ cieMax:150, seeMax:150 },
-    lab:         { cieMax:50,  seeMax:50 }
+    lab:         { cieMax:50,  seeMax:50  },
+    seminar:     { cieMax:50,  seeMax:50  }  // Phase 1 (/50) + Phase 2 (/50)
   };
   const courses = coursesFor(semester).filter(c => !['project','internship','nptel'].includes(c.type));
   const standardCourseCount = courses.length;
   const calculatedCodes = new Set();
 
+  // Semester II and III share the PBL scheme; Semester I uses EL.
+  // Used to pick the correct theory-lab SEE floor in computeFinalGrade.
+  const labScheme = (semester === 'II' || semester === 'III') ? 'sem23' : 'sem1';
+
   const GROUP_LABELS = {
     'theory-lab': 'Theory + Lab',
     'theory': 'Theory Only',
-    'lab': 'Lab Only'
+    'lab': 'Lab Only',
+    'seminar': 'Seminar'
   };
-  const GROUP_ORDER = ['theory-lab', 'theory', 'lab'];
+  const GROUP_ORDER = ['theory-lab', 'theory', 'lab', 'seminar'];
 
   function cardTitleHTML(course){
     if(course.electives && course.electives.length){
@@ -59,12 +65,16 @@
         <span class="credit-badge">${course.credits} Credit</span>
       </div>`;
 
-    const { cieMax, seeMax } = MAX_BY_TYPE[course.type];
+    const { cieMax, seeMax } = MAX_BY_TYPE[course.type] || MAX_BY_TYPE.lab;
+    // Seminar (MCA492L) is evaluated as two internal project phases, so
+    // relabel the fields accordingly rather than showing "CIE / SEE".
+    const cieLabel = course.type === 'seminar' ? 'Project Phase 1' : 'CIE total';
+    const seeLabel = course.type === 'seminar' ? 'Project Phase 2' : 'SEE total';
     return `<div class="course-card" data-code="${course.code}" data-type="${course.type}">
       ${head}
       <div class="field-row stacked">
-        <div class="field"><label>CIE total <span class="hint">/${cieMax}</span></label><input type="number" class="f-cie req" min="0" max="${cieMax}" value=""></div>
-        <div class="field"><label>SEE total <span class="hint">/${seeMax}</span></label><input type="number" class="f-see req" min="0" max="${seeMax}" value=""></div>
+        <div class="field"><label>${cieLabel} <span class="hint">/${cieMax}</span></label><input type="number" class="f-cie req" min="0" max="${cieMax}" value=""></div>
+        <div class="field"><label>${seeLabel} <span class="hint">/${seeMax}</span></label><input type="number" class="f-see req" min="0" max="${seeMax}" value=""></div>
       </div>
       <div class="toolbar"><button type="button" class="btn amber full calc-btn">Calculate Grade</button></div>
       <div class="course-result"></div>
@@ -116,7 +126,7 @@
     const code = card.dataset.code;
     const cie = card.querySelector('.f-cie').value;
     const see = card.querySelector('.f-see').value;
-    const r = computeFinalGrade(type, { cie, see });
+    const r = computeFinalGrade(type, { cie, see }, labScheme);
 
     calculatedCodes.add(code);
     if(window.MCA.achievements){

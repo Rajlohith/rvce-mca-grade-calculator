@@ -98,6 +98,18 @@ window.MCA.DATA = {
       "totalCredits": 19,
       "courses": [
         {
+          "code": "MMA001TA",
+          "title": "Bridge Course Mathematics",
+          "ltp": "3-1-0",
+          "credits": 0,
+          "type": "theory",
+          "cie": 50,
+          "see": 0,
+          "page": 0,
+          "core": false,
+          "note": "Credit-less qualifying course; CIE only, no SEE"
+        },
+        {
           "code": "MMA211TD",
           "title": "Discrete Mathematics and Probability Theory",
           "ltp": "3-1-0",
@@ -301,7 +313,8 @@ window.MCA.DATA = {
           "cie": 50,
           "see": 50,
           "page": 53,
-          "core": true
+          "core": true,
+          "seeFloor": 20
         }
       ]
     },
@@ -407,7 +420,7 @@ window.MCA.DATA = {
           "title": "Technical Seminar",
           "ltp": "0-0-1",
           "credits": 1,
-          "type": "lab",
+          "type": "seminar",
           "cie": 50,
           "see": 50,
           "page": 75,

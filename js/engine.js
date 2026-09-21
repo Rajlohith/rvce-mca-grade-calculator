@@ -83,11 +83,26 @@ window.MCA = window.MCA || {};
         ['Theory CIE subtotal', fmt(theoryCIE)+' / 100'],
         ['Lab (record + test)', fmt(lab)+' / 50'],
       ];
-      const thOk = quizTest>=24 && theoryCIE>=40;
+      const thOk = quizTest>=30 && theoryCIE>=50;
       const labOk = lab>=25;
       const totOk = total>=75;
       passesFloor = thOk && labOk && totOk;
-      note = `Floors: Theory Quiz+Test &ge;24/60 &amp; Theory CIE &ge;40/100 (${thOk?'met':'not met'}); Lab &ge;25/50 (${labOk?'met':'not met'}); combined &ge;75/150 (${totOk?'met':'not met'}).`;
+      note = `Floors: Theory Quiz+Test &ge;30/60 &amp; Theory CIE &ge;50/100 (${thOk?'met':'not met'}); Lab &ge;25/50 (${labOk?'met':'not met'}); combined &ge;75/150 (${totOk?'met':'not met'}).`;
+    } else if(type==='seminar'){
+      /* Semester IV Technical Seminar: evaluated in two internal project
+         phases rather than through the standard Quiz/Test/EL/Lab framework.
+         Both Phase 1 and Phase 2 are graded internally; their combined mark
+         forms the full CIE record for the course. */
+      const phase1 = clampNum(v.phase1,0,50);
+      const phase2 = clampNum(v.phase2,0,50);
+      total = phase1+phase2; max = 100;
+      rows = [
+        ['Project Phase 1', fmt(phase1)+' / 50'],
+        ['Project Phase 2', fmt(phase2)+' / 50'],
+      ];
+      const ok = total>=25;
+      passesFloor = ok;
+      note = `Floor: combined &ge;25/100 - yours: <b style="color:${ok?'#16a34a':'#dc2626'}">${fmt(total)}/100 ${ok?'(met)':'(not met)'}</b>.`;
     } else {
       const lab=clampNum(v.lab,0,40);
       const elLab=clampNum(v.elLab,0,10);
@@ -128,9 +143,12 @@ window.MCA = window.MCA || {};
      Takes the CIE total and max straight from computeCIE() above — SEE
      itself is unaffected by which CIE breakdown applied and stays
      Theory 100 + Lab 50 either way. */
-  function estimateSEE(type, cie, cieMax, targetPct){
+  function estimateSEE(type, cie, cieMax, targetPct, courseData){
     const seeMax = type==='theory' ? 100 : type==='theory-lab' ? 150 : 50;
-    const floor = type==='theory' ? 40 : type==='theory-lab' ? 65 : 25;
+    // theory-lab floor: Sem I (EL) = 60/150; Sems II & III (PBL) = 75/150.
+    // Without labScheme context, 60 is the conservative minimum.
+    // courseData?.seeFloor overrides the default (e.g. MCA427DL lab: 20/50).
+    const floor = courseData?.seeFloor ?? (type==='theory' ? 40 : type==='theory-lab' ? 60 : 25);
     const cieLabel = type==='theory' ? 'CIE' : type==='theory-lab' ? 'CIE (Theory+Lab)' : 'CIE';
     const maxTotal = cieMax+seeMax;
     const neededAgg = targetPct/100*maxTotal;
@@ -148,10 +166,13 @@ window.MCA = window.MCA || {};
      Given a finalized CIE and, for a theory+lab course, an optional fixed
      Lab SEE contribution, returns what's needed in SEE for every passing
      grade band at once, instead of checking one target at a time. */
-  function allGradeRequirements(type, cie, cieMax, labSeeFixed){
+  function allGradeRequirements(type, cie, cieMax, labSeeFixed, courseData){
     const bands = window.MCA.DATA.grading.bands.filter(b => b.grade !== 'F');
     const seeMax = type==='theory' ? 100 : type==='theory-lab' ? 150 : 50;
-    const combinedFloor = type==='theory' ? 40 : type==='theory-lab' ? 65 : 25;
+    // theory-lab floor: Sem I (EL) = 60/150; Sems II & III (PBL) = 75/150.
+    // Without labScheme context, 60 is the conservative minimum.
+    // courseData?.seeFloor overrides for courses with a non-standard floor (e.g. MCA427DL lab: 20/50).
+    const combinedFloor = courseData?.seeFloor ?? (type==='theory' ? 40 : type==='theory-lab' ? 60 : 25);
     const maxTotal = cieMax+seeMax;
     const hasLabSplit = type==='theory-lab' && labSeeFixed !== null && labSeeFixed !== undefined && !isNaN(labSeeFixed);
     // Table 4.4: Practice component of SEE must independently be >=50% of
@@ -159,7 +180,10 @@ window.MCA = window.MCA || {};
     // A fixed Lab SEE entry below this floor makes the course unpassable
     // no matter what the theory SEE is, so it must never be reported as
     // achievable (this was previously missed — see Bug #4).
-    const labSeeMeetsFloor = !hasLabSplit || (labSeeFixed >= 25 && labSeeFixed <= 50);
+    // Sem I (EL): Lab SEE floor = 20/50; Sems II & III (PBL): 25/50.
+    // Without labScheme context use 20 as the conservative minimum so Sem I
+    // students with a valid 20-24 lab SEE aren't incorrectly blocked.
+    const labSeeMeetsFloor = !hasLabSplit || (labSeeFixed >= 20 && labSeeFixed <= 50);
 
     return bands.map(b=>{
       const neededAgg = b.min/100*maxTotal;
@@ -174,7 +198,7 @@ window.MCA = window.MCA || {};
             achievable: false,
             label: labSeeFixed > 50
               ? `Lab SEE can't exceed 50/50`
-              : `Lab SEE must be &ge;25/50 to pass at all (${labLabel} is below the floor)`
+              : `Lab SEE must be &ge;20/50 to pass at all (${labLabel} is below the floor)`
           };
         }
         return {
@@ -215,12 +239,22 @@ window.MCA = window.MCA || {};
     return { cieMax:50, seeMax:50 };
   }
 
-  function computeFinalGrade(type, v){
+  function computeFinalGrade(type, v, labScheme){
     const { cieMax, seeMax } = finalGradeMax(type);
     const cie = clampNum(v.cie,0,cieMax);
     const see = clampNum(v.see,0,seeMax);
     const total = cie+see, max = cieMax+seeMax;
-    const seeFloorPct = type==='theory' ? 40 : 50;
+    // For theory-lab: Sem I (EL, labScheme='sem1') floor = 60/150 = 40%;
+    //                 Sems II & III (PBL, labScheme='sem23') floor = 75/150 = 50%.
+    // For all other types, 50% applies (theory: 40/100=40%; lab/seminar: 25/50=50%).
+    let seeFloorPct;
+    if(type === 'theory'){
+      seeFloorPct = 40;
+    } else if(type === 'theory-lab'){
+      seeFloorPct = (labScheme === 'sem23') ? 50 : 40;
+    } else {
+      seeFloorPct = 50;
+    }
 
     const badges = [];
     const b1 = (cie/cieMax*100) >= 50; badges.push([`CIE ≥50% (${cieMax*0.5}/${cieMax})`, b1]);
