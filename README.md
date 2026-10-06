@@ -30,11 +30,13 @@ The two documents this app is built from:
 - [The Four Calculators](#the-four-calculators)
 - [Beat Yourself & MCA Journey](#beat-yourself--mca-journey)
 - [CIE Breakdown by Semester](#cie-breakdown-by-semester)
+- [Passing Floors & Rounding](#passing-floors--rounding)
 - [Input Validation](#input-validation)
 - [Course Data Is Fixed, Not Freehand](#course-data-is-fixed-not-freehand)
 - [Design](#design)
 - [Repository Structure](#repository-structure)
 - [Running It](#running-it)
+- [Build, Docker & Deployment](#build-docker--deployment)
 - [Data Accuracy](#data-accuracy)
 - [Contributing](#contributing)
 - [Contact](#contact)
@@ -61,13 +63,18 @@ The site is a plain set of statically linked HTML pages: `index.html` at the pro
 - Quiz I, II and III and Test I, II and III are entered as they are actually run; only the best two of each three are counted.
 - Once a course's CIE is calculated, its SEE Marks Required button unlocks and opens a popup listing the SEE score needed for every passing grade at once, from O down to C, instead of one target at a time.
 - For a course with a lab component, an optional field lets a student fix the Lab SEE and see the exact Theory SEE needed around it.
+- A course that misses its CIE floor is marked **DX** (not eligible to sit the SEE), so its SEE Marks Required button stays locked and reads "Not Eligible for SEE (DX)" instead of showing a meaningless projection.
+- Semester IV's **Technical Seminar** has its own card type: it is evaluated as two internal project phases (Phase 1 and Phase 2, 50 marks each) rather than through the Quiz/Test/Lab framework, and since there is no university-conducted SEE for it, it has no SEE Marks Required button.
+- The finalized CIE follows the department's convention of rounding **up** to the next whole mark; see [Passing Floors & Rounding](#passing-floors--rounding).
 
 **Final Grade Calculator**
 - Takes just the two numbers that actually end up on a grade card: finalized CIE total and SEE total.
-- Checked against the Table 4.4 total-row passing conditions (CIE at least 50%, SEE at least 40% for a theory-only course or 50% for a course with a lab component, aggregate at least 50%), with no quiz, test or lab sub-breakdown required at this stage.
+- Checked against the Table 4.4 total-row passing conditions (CIE at least 50%, aggregate at least 50%, and an SEE floor that depends on the course type), with no quiz, test or lab sub-breakdown required at this stage. The SEE floor is 40% for a theory-only course, 40% for a Semester I theory + lab course, 50% for a Semester II or III theory + lab course (PBL scheme), and 50% for lab-only courses.
+- For the Technical Seminar the two inputs are relabeled Project Phase 1 and Project Phase 2 instead of CIE and SEE.
 
 **Final SGPA Calculator**
 - SGPA for a single semester, shown as one row per real course with its own grade dropdown, plus a CGPA blend directly underneath: enter a CGPA and credit total through the previous semester and it merges automatically with the SGPA just computed.
+- Every course row also accepts the handbook's transitional grades (W, I, X, DX and AB), which are left out of the SGPA calculation rather than counted as zero. Project, internship and NPTEL courses, which have no Quiz/Test/Lab marks to finalize, appear only in this table and in the CGPA Calculator, where their grade is picked directly.
 - The full, detailed semester-by-semester CGPA Calculator is still available separately for anyone who wants that instead.
 
 **CGPA Calculator**
@@ -89,6 +96,12 @@ The site is a plain set of statically linked HTML pages: `index.html` at the pro
 
 **Installable, Works Offline**
 - A PWA manifest and service worker mean the site can be installed to a home screen / as a desktop app, and previously visited pages keep working without a connection. Firebase Auth and Firestore requests always go straight to the network — offline mode covers browsing the calculators, not saving new data while offline.
+- A polite install prompt (`js/pwa-install.js`) offers "Add to Home Screen" only when it will not be annoying: never on a first visit, only after the visitor has interacted with the page, at most once per session, and with progressively longer snooze periods (14, 45, then 120 days) after each dismissal, until it stops asking altogether. On iOS Safari, which has no install API, it shows the manual Share → Add to Home Screen hint instead.
+- When launched from an installed app, a branded splash screen covers the first page load of the session.
+
+**Fast Loading**
+- Every page loads minified scripts (`*.min.js`) and a single bundled stylesheet (`css/app.css`), generated from the readable sources by `npm run build`. See [Build, Docker & Deployment](#build-docker--deployment).
+- The Firestore SDK is only fetched once a student is actually signed in (a small hint remembered in `localStorage` lets returning students load it in parallel with Firebase Auth), and the analytics script waits for the first interaction or a few seconds of idle time, so neither competes with the first paint.
 
 Only the 2024 scheme is implemented today. A 2026 scheme option is visible on the scheme-selection page but disabled and marked "Coming soon" until that syllabus is published and added.
 
@@ -97,15 +110,17 @@ Only the 2024 scheme is implemented today. A 2026 scheme option is visible on th
 | Layer | Technology |
 | ----- | ----- |
 | Markup | Plain HTML, one file per page |
-| Styling | Plain CSS, no preprocessor, split into `variables.css`, `base.css`, `layout.css`, `components.css` |
-| Logic | Vanilla JavaScript, ES5-style function scoping, no framework |
+| Styling | Plain CSS, no preprocessor, split into `variables.css`, `base.css`, `layout.css`, `components.css`, and bundled into a single minified `css/app.css` |
+| Logic | Vanilla JavaScript, no framework; each readable source file in `js/` and `js/pages/` ships alongside a minified `.min.js` sibling |
 | Data | A single `data/courses.json` file, mirrored as a plain JS object in `js/data.js` |
 | Persistence & Auth | Firebase Authentication (Google Sign-In, restricted to RVCE MCA emails) + Firestore, used only for the optional Save Progress and Achievements features |
-| Offline / Installable | A web app manifest (`manifest.webmanifest`) + service worker (`sw.js`) for offline browsing and home-screen installation |
-| Fonts | Google Fonts (Inter and JetBrains Mono), loaded via a standard `<link>` tag |
-| Build tooling | None. There is no bundler, transpiler or install step of any kind |
+| Analytics | Firebase Analytics (Google Analytics 4), loaded lazily after the first interaction and never required for any calculator to work |
+| Offline / Installable | A web app manifest (`manifest.webmanifest`) + service worker (`sw.js`) for offline browsing and home-screen installation, plus an install prompt and splash screen |
+| Fonts | Google Fonts (Inter and JetBrains Mono), loaded without blocking rendering |
+| Build tooling | Two small Node scripts in `scripts/`: a CSS bundler/minifier and a JS minifier ([Terser](https://terser.org/), the only dev dependency). Nothing is transpiled and there is no bundler or framework |
+| Hosting & Delivery | Firebase Hosting (deployed from GitHub Actions) and an optional Docker image served by nginx |
 
-`js/data.js` mirrors `data/courses.json` as a plain JS object, so the browser never needs to `fetch()` anything at runtime. That keeps the app fully working even when `index.html` is opened directly from disk, with no server involved at all — the one exception is Google Sign-In and Save Progress, which require the page to be served over `http://` or `https://` (Firebase Hosting, or any local static server); Google's sign-in popup will not work against a `file://` URL.
+`js/data.js` mirrors `data/courses.json` as a plain JS object, so the browser never needs to `fetch()` anything at runtime. The generated `.min.js` and `css/app.css` files are committed to the repository, so the app still works when `index.html` is opened directly from disk, with no server and no build step involved — the exceptions are Google Sign-In, Save Progress and the service worker, which require the page to be served over `http://` or `https://` (Firebase Hosting, Docker, or any local static server); Google's sign-in popup will not work against a `file://` URL.
 
 ## System Architecture
 
@@ -142,6 +157,8 @@ flowchart LR
 
 `js/engine.js` contains no DOM code at all; it is a set of pure functions that take plain values in and return plain result objects out. Every page-level script in `js/pages/` calls into the same engine and renders the result itself, so the CIE math, the SEE math and the grading math can never drift out of sync between pages.
 
+The diagram above shows the readable source files. The pages themselves load the minified `*.min.js` build of each one (see [Build, Docker & Deployment](#build-docker--deployment)).
+
 ## The Four Calculators
 
 | Tool | File | What it needs | What it returns |
@@ -149,7 +166,7 @@ flowchart LR
 | CIE Finalization & SEE Marks Required | `pages/cie-see.html` | Quiz I-III, Test I-III, EL/PBL, Lab marks | Finalized CIE, plus SEE needed for every grade band |
 | Final Grade Calculator | `pages/final-grade.html` | Finalized CIE total, SEE total | Letter grade, grade point, pass/fail against Table 4.4 |
 | Final SGPA Calculator | `pages/final-gpa.html` | A grade for every course in the semester | SGPA, plus an optional CGPA blend with a prior CGPA |
-| CGPA Calculator | `pages/cgpa.html` | SGPA for each completed semester | CGPA, credit progress bar, projected degree class 
+| CGPA Calculator | `pages/cgpa.html` | SGPA for each completed semester | CGPA, credit progress bar, projected degree class |
 
 ## Beat Yourself & MCA Journey
 
@@ -182,6 +199,24 @@ The Quiz and Test split is identical in every semester: three quizzes out of 10 
 - **Semester I** follows Table 4.2.2 as published: Experiential Learning (out of 40) on the theory side, plus a single combined Lab (record + test) mark out of 50, for a CIE out of 150 in total.
 - **Semesters II and III** use the college's own current practice instead: **PBL (Project Based Learning)** stands in for the theory-side Experiential Learning mark, at the same 40-mark weight and the same role in the floor checks, alongside a single 50-mark Lab / Practical CIE. Quiz+Test (60) + PBL (40) + Lab (50) totals the same 150 as Semester I. The PBL label itself is not in the published handbook table, but `js/engine.js` applies the same floor conditions to it as it would to EL, and says so explicitly in the note shown under each result.
 
+Semester IV's Technical Seminar is the one exception to all of the above: it has no Quiz, Test, EL or Lab marks at all, and is scored purely as Project Phase 1 (out of 50) plus Project Phase 2 (out of 50).
+
+## Passing Floors & Rounding
+
+The CIE Finalization page checks each course against the floor for its type, as implemented in `js/engine.js`. A course that misses its floor is marked **DX** and is not eligible to sit the SEE.
+
+| Course type | CIE floors |
+| ----- | ----- |
+| Theory only | Quiz+Test at least 30/60, and CIE at least 50/100 |
+| Theory + Lab, Semester I (EL) | Theory Quiz+Test at least 30/60, theory CIE at least 50/100, Lab at least 25/50, combined at least 75/150 |
+| Theory + Lab, Semesters II & III (PBL) | Quiz+Test at least 24/60, Quiz+Test+PBL at least 40/100, Lab at least 25/50, combined at least 75/150 |
+| Lab only | CIE at least 25/50 |
+| Technical Seminar | Combined phases at least 25/100 |
+
+On the SEE side, the SEE Marks Required popup uses a minimum SEE of 40/100 for theory, 60/150 for any theory + lab course (the conservative Semester I figure, since the popup does not distinguish EL from PBL), and 25/50 for lab-only courses. The Final Grade Calculator is stricter for theory + lab courses in Semesters II and III, where the SEE floor is 75/150. One course, the Semester II Design Thinking Lab (`MCA427DL`), carries a course-specific `seeFloor` of 20/50 in `data/courses.json`, which the engine honors in place of the default. For a theory + lab course, a fixed Lab SEE entry below 20/50 makes the course unpassable no matter what the theory SEE is, and the popup says so instead of reporting a grade as achievable.
+
+**Rounding.** RVCE's MCA department finalizes a course's CIE by rounding **up** to the next whole mark, not to the nearest one, so a raw total of 135.1 and 135.9 both finalize as 136 (while 135.0 stays 135). The Quiz/Test/EL/Lab breakdown still shows exact decimals; the finalized total is what feeds every SEE requirement calculation, because it is the number the department will actually use. The same ceiling convention is applied to the aggregate on the Final Grade Calculator.
+
 ## Input Validation
 
 Every numeric field has a hard minimum and maximum. Typing a value above a field's maximum clamps it back down immediately, with an inline warning naming the actual limit. This runs through a single delegated listener (`js/input-guard.js`) rather than being wired up field by field, so it automatically covers new fields added later too.
@@ -196,11 +231,11 @@ If a course is missing or a value looks wrong, please open an issue on the GitHu
 
 ## Design
 
-The visual language (white cards on a soft gray gradient, rounded corners, a single near-black primary action color, blue reserved for focus states, green and red for pass and fail) is a from-scratch CSS implementation with no build tooling behind it.
+The visual language (white cards on a soft gray gradient, rounded corners, a single near-black primary action color, blue reserved for focus states, green and red for pass and fail) is a from-scratch CSS implementation, with no preprocessor or framework behind it.
 
 Course-picker, tool-picker and semester-picker cards use small colored icon badges built from inline SVG, not emoji, so the wizard reads as a set of distinct destinations rather than a wall of identical white boxes. `js/icons.js` holds the shared icon set.
 
-A light and dark toggle sits in the header on every page. Dark mode is a soft charcoal surface rather than pure black, so it stays comfortable during long study sessions. The choice is remembered through `localStorage` and applied before the page paints, so there is no flash of the wrong theme on reload.
+A light and dark toggle sits in the header on every page. Dark is the default theme for a first-time visitor, and it is a soft charcoal surface rather than pure black, so it stays comfortable during long study sessions. The choice is remembered through `localStorage` and applied before the page paints, so there is no flash of the wrong theme on reload.
 
 The header is a single navbar row at any screen width. On wide screens the nav links, sign-in control and theme toggle sit inline next to the brand; below a breakpoint they collapse behind a hamburger button into a dropdown panel instead of the header itself growing extra rows. GitHub is linked from the footer only, not the header.
 
@@ -213,17 +248,19 @@ rvce-mca-grade-calculator/
 │
 ├── .github/
 │   └── workflows/
-│       ├── ci.yml                            Continuous integration workflow
-│       ├── firebase-hosting-merge.yml        Firebase Hosting deployment on merge
-│       └── firebase-hosting-pull-request.yml Firebase Hosting preview deployment for pull requests
+│       ├── ci.yml                            Continuous integration: build, then JavaScript syntax check
+│       ├── firebase-hosting-merge.yml        Build and Firebase Hosting deployment on merge
+│       └── firebase-hosting-pull-request.yml Build and Firebase Hosting preview deployment for pull requests
 │
+├── .dockerignore                             Docker build-context ignore rules
 ├── .firebaseignore                           Firebase CLI deployment ignore rules
-├── .firebaserc                               Firebase project configuration
 ├── .gitignore                                Git ignore rules
+├── Dockerfile                                Multi-stage image: Node build stage, then nginx
 ├── LICENSE                                   Project license
 ├── NOTICE                                    License and attribution notices
 ├── README.md                                 Project documentation
 ├── package.json                              Node.js project and build configuration
+├── package-lock.json                         Locked dev-dependency versions (Terser)
 │
 ├── index.html                                Home page (must stay at the project root)
 ├── 404.html                                  Custom not-found page
@@ -261,11 +298,14 @@ rvce-mca-grade-calculator/
 │   ├── icon.svg                              Scalable application icon
 │   └── social-preview.png                    Social sharing preview image
 │
+├── docker/
+│   └── nginx.conf                            nginx config: port 8080, gzip, caching and security headers
+│
 ├── pages/
 │   ├── scheme.html                           Step 1: scheme selection
-│   ├── year.html                             Step 2: academic year selection
-│   ├── semester.html                         Step 3: semester selection
-│   ├── tools.html                            Step 4: calculator picker for a semester
+│   ├── semester.html                         Step 2: semester selection, grouped by year
+│   ├── tools.html                            Step 3: calculator picker for a semester
+│   ├── year.html                             Standalone year-selection page (not part of the wizard flow)
 │   ├── cie-see.html                          CIE Finalization and SEE Marks Required calculator
 │   ├── final-grade.html                      Final Grade Calculator
 │   ├── final-gpa.html                        Final SGPA Calculator and CGPA blend
@@ -279,9 +319,9 @@ rvce-mca-grade-calculator/
 │   ├── base.css                              Resets and base typography
 │   ├── layout.css                            Header, navigation, page layout and breadcrumb
 │   ├── components.css                        Cards, forms, tables, buttons, FAQ, footer and components
-│   └── app.css                               Generated or bundled application stylesheet
+│   └── app.css                               Generated, minified bundle of the four files above (do not edit by hand)
 │
-├── js/
+├── js/                                       Every <name>.js below has a generated <name>.min.js sibling, which is what the pages load
 │   ├── data.js                               MCA course data and grading constants
 │   ├── grading.js                            Shared grading-table and grade-point helpers
 │   ├── engine.js                             Pure CIE, SEE, grade, SGPA and CGPA calculation functions
@@ -292,6 +332,7 @@ rvce-mca-grade-calculator/
 │   ├── progress.js                           Shared Save Progress serialization
 │   ├── achievements.js                       Achievement catalog, unlock rules and Firestore persistence
 │   ├── pwa-register.js                       Registers the service worker
+│   ├── pwa-install.js                        Add to Home Screen prompt with visit and snooze rules
 │   ├── splash.js                             Splash/loading screen functionality
 │   ├── icons.js                              Shared inline-SVG icon definitions
 │   ├── faqContent.js                         FAQ questions and answers
@@ -316,18 +357,20 @@ rvce-mca-grade-calculator/
 │   └── courses.json                          Canonical course, credit, marks and syllabus-page data
 │
 ├── docs/
+│   ├── Coure-List-2024-Marks.xlsx            Course list with CIE/SEE marks for the 2024 scheme
 │   ├── MCA-2024-Scheme-Syllabus.pdf          Source MCA 2024 Scheme syllabus
 │   └── PG-2024-Scheme-Handbook.pdf           Source PG 2024 Scheme academic handbook
 │
 └── scripts/
-    └── build-css.mjs                         CSS build script
+    ├── build-css.mjs                         Bundles and minifies the four CSS sources into css/app.css
+    └── build-js.mjs                          Minifies every js/**/*.js file into a .min.js sibling
 ```
 
 `index.html` has to stay at the project root for the site to open correctly at its root URL (for example, on GitHub Pages); every other page lives one level down in `pages/`. `js/site.js` works out which of the two contexts it is running in and adjusts every link it generates accordingly, so nothing else needs to know or care where a given page physically lives.
 
 ## Running It
 
-There is no build step of any kind. Any of the following works:
+To just use or browse the app, there is nothing to build: the generated files are committed. Any of the following works:
 
 ```bash
 # just open it directly
@@ -339,11 +382,38 @@ open index.html          # macOS
 python3 -m http.server 5173
 ```
 
-Because `js/data.js` mirrors `data/courses.json` as a plain JS object, the app works identically whether it is opened straight from disk or served over HTTP; nothing needs to be fetched at runtime.
+Because `js/data.js` mirrors `data/courses.json` as a plain JS object, the app works identically whether it is opened straight from disk or served over HTTP; nothing needs to be fetched at runtime. Google Sign-In, Save Progress and offline support need the page to be served over `http://` or `https://`.
+
+## Build, Docker & Deployment
+
+**Building after you edit a source file.** The pages load `css/app.css` and the `*.min.js` files, never the readable sources directly, so after editing any of them regenerate the output:
+
+```bash
+npm install        # once: installs Terser, the only dev dependency
+npm run build      # runs build-css.mjs, then build-js.mjs
+```
+
+Then bump the `?v=` query string on the matching `<link>` / `<script>` tags in the HTML pages and the `CACHE_VERSION` in `sw.js`, which is how this project busts caches (there are no content-hashed filenames). Commit the regenerated files along with the source change.
+
+**Docker.** The `Dockerfile` is a two-stage build: a Node stage runs `npm ci` and `npm run build` so the image can never ship stale minified files, then a small nginx image serves the static site on port 8080 with gzip, long-lived caching for versioned JS/CSS, no caching for HTML and `sw.js`, security headers, clean URLs, the custom 404 page and a health check.
+
+```bash
+docker build -t rvce-mca-grade-calculator .
+docker run --rm -p 8080:8080 rvce-mca-grade-calculator
+# then open http://localhost:8080
+```
+
+**CI and deployment.** Three GitHub Actions workflows live in `.github/workflows/`:
+
+- `ci.yml` runs on pushes and pull requests to `main`: it installs dependencies, runs `npm run build`, then syntax-checks every JavaScript file with `node --check`.
+- `firebase-hosting-merge.yml` builds and deploys the site to Firebase Hosting (the live channel) on every push to `main`.
+- `firebase-hosting-pull-request.yml` builds and deploys a preview channel for each pull request opened from the same repository.
+
+Both Firebase workflows run the build first, so a forgotten local `npm run build` can never ship stale files. `firebase.json` holds the hosting headers (including the Content Security Policy and cache rules) and `firestore.rules` holds the server-side access rules.
 
 ## Data Accuracy
 
-Course codes, titles, credits and CIE/SEE marks for all four semesters were transcribed from the RVCE 2024 Scheme syllabus PDF (`docs/`). The grading table, passing standards, CIE scheme and credit-distribution rules come from the PG Academic Handbook. If RVCE revises either document, `data/courses.json` (mirrored in `js/data.js`) and `js/grading.js` are the two places to update; every page reads from them, so nothing else needs to change.
+Course codes, titles, credits and CIE/SEE marks for all four semesters were transcribed from the RVCE 2024 Scheme syllabus PDF (`docs/`). The grading table, passing standards, CIE scheme and credit-distribution rules come from the PG Academic Handbook. `docs/Coure-List-2024-Marks.xlsx` is a working spreadsheet of the same course list and marks. If RVCE revises either document, `data/courses.json` (mirrored in `js/data.js`) and `js/grading.js` are the two places to update, followed by `npm run build`; every page reads from them, so nothing else needs to change.
 
 ## Contributing
 
@@ -355,10 +425,11 @@ Contributions are welcome!
 4. Push to the branch: `git push origin feature-new-feature`
 5. Open a pull request.
 
-Please follow consistent coding styles and include clear commit messages. Please also keep contributions consistent with the "no manual course entry" design described above: corrections belong in `data/courses.json`, not in the calculator forms.
+Please follow consistent coding styles and include clear commit messages. Edit the readable sources (`js/**/*.js` and the four CSS source files), never the generated `*.min.js` or `css/app.css`, and run `npm run build` before committing; see [Build, Docker & Deployment](#build-docker--deployment). Please also keep contributions consistent with the "no manual course entry" design described above: corrections belong in `data/courses.json`, not in the calculator forms.
 
 ## Contact
 
+- Live site: <https://rvce-mca-grade-calc.web.app/>
 - GitHub repository: <https://github.com/Rajlohith/rvce-mca-grade-calculator>
 - Email: <brlohithraj.mca25@rvce.edu.in>
 - Official RVCE scheme and syllabus: <https://rvce.edu.in/academics_and_examinations/rvce_scheme_syllabus>
