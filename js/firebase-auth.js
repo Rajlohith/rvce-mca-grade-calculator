@@ -85,6 +85,31 @@ window.MCA = window.MCA || {};
 
   let initialized = false;
 
+  // The Firestore SDK is ~100 KiB and only matters once someone is signed
+  // in, so it is NOT fetched for signed-out visitors. localStorage keeps a
+  // tiny hint ("this browser had a signed-in user") so returning students
+  // still get Firestore in parallel with Auth, exactly as before.
+  const HINT_KEY = 'mca-auth-hint';
+  function getAuthHint(){ try { return localStorage.getItem(HINT_KEY) === '1'; } catch(e){ return false; } }
+  function setAuthHint(on){ try { if(on) localStorage.setItem(HINT_KEY, '1'); else localStorage.removeItem(HINT_KEY); } catch(e){} }
+
+  function attachFirestore(){
+    if(NEEDS_FIRESTORE && !window.MCA.firestore && window.firebase && window.firebase.firestore && initialized){
+      window.MCA.firestore = window.firebase.firestore();
+    }
+  }
+
+  let firestorePromise = null;
+  function ensureFirestore(){
+    if(!NEEDS_FIRESTORE) return Promise.resolve();
+    if(firestorePromise) return firestorePromise;
+    firestorePromise = ensureFirebaseBooted()
+      .then(() => window.firebase.firestore ? null : loadScript(SDK_BASE + 'firebase-firestore-compat.js'))
+      .then(() => { attachFirestore(); })
+      .catch(err => { firestorePromise = null; throw err; });
+    return firestorePromise;
+  }
+
   function initializeFirebase(){
     if(initialized || !window.firebase) return;
     initialized = true;
@@ -92,9 +117,7 @@ window.MCA = window.MCA || {};
     try {
       window.firebase.initializeApp(firebaseConfig);
       window.MCA.auth = window.firebase.auth();
-      if(NEEDS_FIRESTORE && window.firebase.firestore){
-        window.MCA.firestore = window.firebase.firestore();
-      }
+      attachFirestore(); // no-op until the (lazily loaded) Firestore SDK is on the page
 
       window.MCA.auth.onAuthStateChanged((user) => {
         if(user){
@@ -106,6 +129,7 @@ window.MCA = window.MCA || {};
 
             window.MCA.auth.signOut();
             window.MCA.currentUser = null;
+            setAuthHint(false);
 
             dispatchAuthEvent('auth-rejected', {
               reason: 'Account is blocked'
@@ -129,6 +153,7 @@ window.MCA = window.MCA || {};
 
             window.MCA.auth.signOut();
             window.MCA.currentUser = null;
+            setAuthHint(false);
 
             dispatchAuthEvent('auth-rejected', {
               reason: 'Not an RVCE MCA student email'
@@ -139,15 +164,23 @@ window.MCA = window.MCA || {};
           }
 
           window.MCA.currentUser = user;
-          dispatchAuthEvent('signed-in', {
-            user,
-            email: user.email,
-            uid: user.uid
+          setAuthHint(true);
+          // Listeners of 'signed-in' (achievements.js, progress sync) read
+          // window.MCA.firestore straight away, so make sure it's loaded
+          // first. Returning users already have it in flight (see the hint).
+          ensureFirestore().catch(() => {}).then(() => {
+            if(window.MCA.currentUser !== user) return; // signed out meanwhile
+            dispatchAuthEvent('signed-in', {
+              user,
+              email: user.email,
+              uid: user.uid
+            });
+            updateAuthUI();
           });
-          updateAuthUI();
 
         } else {
           window.MCA.currentUser = null;
+          setAuthHint(false);
           invalidateUserDoc();
           dispatchAuthEvent('signed-out');
           updateAuthUI();
@@ -263,7 +296,7 @@ window.MCA = window.MCA || {};
     // times — this just guarantees booting has been kicked off (or is
     // already done) before we check for window.MCA.firestore, rather than
     // assuming something else already triggered it.
-    return ensureFirebaseBooted().then(() => {
+    return ensureFirestore().then(() => {
       if(!window.MCA.firestore){
         throw new Error('Firestore is not loaded on this page');
       }
@@ -438,11 +471,19 @@ window.MCA = window.MCA || {};
       })
       .catch(() => { /* analytics is optional — a failed/blocked load is non-fatal */ });
 
-    if('requestIdleCallback' in window){
-      requestIdleCallback(loadAnalytics, { timeout: 3000 });
-    } else {
-      setTimeout(loadAnalytics, 300);
-    }
+    // gtag.js is ~170 KiB of JS that does nothing for the visitor, so keep
+    // it out of the busy first seconds: start on the first interaction, or
+    // after ~5 s for someone who just reads — whichever comes first.
+    let started = false;
+    const go = () => {
+      if(started) return; started = true;
+      EVENTS.forEach(t => window.removeEventListener(t, go));
+      if('requestIdleCallback' in window) requestIdleCallback(loadAnalytics, { timeout: 2000 });
+      else setTimeout(loadAnalytics, 0);
+    };
+    const EVENTS = ['pointerdown', 'keydown', 'scroll', 'touchstart'];
+    EVENTS.forEach(t => window.addEventListener(t, go, { passive: true }));
+    setTimeout(go, 5000);
   }
 
   let bootPromise = null;
@@ -475,7 +516,7 @@ window.MCA = window.MCA || {};
     bootPromise = loadScript(SDK_BASE + 'firebase-app-compat.js')
       .then(() => Promise.all([
         loadScript(SDK_BASE + 'firebase-auth-compat.js'),
-        NEEDS_FIRESTORE ? loadScript(SDK_BASE + 'firebase-firestore-compat.js') : Promise.resolve()
+        (NEEDS_FIRESTORE && getAuthHint()) ? loadScript(SDK_BASE + 'firebase-firestore-compat.js') : Promise.resolve()
       ]))
       .then(() => {
         initializeFirebase();

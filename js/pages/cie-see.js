@@ -273,7 +273,7 @@
       <div class="breakdown">
         ${r.rows.map(row=>`<div class="row"><span>${row[0]}</span><span>${row[1]}</span></div>`).join('')}
         <div class="row total"><span>Finalized CIE</span><span>${fmt(r.total)} / ${r.max}</span></div>
-        <div class="row total"><span>Final CIE (used for SEE): <b>${r.finalTotal} / ${r.max} (${r.finalPct.toFixed(2)}%)</b></span></div>
+        <div class="row total final-cie"><span>Final CIE (used for SEE):</span><span>${r.finalTotal} / ${r.max} (${r.finalPct.toFixed(2)}%)</span></div>
       </div>
       ${finalNote}`;
 

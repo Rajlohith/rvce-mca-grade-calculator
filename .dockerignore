@@ -11,5 +11,4 @@ NOTICE
 firebase.json
 firestore.rules
 firestore.indexes.json
-scripts
-package.json
+# scripts/, package.json and package-lock.json are needed by the build stage

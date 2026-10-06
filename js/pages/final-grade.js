@@ -137,12 +137,14 @@
     }
 
     card.querySelector('.course-result').innerHTML = `
-      <div class="result" style="margin-top:0;">
-        <div class="stamp ${r.isPass?'pass':'fail'}"><span class="g">${r.letter}</span><span class="t">${r.isPass?'PASS':'FAIL'}</span></div>
-        <div class="result-detail">
-          <div class="big">Marks: ${Math.round(r.total)} / ${r.max} (${r.pct.toFixed(2)}%)</div>
-          <div class="big">Grade point: ${r.gp}</div>
+      <div class="result grade-result" style="margin-top:0;">
+        <div class="grade-summary">
+          <div class="big"><span class="lbl">Marks:</span> <span class="val">${Math.round(r.total)} / ${r.max} (${r.pct.toFixed(2)}%)</span></div>
+          <div class="big"><span class="lbl">Grade point:</span> <span class="val">${r.gp}</span></div>
           ${r.isPass ? '' : `<div class="note">A passing condition isn't met, so this is recorded as F.</div>`}
+        </div>
+        <div class="grade-main">
+          <div class="stamp ${r.isPass?'pass':'fail'}"><span class="g">${r.letter}</span><span class="t">${r.isPass?'PASS':'FAIL'}</span></div>
           <div class="badge-list">
             ${r.badges.map(b=>`<span class="badge ${b[1]?'ok':'no'}">${b[1]?'\u2713':'\u2715'} ${b[0]}</span>`).join('')}
           </div>

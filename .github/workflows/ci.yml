@@ -22,9 +22,16 @@ jobs:
         with:
           node-version: 24
 
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build (CSS + minified JS)
+        run: npm run build
+
       - name: Check JavaScript syntax
         run: |
           find . -type f -name "*.js" \
             -not -path "./.git/*" \
+            -not -path "./node_modules/*" \
             -print0 |
           xargs -0 -r -n1 node --check

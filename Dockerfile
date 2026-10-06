@@ -1,4 +1,16 @@
-# Small, production-ready nginx image
+# ---- Stage 1: build ------------------------------------------------------
+# Regenerates css/app.css and every js/**/*.min.js from the sources, so the
+# image can never ship stale minified files if `npm run build` was forgotten.
+FROM node:22-alpine AS build
+WORKDIR /app
+COPY package.json package-lock.json ./
+RUN npm ci
+COPY scripts/ scripts/
+COPY css/ css/
+COPY js/ js/
+RUN npm run build
+
+# ---- Stage 2: small, production-ready nginx image -------------------------
 FROM nginx:alpine
 
 # Remove nginx's default sample page/config
@@ -18,8 +30,8 @@ COPY manifest.webmanifest /usr/share/nginx/html/
 COPY sw.js /usr/share/nginx/html/
 COPY favicon.ico /usr/share/nginx/html/
 COPY apple-touch-icon.png /usr/share/nginx/html/
-COPY css/ /usr/share/nginx/html/css/
-COPY js/ /usr/share/nginx/html/js/
+COPY --from=build /app/css/ /usr/share/nginx/html/css/
+COPY --from=build /app/js/ /usr/share/nginx/html/js/
 COPY pages/ /usr/share/nginx/html/pages/
 COPY icons/ /usr/share/nginx/html/icons/
 COPY data/ /usr/share/nginx/html/data/

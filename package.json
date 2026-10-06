@@ -8,5 +8,11 @@
     "type": "git",
     "url": "https://github.com/Rajlohith/rvce-mca-grade-calculator"
   },
-  "author": "B R Lohith Raj <brlohithraj.mca25@rvce.edu.in>"
+  "author": "B R Lohith Raj <brlohithraj.mca25@rvce.edu.in>",
+  "devDependencies": {
+    "terser": "^5.51.2"
+  },
+  "scripts": {
+    "build": "node scripts/build-css.mjs && node scripts/build-js.mjs"
+  }
 }

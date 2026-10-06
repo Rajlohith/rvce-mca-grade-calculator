@@ -11,6 +11,16 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      # Regenerates css/app.css and every js/**/*.min.js from the sources, so a
+      # forgotten local `npm run build` can never ship stale files.
+      - name: Install dependencies
+        run: npm ci
+      - name: Build (CSS + minified JS)
+        run: npm run build
       - uses: FirebaseExtended/action-hosting-deploy@v0
         with:
           repoToken: ${{ secrets.GITHUB_TOKEN }}
