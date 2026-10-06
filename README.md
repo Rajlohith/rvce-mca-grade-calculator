@@ -338,7 +338,7 @@ rvce-mca-grade-calculator/
 │   ├── faqContent.js                         FAQ questions and answers
 │   ├── site.js                               Shared header, footer, breadcrumb and URL helpers
 │   │
-│   └── pages/
+│   └── pages/                                Page-level scripts (each also has a generated .min.js sibling)
 │       ├── home.js                           Home page logic
 │       ├── scheme.js                         Scheme selection logic
 │       ├── year.js                           Academic year selection logic
