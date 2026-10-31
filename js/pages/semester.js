@@ -5,17 +5,23 @@
 
   const scheme = qs('scheme');
 
-  if(scheme !== '2024'){
+  if(scheme !== '2024' && scheme !== '2026'){
     window.location.replace('scheme.html');
     return;
   }
+
+  // Scheme-year badge, same style as the CGPA / calculator pages.
+  (function(){
+    const h = document.querySelector('.page-hero h1');
+    if(h && !h.querySelector('.accent-word')) h.insertAdjacentHTML('beforeend', ' <span class="accent-word">' + scheme + '</span>');
+  })();
 
   mount({
     active: 'start',
     trail: [
       { label:'Home', href:'../index.html' },
       { label:'Scheme', href:'scheme.html' },
-      { label:'2024 Scheme', href: withParams('semester.html', { scheme }) },
+      { label:`${scheme} Scheme`, href: withParams('semester.html', { scheme }) },
       { label:'Semester' }
     ]
   });

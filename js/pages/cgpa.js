@@ -3,12 +3,19 @@
   const { computeCGPA } = window.MCA.engine;
   const { fmt } = window.MCA.grading;
   const DATA = window.MCA.DATA;
+  // This script serves both cgpa-2024.html and cgpa-2026.html; each page declares its
+  // scheme with <html data-scheme="..."> and data-2026.js points window.MCA.DATA at it,
+  // so the semester credits below are always that scheme's.
+  const scheme = window.MCA.scheme;
+  // The 2024 page keeps the original 'cgpa' key so progress saved before the split still loads.
+  const progressKey = scheme === '2026' ? 'cgpa-2026' : 'cgpa';
 
   mount({
     active: 'cgpa',
     trail: [
       { label:'Home', href:'../index.html' },
-      { label:'CGPA' }
+      { label:'CGPA', href:'cgpa.html' },
+      { label:`${scheme} Scheme` }
     ]
   });
   document.getElementById('cgpaIconBadge').innerHTML = window.MCA.icons.trendingUp;
@@ -196,7 +203,7 @@
 
   const progressRoot = document.getElementById('app');
   function restoreProgress(){
-    window.MCA.progress.loadProgress('cgpa', progressRoot).then(restored=>{
+    window.MCA.progress.loadProgress(progressKey, progressRoot).then(restored=>{
       if(restored) recompute();
     });
   }
@@ -204,7 +211,7 @@
   document.addEventListener('signed-in', restoreProgress);
 
   document.getElementById('saveProgressBtn').addEventListener('click', ()=>{
-    window.MCA.progress.saveProgress('cgpa', progressRoot);
+    window.MCA.progress.saveProgress(progressKey, progressRoot);
   });
 
   document.getElementById('resetAllBtn').addEventListener('click', ()=>{

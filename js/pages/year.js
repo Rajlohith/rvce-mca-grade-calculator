@@ -2,7 +2,7 @@
   const { qs, withParams, mount } = window.MCA.site;
   const scheme = qs('scheme');
 
-  if(scheme !== '2024'){
+  if(scheme !== '2024' && scheme !== '2026'){
     window.location.replace('scheme.html');
     return;
   }
@@ -12,7 +12,7 @@
     trail: [
       { label:'Home', href:'../index.html' },
       { label:'Scheme', href:'scheme.html' },
-      { label:'2024 Scheme', href: withParams('year.html', { scheme }) },
+      { label:`${scheme} Scheme`, href: withParams('year.html', { scheme }) },
       { label:'Year' }
     ]
   });

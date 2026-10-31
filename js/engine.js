@@ -321,5 +321,186 @@ window.MCA = window.MCA || {};
     return { cgpa, totalCredits, degreeClass: window.MCA.grading.degreeClass(cgpa) };
   }
 
-  window.MCA.engine = { computeCIE, estimateSEE, allGradeRequirements, computeFinalGrade, computeSGPA, computeCGPA, blendCGPA };
+  /* ==========================================================================
+     2026 SCHEME
+     Everything below is used only by 2026-scheme pages (course.model comes from
+     data/courses-2026.json). The 2024 functions above are untouched, because the
+     two schemes do not share a marking structure:
+
+       2024: 2 quizzes (best 2 of 3, 20) + tests 40 + EL/PBL 40
+       2026: 1 quiz (10) + tests 40 + EL 50   (PBL is now a 10-mark slice of the
+             50-mark Lab, not a stand-in for EL)
+
+     Models (course.model):
+       theory       Q10 + T40 + EL50 = 100                  SEE 100
+       theory-lab   Q10 + T40 + EL50 + Lab50 = 150          SEE 100 + 50
+       theory-50    Q5 + T20 + EL25 = 50   (AI Fundamentals) SEE 50
+       online-lab   Modules30 + Test I 10 + Test II 10 = 50  (Technical English) SEE 50
+       dtl          Review I 10 + II 20 + III 15 + Report 5 = 50 (Design Thinking Lab) SEE 50
+
+     Passing floors follow handbook Table 4.4:
+       Theory without practice : Quiz+Test >=50%, CIE >=50%, SEE >=40%, aggregate >=50%
+       Theory with practice    : theory Quiz+Test >=40%, theory CIE >=40%, Lab >=50%,
+                                 total CIE >=50%; SEE theory >=40%, lab >=50%, total >=50%
+       Practice only           : CIE >=50%, SEE >=50%, aggregate >=50%
+     ========================================================================== */
+
+  const ok26 = (b) => `<b style="color:${b?'#16a34a':'#dc2626'}">${b?'met':'not met'}</b>`;
+
+  function computeCIE26(course, v){
+    const model = course.model;
+    let rows=[], total=0, max=0, note='', passesFloor=false;
+
+    if(model==='theory' || model==='theory-lab'){
+      const quiz = clampNum(v.q,0,10);                                   // ONE quiz, /10
+      const testRaw = bestTwoOfThree(clampNum(v.t1,0,50), clampNum(v.t2,0,50), clampNum(v.t3,0,50)); // /100
+      const testScaled = testRaw/100*40;                                 // reduced to /40
+      const quizTest = quiz + testScaled;                                // /50
+      const el = clampNum(v.el,0,50);                                    // Phase I 25 + Phase II 25
+      const theoryCIE = quizTest + el;                                   // /100
+      rows = [
+        ['Quiz (1 quiz)', fmt(quiz)+' / 10'],
+        ['Test (best 2 of 3, scaled)', fmt(testScaled)+' / 40'],
+        ['Experiential Learning', fmt(el)+' / 50'],
+      ];
+      if(model==='theory'){
+        total = theoryCIE; max = 100;
+        const qtOk = quizTest>=25, totOk = total>=50;
+        passesFloor = qtOk && totOk;
+        note = `Floors: Quiz+Test &ge;25/50 (${ok26(qtOk)}, yours ${fmt(quizTest)}) &amp; CIE &ge;50/100 (${ok26(totOk)}, yours ${fmt(total)}).`;
+      } else {
+        const lab = clampNum(v.lab,0,50);                                // lab work 30 + PBL review 10 + lab test 10
+        total = theoryCIE + lab; max = 150;
+        rows.push(['Theory CIE subtotal', fmt(theoryCIE)+' / 100']);
+        rows.push(['Lab', fmt(lab)+' / 50']);
+        const qtOk = quizTest>=20, thOk = theoryCIE>=40, labOk = lab>=25, totOk = total>=75;
+        passesFloor = qtOk && thOk && labOk && totOk;
+        note = `Floors (Table 4.4, theory with practice): theory Quiz+Test &ge;20/50 (${ok26(qtOk)}) &amp; theory CIE &ge;40/100 (${ok26(thOk)}); Lab &ge;25/50 (${ok26(labOk)}); combined &ge;75/150 (${ok26(totOk)}).`;
+        if(qtOk && quizTest<25){
+          note += ` Heads-up: the course syllabus rubric says &ldquo;minimum 50% in Test &amp; Quiz&rdquo; (25/50) while handbook Table 4.4 says 40% for theory with practice - confirm with your faculty if you are in this range.`;
+        }
+      }
+    } else if(model==='theory-50'){
+      // AI Fundamentals: Quiz conducted for 10 and scaled down to 5; tests of 25 each,
+      // best 2 of 3 counted (50 total) and reduced to 20; EL 25 (Phase I 10 + Phase II 15).
+      // (The syllabus lists two tests; the project owner asked for 3 entries with best 2 counted.)
+      const quizCounted = clampNum(v.q,0,10)/10*5;
+      const testScaled = bestTwoOfThree(clampNum(v.t1,0,25), clampNum(v.t2,0,25), clampNum(v.t3,0,25))/50*20;
+      const quizTest = quizCounted + testScaled;                         // /25
+      const el = clampNum(v.el,0,25);
+      total = quizTest + el; max = 50;
+      rows = [
+        ['Quiz (scaled down to 5)', fmt(quizCounted)+' / 5'],
+        ['Test (best 2 of 3, scaled)', fmt(testScaled)+' / 20'],
+        ['Experiential Learning', fmt(el)+' / 25'],
+      ];
+      const qtOk = quizTest>=12.5, totOk = total>=25;
+      passesFloor = qtOk && totOk;
+      note = `Floors: Quiz+Test &ge;12.5/25 (${ok26(qtOk)}, yours ${fmt(quizTest)}) &amp; CIE &ge;25/50 (${ok26(totOk)}, yours ${fmt(total)}).`;
+    } else if(model==='online-lab'){
+      const modules = clampNum(v.modules,0,30), t1 = clampNum(v.lt1,0,10), t2 = clampNum(v.lt2,0,10);
+      total = modules + t1 + t2; max = 50;
+      rows = [
+        ['Modules assessment', fmt(modules)+' / 30'],
+        ['Test I', fmt(t1)+' / 10'],
+        ['Test II', fmt(t2)+' / 10'],
+      ];
+      passesFloor = total>=25;
+      note = `Floor: CIE &ge;25/50 - yours <b style="color:${passesFloor?'#16a34a':'#dc2626'}">${fmt(total)}/50 (${passesFloor?'met':'not met'})</b>.`;
+    } else if(model==='dtl'){
+      const r1 = clampNum(v.r1,0,10), r2 = clampNum(v.r2,0,20), r3 = clampNum(v.r3,0,15), rep = clampNum(v.rep,0,5);
+      total = r1 + r2 + r3 + rep; max = 50;
+      rows = [
+        ['Review I', fmt(r1)+' / 10'],
+        ['Review II', fmt(r2)+' / 20'],
+        ['Review III', fmt(r3)+' / 15'],
+        ['Final report', fmt(rep)+' / 5'],
+      ];
+      passesFloor = total>=25;
+      note = `Floor: CIE &ge;25/50 - yours <b style="color:${passesFloor?'#16a34a':'#dc2626'}">${fmt(total)}/50 (${passesFloor?'met':'not met'})</b>.`;
+    }
+
+    const pct = max ? total/max*100 : 0;
+    // Same department convention as 2024: the finalized CIE is rounded UP to the next whole mark.
+    const finalTotal = Math.ceil(fmt(total));
+    const finalPct = max ? fmt(finalTotal/max*10000)/100 : 0;
+    return { rows, total, max, pct, note, passesFloor, dx: !passesFloor, finalTotal, finalPct, seeMax: course.see };
+  }
+
+  /* Minimum SEE (out of the course's SEE max) needed just to be allowed to pass. */
+  function seeCombinedFloor26(course){
+    switch(course.model){
+      case 'theory':     return 40;   // 40% of 100
+      case 'theory-50':  return 20;   // 40% of 50
+      case 'theory-lab': return 75;   // total SEE 50% of 150 (theory >=40/100 and lab >=25/50 also apply)
+      default:           return 25;   // practice-only: 50% of 50
+    }
+  }
+
+  function allGradeRequirements26(course, cie, cieMax, labSeeFixed){
+    const bands = window.MCA.DATA.grading.bands.filter(b => b.grade !== 'F');
+    const seeMax = course.see;
+    const combinedFloor = seeCombinedFloor26(course);
+    const maxTotal = cieMax + seeMax;
+    const isTL = course.model==='theory-lab';
+    const hasLabSplit = isTL && labSeeFixed !== null && labSeeFixed !== undefined && !isNaN(labSeeFixed);
+    // Table 4.4: the practice part of SEE must independently be >=50% of its 50 marks.
+    const labSeeMeetsFloor = !hasLabSplit || (labSeeFixed >= 25 && labSeeFixed <= 50);
+
+    return bands.map(b=>{
+      const neededAgg = b.min/100*maxTotal;
+      const neededSEETotal = Math.max(neededAgg - cie, combinedFloor);
+      if(hasLabSplit){
+        const theorySEE = Math.max(neededSEETotal - labSeeFixed, 40);
+        const labLabel = `Lab fixed at ${fmt(labSeeFixed)}/50`;
+        if(!labSeeMeetsFloor){
+          return { grade:b.grade, gp:b.gp, neededSEE:theorySEE, seeMax:100, achievable:false,
+            label: labSeeFixed > 50 ? `Lab SEE can't exceed 50/50`
+                                    : `Lab SEE must be &ge;25/50 to pass at all (${labLabel} is below the floor)` };
+        }
+        return { grade:b.grade, gp:b.gp, neededSEE:theorySEE, seeMax:100,
+          achievable: theorySEE<=100,
+          label: `Theory SEE ${fmt(Math.max(theorySEE,0))}/100 (${labLabel})` };
+      }
+      return { grade:b.grade, gp:b.gp, neededSEE:neededSEETotal, seeMax,
+        achievable: neededSEETotal<=seeMax,
+        label: isTL ? `SEE ${fmt(Math.max(neededSEETotal,0))}/${seeMax} (min 40 theory + 25 lab)`
+                    : `SEE ${fmt(Math.max(neededSEETotal,0))}/${seeMax}` };
+    });
+  }
+
+  /* Final grade for a 2026 course, using the combined CIE and SEE totals like 2024. */
+  function computeFinalGrade26(course, v){
+    const model = course.model;
+    const cieMax = course.cie, seeMax = course.see;
+    const cie = clampNum(v.cie,0,cieMax);
+    const badges = [];
+    let see, seeOk = true;
+
+    // Combined SEE (like 2024): theory-lab total SEE must be >=50% (75/150); other models as listed.
+    see = clampNum(v.see,0,seeMax);
+    const seePct = (model==='theory' || model==='theory-50') ? 40 : 50;
+    const bS = (see/seeMax*100) >= seePct;
+    badges.push([`SEE \u2265${seePct}% (${Math.round(seeMax*seePct/100)}/${seeMax})`, bS]);
+    seeOk = bS;
+    const bC = (cie/cieMax*100) >= 50;
+    badges.unshift([`CIE \u226550% (${cieMax*0.5}/${cieMax})`, bC]);
+    const total = cie + see, max = cieMax + seeMax;
+    const bA = (total/max*100) >= 50;
+    badges.push(['Aggregate \u226550%', bA]);
+    const allOk = bC && seeOk && bA;
+
+    const pct = total/max*100;
+    const band = gradeFromPct(pct);
+    const isPass = allOk && band.grade!=='F';
+    const finalTotal = Math.ceil(fmt(total));
+    const finalPct = max ? fmt(finalTotal/max*10000)/100 : 0;
+    // Note: for theory + lab, Table 4.4 also wants theory SEE >=40/100 and lab SEE >=25/50 inside
+    // the 75/150 total; a single combined SEE number can only check the total.
+    return { total, max, pct, cie, cieMax, see, seeMax, badges, isPass,
+      letter: allOk?band.grade:'F', gp: allOk?band.gp:0, finalTotal, finalPct };
+  }
+
+  window.MCA.engine = { computeCIE, estimateSEE, allGradeRequirements, computeFinalGrade, computeSGPA, computeCGPA, blendCGPA,
+    computeCIE26, allGradeRequirements26, computeFinalGrade26 };
 })();

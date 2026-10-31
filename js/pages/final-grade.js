@@ -1,20 +1,27 @@
 (function(){
   const { qs, withParams, mount } = window.MCA.site;
   const { coursesFor } = window.MCA.courses;
-  const { computeFinalGrade } = window.MCA.engine;
+  const { computeFinalGrade, computeFinalGrade26 } = window.MCA.engine;
   const { fmt, renderGradeScale } = window.MCA.grading;
   const DATA = window.MCA.DATA;
 
   const scheme = qs('scheme'), semester = qs('semester');
   const validSem = semester && DATA.semesters[semester];
-  if(scheme !== '2024' || !validSem){ window.location.replace('scheme.html'); return; }
+  if((scheme !== '2024' && scheme !== '2026') || !validSem){ window.location.replace('scheme.html'); return; }
+  const is2026 = scheme === '2026';
+  // Same scheme-year badge as the CGPA pages (.accent-word is the existing accent colour style).
+  (function(){
+    const h = document.querySelector('.page-hero h1');
+    if(h && !h.querySelector('.accent-word')) h.insertAdjacentHTML('beforeend', ' <span class="accent-word">' + scheme + '</span>');
+  })();
+  const progressKey = is2026 ? `final-grade:2026:${semester}` : `final-grade:${semester}`;
 
   mount({
     active: 'start',
     trail: [
       { label:'Home', href:'../index.html' },
       { label:'Scheme', href:'scheme.html' },
-      { label:'2024 Scheme', href: withParams('semester.html', { scheme }) },
+      { label:`${scheme} Scheme`, href: withParams('semester.html', { scheme }) },
       { label:`Semester ${semester}`, href: withParams('tools.html', { scheme, semester }) },
       { label:'Final Grade' }
     ]
@@ -65,16 +72,18 @@
         <span class="credit-badge">${course.credits} Credit</span>
       </div>`;
 
-    const { cieMax, seeMax } = MAX_BY_TYPE[course.type] || MAX_BY_TYPE.lab;
+    // 2026: maximums come straight from the course (AI Fundamentals is 50 + 50, not 100 + 100).
+    const { cieMax, seeMax } = is2026 ? { cieMax: course.cie, seeMax: course.see } : (MAX_BY_TYPE[course.type] || MAX_BY_TYPE.lab);
     // Seminar (MCA492L) is evaluated as two internal project phases, so
     // relabel the fields accordingly rather than showing "CIE / SEE".
     const cieLabel = course.type === 'seminar' ? 'Project Phase 1' : 'CIE total';
     const seeLabel = course.type === 'seminar' ? 'Project Phase 2' : 'SEE total';
+    const seeFields = `<div class="field"><label>${seeLabel} <span class="hint">/${seeMax}</span></label><input type="number" class="f-see req" min="0" max="${seeMax}" value=""></div>`;
     return `<div class="course-card" data-code="${course.code}" data-type="${course.type}">
       ${head}
       <div class="field-row stacked">
         <div class="field"><label>${cieLabel} <span class="hint">/${cieMax}</span></label><input type="number" class="f-cie req" min="0" max="${cieMax}" value=""></div>
-        <div class="field"><label>${seeLabel} <span class="hint">/${seeMax}</span></label><input type="number" class="f-see req" min="0" max="${seeMax}" value=""></div>
+        ${seeFields}
       </div>
       <div class="toolbar"><button type="button" class="btn amber full calc-btn">Calculate Grade</button></div>
       <div class="course-result"></div>
@@ -99,13 +108,13 @@
   // result renders no longer stretches its still-empty siblings to match.
 
   function restoreProgress(){
-    window.MCA.progress.loadProgress(`final-grade:${semester}`, grid);
+    window.MCA.progress.loadProgress(progressKey, grid);
   }
   restoreProgress();
   document.addEventListener('signed-in', restoreProgress);
 
   document.getElementById('saveProgressBtn').addEventListener('click', ()=>{
-    window.MCA.progress.saveProgress(`final-grade:${semester}`, grid);
+    window.MCA.progress.saveProgress(progressKey, grid);
   });
 
   function validateCard(card){
@@ -118,15 +127,22 @@
   function calculateCard(card){
     const missing = validateCard(card);
     if(missing.length){
-      card.querySelector('.course-result').innerHTML = `<div class="callout error">Fill in both CIE total and SEE total for this course before calculating.</div>`;
+      card.querySelector('.course-result').innerHTML = `<div class="callout error">Fill in every field for this course before calculating.</div>`;
       missing[0].focus();
       return;
     }
     const type = card.dataset.type;
     const code = card.dataset.code;
     const cie = card.querySelector('.f-cie').value;
-    const see = card.querySelector('.f-see').value;
-    const r = computeFinalGrade(type, { cie, see }, labScheme);
+    let r;
+    if(is2026){
+      const course = courses.find(c => c.code === code);
+      const q = sel => { const el = card.querySelector(sel); return el ? el.value : 0; };
+      r = computeFinalGrade26(course, { cie, see: q('.f-see') });
+    } else {
+      const see = card.querySelector('.f-see').value;
+      r = computeFinalGrade(type, { cie, see }, labScheme);
+    }
 
     calculatedCodes.add(code);
     if(window.MCA.achievements){

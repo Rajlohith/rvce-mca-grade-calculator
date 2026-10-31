@@ -7,7 +7,7 @@
   const semester = qs('semester');
   const validSem = semester && DATA.semesters[semester];
 
-  if(scheme !== '2024' || !validSem){
+  if((scheme !== '2024' && scheme !== '2026') || !validSem){
     window.location.replace('scheme.html');
     return;
   }
@@ -17,7 +17,7 @@
     trail: [
       { label:'Home', href:'../index.html' },
       { label:'Scheme', href:'scheme.html' },
-      { label:'2024 Scheme', href: withParams('semester.html', { scheme }) },
+      { label:`${scheme} Scheme`, href: withParams('semester.html', { scheme }) },
       { label:`Semester ${semester}`, href: withParams('tools.html', { scheme, semester }) },
       { label:'Tools' }
     ]
@@ -26,6 +26,11 @@
   const d = DATA.semesters[semester];
   const courseCount = coursesFor(semester).length;
   document.getElementById('toolTitle').textContent = `Semester ${semester}`;
+  // Scheme-year badge, same style as the CGPA / calculator pages.
+  (function(){
+    const h = document.querySelector('.page-hero h1');
+    if(h && !h.querySelector('.accent-word')) h.insertAdjacentHTML('beforeend', ' <span class="accent-word">' + scheme + '</span>');
+  })();
 
   if(window.MCA.achievements) window.MCA.achievements.track('semester_tools_viewed', { semester });
 

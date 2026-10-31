@@ -40,8 +40,15 @@
     item.querySelector('.faq-q').addEventListener('click', ()=>{
       const wasOpen = item.classList.contains('open');
       item.classList.toggle('open');
+      // Size the panel to its real content so a long answer can never be clipped.
+      const panel = item.querySelector('.faq-a');
+      panel.style.maxHeight = item.classList.contains('open') ? panel.scrollHeight + 'px' : '';
       if(!wasOpen && window.MCA.achievements) window.MCA.achievements.track('faq_opened', {});
     });
+  });
+
+  window.addEventListener('resize', ()=>{
+    document.querySelectorAll('.faq-item.open .faq-a').forEach(panel=>{ panel.style.maxHeight = panel.scrollHeight + 'px'; });
   });
 
   document.getElementById('faqSearch').addEventListener('input', (e)=>{

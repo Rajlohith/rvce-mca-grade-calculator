@@ -7,14 +7,24 @@
 
   const scheme = qs('scheme'), semester = qs('semester');
   const validSem = semester && DATA.semesters[semester];
-  if(scheme !== '2024' || !validSem){ window.location.replace('scheme.html'); return; }
+  if((scheme !== '2024' && scheme !== '2026') || !validSem){ window.location.replace('scheme.html'); return; }
+  const is2026 = scheme === '2026';
+  // Same scheme-year badge as the CGPA pages (.accent-word is the existing accent colour style).
+  (function(){
+    const h = document.querySelector('.page-hero h1');
+    if(h && !h.querySelector('.accent-word')) h.insertAdjacentHTML('beforeend', ' <span class="accent-word">' + scheme + '</span>');
+  })();
+  const progressKey = is2026 ? `final-gpa:2026:${semester}` : `final-gpa:${semester}`;
+  // The detailed CGPA calculator exists once per scheme (credits differ between them).
+  const detailedLink = document.getElementById('detailedCgpaLink');
+  if(detailedLink) detailedLink.setAttribute('href', is2026 ? 'cgpa-2026.html' : 'cgpa-2024.html');
 
   mount({
     active: 'start',
     trail: [
       { label:'Home', href:'../index.html' },
       { label:'Scheme', href:'scheme.html' },
-      { label:'2024 Scheme', href: withParams('semester.html', { scheme }) },
+      { label:`${scheme} Scheme`, href: withParams('semester.html', { scheme }) },
       { label:`Semester ${semester}`, href: withParams('tools.html', { scheme, semester }) },
       { label:'Final SGPA' }
     ]
@@ -111,7 +121,7 @@
 
   const progressRoot = document.getElementById('app');
   function restoreProgress(){
-    window.MCA.progress.loadProgress(`final-gpa:${semester}`, progressRoot).then(restored=>{
+    window.MCA.progress.loadProgress(progressKey, progressRoot).then(restored=>{
       if(restored) computeSgpa();
     });
   }
@@ -119,7 +129,7 @@
   document.addEventListener('signed-in', restoreProgress);
 
   document.getElementById('saveProgressBtn').addEventListener('click', ()=>{
-    window.MCA.progress.saveProgress(`final-gpa:${semester}`, progressRoot);
+    window.MCA.progress.saveProgress(progressKey, progressRoot);
   });
 
 

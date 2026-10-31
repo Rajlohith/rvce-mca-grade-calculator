@@ -16,6 +16,7 @@ The two documents this app is built from:
 
 - *Academic Planning, Assessment & Evaluation Handbook, Guidelines and Information of Postgraduate Programs* (w.e.f. 2024-25)
 - *MCA 2024 Scheme and Syllabus, Semester I-IV*
+- *PG Academic Handbook (w.e.f. 2026-27)* and *MCA 2026 Scheme and Syllabus, Semester I-IV*
 
 **Disclaimer: this is not an official RVCE tool, and no responsibility is taken for discrepancies.** It is an independent student project, not affiliated with or endorsed by R V College of Engineering. Always check your official grade card and the Controller of Examinations for anything that actually matters.
 
@@ -103,7 +104,15 @@ The site is a plain set of statically linked HTML pages: `index.html` at the pro
 - Every page loads minified scripts (`*.min.js`) and a single bundled stylesheet (`css/app.css`), generated from the readable sources by `npm run build`. See [Build, Docker & Deployment](#build-docker--deployment).
 - The Firestore SDK is only fetched once a student is actually signed in (a small hint remembered in `localStorage` lets returning students load it in parallel with Firebase Auth), and the analytics script waits for the first interaction or a few seconds of idle time, so neither competes with the first paint.
 
-Only the 2024 scheme is implemented today. A 2026 scheme option is visible on the scheme-selection page but disabled and marked "Coming soon" until that syllabus is published and added.
+Both the **2024** and **2026** schemes are implemented. They are separate structures and are calculated by separate code paths, so changes to one never affect the other.
+
+**How the 2026 scheme is wired in**
+
+- `data/courses-2026.json` (mirrored in `js/data-2026.js`) holds the 2026 course list. `js/data-2026.js` registers it next to the 2024 data in `window.MCA.SCHEMES` and points `window.MCA.DATA` at the scheme the page is for (`?scheme=2026` or `<html data-scheme="2026">`; default 2024), so `grading.js`, `engine.js` and `course-picker.js` need no changes.
+- `js/engine.js` adds `computeCIE26`, `allGradeRequirements26` and `computeFinalGrade26`. The 2026 rules: one 10-mark quiz, tests best-2-of-3 reduced to 40, EL out of 50, and a 50-mark lab that includes a 10-mark PBL progress review. AI Fundamentals is a 50 + 50 course (quiz scaled down to 5, best 2 of 3 tests of 25 reduced to 20, EL 25). Technical English and the Design Thinking Lab have their own 50-mark layouts. Bridge Course Mathematics is intentionally not implemented.
+- The CGPA calculator is split per scheme: `pages/cgpa-2024.html` and `pages/cgpa-2026.html` (`pages/cgpa.html` is a scheme picker). The 2024 page keeps the original saved-progress key.
+- Saved-progress keys for 2026 are prefixed (`cie-see:2026:<sem>`, `final-grade:2026:<sem>`, `final-gpa:2026:<sem>`, `cgpa-2026`) because several course codes exist in both schemes.
+- Full marking, minimum-pass and source-ambiguity reference: `docs/2026-Scheme-Marking-and-Passing-Guide.md`.
 
 ## Technology Stack
 
@@ -359,7 +368,10 @@ rvce-mca-grade-calculator/
 ├── docs/
 │   ├── Coure-List-2024-Marks.xlsx            Course list with CIE/SEE marks for the 2024 scheme
 │   ├── MCA-2024-Scheme-Syllabus.pdf          Source MCA 2024 Scheme syllabus
-│   └── PG-2024-Scheme-Handbook.pdf           Source PG 2024 Scheme academic handbook
+│   ├── PG-2024-Scheme-Handbook.pdf           Source PG 2024 Scheme academic handbook
+│   ├── MCA-2026-Scheme-Syllabus.pdf          Source MCA 2026 Scheme syllabus
+│   ├── PG-2026-Scheme-Handbook.pdf           Source PG handbook w.e.f. 2026-27
+│   └── 2026-Scheme-Marking-and-Passing-Guide.md   2026 marking, minimum pass marks, source notes
 │
 └── scripts/
     ├── build-css.mjs                         Bundles and minifies the four CSS sources into css/app.css
@@ -382,6 +394,25 @@ open index.html          # macOS
 python3 -m http.server 5173
 ```
 
+**After extracting the zip or cloning the repo.** Node.js 18 or newer is only needed to rebuild the minified files; it is not needed just to run the site.
+
+```bash
+npm ci             # installs node_modules (or: npm install)
+npm run build      # regenerates css/app.css and every *.min.js
+```
+
+The project has no dev-server script, so serve the folder with any static server:
+
+```bash
+npx serve -l 8080 .              # then open http://localhost:8080
+# or: python -m http.server 8080
+# or: VS Code "Live Server" -> right-click index.html -> Open with Live Server (uses port 5500)
+```
+
+Port 8080 is used everywhere on purpose, so the plain static server and the Docker image behave the same: the nginx config in `docker/nginx.conf` listens on 8080 inside the container (an unprivileged port, and the one Azure Container Apps is pointed at), and `docker run -p 8080:8080` maps it to the same port on your machine. Run only one of them at a time, or change the left-hand number in `-p` (for example `-p 9090:8080`) to run both.
+
+Run `npm run build` again after editing any non-minified JS or CSS file.
+
 Because `js/data.js` mirrors `data/courses.json` as a plain JS object, the app works identically whether it is opened straight from disk or served over HTTP; nothing needs to be fetched at runtime. Google Sign-In, Save Progress and offline support need the page to be served over `http://` or `https://`.
 
 ## Build, Docker & Deployment
@@ -402,6 +433,8 @@ docker build -t rvce-mca-grade-calculator .
 docker run --rm -p 8080:8080 rvce-mca-grade-calculator
 # then open http://localhost:8080
 ```
+
+**Azure Static Web Apps.** `staticwebapp.config.json` holds the same security headers, CSP, cache rules and 404 page as `firebase.json` and `docker/nginx.conf`, so the site can be deployed there without a container (App location `/`, no API, no output folder; set `skip_app_build: true` because the minified files are committed).
 
 **CI and deployment.** Three GitHub Actions workflows live in `.github/workflows/`:
 

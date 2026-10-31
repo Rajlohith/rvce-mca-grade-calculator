@@ -12,3 +12,4 @@ LICENSE
 *.log
 .DS_Store
 .vscode/
+staticwebapp.config.json

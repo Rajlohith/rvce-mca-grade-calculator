@@ -35,6 +35,18 @@
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
+  <url>
+    <loc>https://rvce-mca-grade-calc.web.app/pages/cgpa-2024.html</loc>
+    <lastmod>2026-10-30</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://rvce-mca-grade-calc.web.app/pages/cgpa-2026.html</loc>
+    <lastmod>2026-10-30</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
 
   <url>
     <loc>https://rvce-mca-grade-calc.web.app/pages/scheme.html</loc>
