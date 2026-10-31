@@ -7,14 +7,13 @@
    - The browser can actually install it: Chromium fires beforeinstallprompt
      (native install dialog), or it's iOS Safari (no API; we show the manual
      Share -> Add to Home Screen hint instead). Anything else: stays silent.
-   - It's at least the visitor's 2nd separate visit (a new browser session),
-     they've interacted with the page, and a few seconds have passed — never
-     on a first impression, never mid-load.
-   - Not more than once per browser session, and not within 3 days of the
-     last time it was shown.
-   - Dismissal snoozes it: 14 days, then 45, then 120; after the third
-     dismissal it never comes back. Declining the native dialog counts as a
-     dismissal too.
+   - The visitor has interacted with the page and a few seconds have passed,
+     so the reminder does not cover the initial page load.
+   - It can appear from the first visit, at most once per browser session and
+     at most once every 1 hour (and once per tab session).
+   - Dismissal snoozes it for 4 hours, then 12 hours, then 1 day. Repeated
+     dismissals keep the 7-day snooze; they never permanently disable it.
+     Declining the native dialog counts as a dismissal too.
    - No modal is open at that moment (it waits and retries instead).
    If localStorage is unavailable nothing can be remembered, so it never
    shows. Styles live in components.css (.pwa-install); no inline scripts.
@@ -24,10 +23,10 @@
   var KEY = 'mca-pwa-install';
   var SESSION_KEY = 'mca-pwa-session';
   var DAY = 86400000;
-  var SNOOZE_DAYS = [14, 45, 120];
-  var MIN_VISITS = 2;
-  var MIN_DELAY_MS = 8000;
-  var RESHOW_GAP_MS = 3 * DAY;
+  var SNOOZE_HOURS = [4, 12, 24];
+  var MIN_VISITS = 1;
+  var MIN_DELAY_MS = 2000;
+  var RESHOW_GAP_MS = 60 * 60 * 1000;
 
   var state = load();
   if(!state) return; // storage unavailable: can't remember choices, so don't prompt
@@ -102,10 +101,14 @@
   function eligible(){
     if(!(deferred || ios)) return false;
     if((state.visits || 0) < MIN_VISITS) return false;
-    var d = state.dismissals || 0;
-    if(d >= SNOOZE_DAYS.length) return false;
+    var d = Math.max(0, Number(state.dismissals) || 0);
     var now = Date.now();
-    if(state.dismissedAt && now - state.dismissedAt < SNOOZE_DAYS[d - 1] * DAY) return false;
+    // Keep increasing the snooze only up to the final interval. Unlike the
+    // previous behaviour, repeated dismissals never suppress the prompt forever.
+    if(d > 0 && state.dismissedAt){
+      var snoozeIndex = Math.min(d - 1, SNOOZE_HOURS.length - 1);
+      if(now - state.dismissedAt < SNOOZE_HOURS[snoozeIndex] * 60 * 60 * 1000) return false;
+    }
     if(state.lastShown && now - state.lastShown < RESHOW_GAP_MS) return false;
     try { if(sessionStorage.getItem('mca-pwa-shown')) return false; } catch(e){ return false; }
     return true;
