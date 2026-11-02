@@ -434,7 +434,7 @@ docker run --rm -p 8080:8080 rvce-mca-grade-calculator
 # then open http://localhost:8080
 ```
 
-**Azure Static Web Apps.** `staticwebapp.config.json` holds the same security headers, CSP, cache rules and 404 page as `firebase.json` and `docker/nginx.conf`, so the site can be deployed there without a container (App location `/`, no API, no output folder; set `skip_app_build: true` because the minified files are committed).
+**Azure Static Web Apps.** `staticwebapp.config.json` holds the same security headers, CSP, cache rules and 404 page as `firebase.json` and `docker/nginx.conf`, so the site can be deployed there without a container (App location `/`, no API, no output folder; set `skip_app_build: true` because the minified files are committed). The Firebase `authDomain` is `rvce-mca-grade-calc.web.app`, so that origin must stay in the CSP `frame-src`, and the Azure `*.azurestaticapps.net` hostname must be added under Firebase Authentication -> Authorized domains, or Google Sign-In fails.
 
 **CI and deployment.** Three GitHub Actions workflows live in `.github/workflows/`:
 
