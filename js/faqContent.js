@@ -502,7 +502,7 @@ window.MCA.FAQ = [
       <p><b>Current scheme availability:</b></p>
       <ul>
         <li><b>2024 Scheme:</b> Active.</li>
-        <li><b>2026 Scheme:</b> Active, built from the 2026 syllabus and the PG handbook effective 2026-27.</li>
+        <li><b>2026 Scheme:</b> Active.</li>
       </ul>
     `
   },
