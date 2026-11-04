@@ -172,15 +172,17 @@ window.MCA.FAQ = [
       <p><b>2024 scheme, CIE Finalization tool:</b></p>
       <ul>
         <li>Checks the detailed CIE requirements while you are building your CIE.</li>
-        <li>For theory courses: <b>Quiz + Test ≥ 50% of 60</b>.</li>
+        <li>For theory courses: <b>Quiz + Test ≥ 50% of 60</b> (30/60).</li>
         <li>Overall CIE must be <b>≥ 50% of 100</b>.</li>
+        <li>For theory + lab courses (every semester): Quiz + Test ≥ 30/60, theory CIE ≥ 50/100, Lab ≥ 25/50 and total CIE ≥ 75/150.</li>
+        <li>Missing any of these shows <b>Grade: DX (NSSR)</b> on the card, with the condition that was missed.</li>
       </ul>
 
       <p><b>2024 scheme, Final Grade tool:</b></p>
       <ul>
         <li><b>CIE ≥ 50%</b>.</li>
         <li><b>SEE ≥ 40%</b> for theory courses.</li>
-        <li><b>SEE ≥ 50%</b> for lab/theory-lab courses.</li>
+        <li><b>SEE ≥ 50%</b> for every theory + lab course (75/150, all semesters) and every lab course (25/50, including the Design Thinking Lab).</li>
         <li><b>Overall aggregate ≥ 50%</b>.</li>
       </ul>
 
@@ -188,14 +190,16 @@ window.MCA.FAQ = [
       <ul>
         <li><b>Theory (CIE 100, SEE 100):</b> Quiz + Test ≥ 25/50, CIE ≥ 50/100, SEE ≥ 40/100, aggregate ≥ 100/200.</li>
         <li><b>AI Fundamentals (CIE 50, SEE 50):</b> Quiz + Test ≥ 12.5/25, CIE ≥ 25/50, SEE ≥ 20/50, aggregate ≥ 50/100.</li>
-        <li><b>Theory + Lab, CIE:</b> theory Quiz + Test ≥ 20/50, theory CIE (Quiz + Test + EL) ≥ 40/100, Lab ≥ 25/50, total CIE ≥ 75/150.</li>
+        <li><b>Theory + Lab, CIE:</b> theory Quiz + Test ≥ 25/50, theory CIE (Quiz + Test + EL) ≥ 50/100, Lab ≥ 25/50, total CIE ≥ 75/150.</li>
         <li><b>Theory + Lab, SEE:</b> theory SEE ≥ 40/100, lab SEE ≥ 25/50, total SEE ≥ 75/150, aggregate ≥ 150/300.</li>
         <li><b>Lab-only (CIE 50, SEE 50):</b> CIE ≥ 25/50, SEE ≥ 25/50, aggregate ≥ 50/100.</li>
       </ul>
 
       <p><b>2026 scheme, projects and internship (graded directly in this tool):</b> handbook Table 4.4 has no separate row for them, but their course category is Lab / Practice, so the practice standard applies: <b>CIE &ge; 50%, SEE &ge; 50%, aggregate &ge; 50%</b>. That means 50/100, 50/100 and 100/200 for the Major Project and the Project Internship, and 50% of the marks for the Minor Project (25/50 per the credit table, 50/100 per the course page). The Major Project syllabus also states that 50% CIE is a prerequisite to appear for SEE. NPTEL / MOOC courses have no numeric pass mark in the handbook; an F means re-registering and clearing the course online.</p>
 
-      <p><b>A note on the 2026 theory + lab floor:</b> handbook Table 4.4 sets 40% for the theory part of a theory + practice course, while each course's syllabus rubric repeats the line &ldquo;minimum 50% in Test &amp; Quiz to clear CIE&rdquo;. The calculator follows the handbook table and shows a heads-up when your Quiz + Test falls between the two. If you are in that range, confirm with your course faculty.</p>
+      <p><b>Lab SEE in the &ldquo;SEE Marks Required&rdquo; popup:</b> for theory + lab courses (both schemes) the lab part of the SEE needs at least 25/50 (50%) on its own. If you enter a Lab SEE below 25 in the popup, a red message explains that the course cannot be cleared however well the theory SEE goes, and every grade is shown as not reachable.</p>
+
+      <p><b>Quiz + Test is a percentage rule:</b> in every course you need at least 50% of the Quiz + Test marks (not a fixed number of marks), so the cut-off is 30/60 in the 2024 scheme, 25/50 in the 2026 theory and theory + lab courses, and 12.5/25 in AI Fundamentals. The course syllabi state this as &ldquo;minimum 50% in Test &amp; Quiz to clear CIE&rdquo;, and the calculator applies it to theory + lab courses as well.</p>
 
       <p><b>Important:</b> Missing even one required condition results in an <b>F</b>, regardless of the raw overall percentage. On the 2026 Final Grade page you enter one combined CIE and one combined SEE per course, as in 2024; for theory + lab courses the SEE total must be at least 75/150.</p>
     `
@@ -284,7 +288,7 @@ window.MCA.FAQ = [
         <li>
           <b>DX (Not eligible for SEE):</b>
           <ul>
-            <li>Did not meet the minimum CIE requirement.</li>
+            <li>Did not meet the minimum CIE requirement (for example less than 50% in Quiz + Test, or less than 50% in overall CIE). The handbook writes this grade as DX (NSAR / NSSR): Not Satisfied Attendance Requirement / Not Satisfied Sessional Requirement.</li>
             <li>Not allowed to write the SEE for that course at that stage.</li>
           </ul>
         </li>

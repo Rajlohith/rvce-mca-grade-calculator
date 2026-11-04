@@ -1,10 +1,7 @@
 /* ==========================================================================
    Base resets & typography
    ========================================================================== */
-* {
-  box-sizing: border-box;
-  -webkit-tap-highlight-color: transparent;
-}
+*{ box-sizing: border-box; }
 html,body{ margin:0; padding:0; }
 
 /* Desktop renders a touch large at 100%; 90% matches how the app is

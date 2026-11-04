@@ -31,6 +31,9 @@ window.MCA = window.MCA || {};
     const quizTest = quiz+testScaled;
 
     let rows=[], total=0, max=0, note='', passesFloor=false;
+    // Plain-language list of the CIE conditions that were missed (empty when none were).
+    const failures=[];
+    const need=(ok,label,val,min,of)=>{ if(!ok) failures.push(`${label}: ${fmt(val)}/${of}, needs at least ${min}/${of}`); };
     if(type==='theory'){
       const theoryCIE = quizTest+el;
       total = theoryCIE; max = 100;
@@ -41,6 +44,8 @@ window.MCA = window.MCA || {};
       ];
       const ok = quizTest>=30 && total>=50;
       passesFloor = ok;
+      need(quizTest>=30,'Quiz + Test (50%)',quizTest,30,60);
+      need(total>=50,'Overall CIE (50%)',total,50,100);
       note = `Floor: Quiz+Test &ge;30/60 &amp; CIE &ge;50/100 - yours: ${fmt(quizTest)}/60, ${fmt(total)}/100 <b style="color:${ok?'#16a34a':'#dc2626'}">(${ok?'meets floor':'below floor'})</b>.`;
     } else if(type==='theory-lab' && labScheme==='sem23'){
       /* Semester II & III: PBL (Project Based Learning) stands in for the
@@ -63,11 +68,15 @@ window.MCA = window.MCA || {};
         ['Theory-equivalent subtotal', fmt(theoryEquiv)+' / 100'],
         ['Lab / Practical CIE', fmt(labCIE)+' / 50'],
       ];
-      const thOk = quizTest>=24 && theoryEquiv>=40;
+      const thOk = quizTest>=30 && theoryEquiv>=50;
       const labOk = labCIE>=25;
       const totOk = total>=75;
       passesFloor = thOk && labOk && totOk;
-      note = `PBL stands in for Experiential Learning here. Floors: Quiz+Test &ge;24/60 &amp; +PBL &ge;40/100 (${thOk?'met':'not met'}); Lab &ge;25/50 (${labOk?'met':'not met'}); combined &ge;75/150 (${totOk?'met':'not met'}).`;
+      need(quizTest>=30,'Quiz + Test (50%)',quizTest,30,60);
+      need(theoryEquiv>=50,'Theory CIE incl. PBL (50%)',theoryEquiv,50,100);
+      need(labOk,'Lab CIE (50%)',labCIE,25,50);
+      need(totOk,'Overall CIE (50%)',total,75,150);
+      note = `PBL stands in for Experiential Learning here. Floors: Quiz+Test &ge;30/60 &amp; +PBL &ge;50/100 (${thOk?'met':'not met'}); Lab &ge;25/50 (${labOk?'met':'not met'}); combined &ge;75/150 (${totOk?'met':'not met'}).`;
     } else if(type==='theory-lab'){
       /* Semester I: Lab / Practical CIE is a single combined 50-mark field
          (record + test, plus Lab Experiential Learning), matching Table
@@ -87,6 +96,10 @@ window.MCA = window.MCA || {};
       const labOk = lab>=25;
       const totOk = total>=75;
       passesFloor = thOk && labOk && totOk;
+      need(quizTest>=30,'Quiz + Test (50%)',quizTest,30,60);
+      need(theoryCIE>=50,'Theory CIE (50%)',theoryCIE,50,100);
+      need(labOk,'Lab CIE (50%)',lab,25,50);
+      need(totOk,'Overall CIE (50%)',total,75,150);
       note = `Floors: Theory Quiz+Test &ge;30/60 &amp; Theory CIE &ge;50/100 (${thOk?'met':'not met'}); Lab &ge;25/50 (${labOk?'met':'not met'}); combined &ge;75/150 (${totOk?'met':'not met'}).`;
     } else if(type==='seminar'){
       /* Semester IV Technical Seminar: evaluated in two internal project
@@ -102,6 +115,7 @@ window.MCA = window.MCA || {};
       ];
       const ok = total>=25;
       passesFloor = ok;
+      need(ok,'Combined CIE',total,25,100);
       note = `Floor: combined &ge;25/100 - yours: <b style="color:${ok?'#16a34a':'#dc2626'}">${fmt(total)}/100 ${ok?'(met)':'(not met)'}</b>.`;
     } else {
       const lab=clampNum(v.lab,0,40);
@@ -113,6 +127,7 @@ window.MCA = window.MCA || {};
       ];
       const ok = total>=25;
       passesFloor = ok;
+      need(ok,'Overall CIE (50%)',total,25,50);
       note = `Floor: CIE &ge;25/50 - yours: <b style="color:${ok?'#16a34a':'#dc2626'}">${fmt(total)}/50 ${ok?'(met)':'(not met)'}</b>.`;
     }
     const pct = max ? total/max*100 : 0;
@@ -136,7 +151,7 @@ window.MCA = window.MCA || {};
        semester is finalized. */
     const finalTotal = Math.ceil(fmt(total));
     const finalPct = max ? fmt(finalTotal/max*10000)/100 : 0;
-    return { rows, total, max, pct, note, passesFloor, dx: !passesFloor, finalTotal, finalPct };
+    return { rows, total, max, pct, note, passesFloor, dx: !passesFloor, failures, finalTotal, finalPct };
   }
 
   /* ---------- SEE Requirement Estimator ----------
@@ -145,10 +160,10 @@ window.MCA = window.MCA || {};
      Theory 100 + Lab 50 either way. */
   function estimateSEE(type, cie, cieMax, targetPct, courseData){
     const seeMax = type==='theory' ? 100 : type==='theory-lab' ? 150 : 50;
-    // theory-lab floor: Sem I (EL) = 60/150; Sems II & III (PBL) = 75/150.
-    // Without labScheme context, 60 is the conservative minimum.
-    // courseData?.seeFloor overrides the default (e.g. MCA427DL lab: 20/50).
-    const floor = courseData?.seeFloor ?? (type==='theory' ? 40 : type==='theory-lab' ? 60 : 25);
+    // SEE floors (Table 4.4): theory 40/100, theory+lab total 75/150 (50%) in every semester,
+    // practice-only 25/50 (this includes the Design Thinking Lab). courseData?.seeFloor can still
+    // override a single course, but no course sets one any more.
+    const floor = courseData?.seeFloor ?? (type==='theory' ? 40 : type==='theory-lab' ? 75 : 25);
     const cieLabel = type==='theory' ? 'CIE' : type==='theory-lab' ? 'CIE (Theory+Lab)' : 'CIE';
     const maxTotal = cieMax+seeMax;
     const neededAgg = targetPct/100*maxTotal;
@@ -169,10 +184,9 @@ window.MCA = window.MCA || {};
   function allGradeRequirements(type, cie, cieMax, labSeeFixed, courseData){
     const bands = window.MCA.DATA.grading.bands.filter(b => b.grade !== 'F');
     const seeMax = type==='theory' ? 100 : type==='theory-lab' ? 150 : 50;
-    // theory-lab floor: Sem I (EL) = 60/150; Sems II & III (PBL) = 75/150.
-    // Without labScheme context, 60 is the conservative minimum.
-    // courseData?.seeFloor overrides for courses with a non-standard floor (e.g. MCA427DL lab: 20/50).
-    const combinedFloor = courseData?.seeFloor ?? (type==='theory' ? 40 : type==='theory-lab' ? 60 : 25);
+    // SEE floors (Table 4.4): theory 40/100, theory+lab total 75/150 (50%) in every semester,
+    // practice-only 25/50 (this includes the Design Thinking Lab).
+    const combinedFloor = courseData?.seeFloor ?? (type==='theory' ? 40 : type==='theory-lab' ? 75 : 25);
     const maxTotal = cieMax+seeMax;
     const hasLabSplit = type==='theory-lab' && labSeeFixed !== null && labSeeFixed !== undefined && !isNaN(labSeeFixed);
     // Table 4.4: Practice component of SEE must independently be >=50% of
@@ -180,10 +194,8 @@ window.MCA = window.MCA || {};
     // A fixed Lab SEE entry below this floor makes the course unpassable
     // no matter what the theory SEE is, so it must never be reported as
     // achievable (this was previously missed — see Bug #4).
-    // Sem I (EL): Lab SEE floor = 20/50; Sems II & III (PBL): 25/50.
-    // Without labScheme context use 20 as the conservative minimum so Sem I
-    // students with a valid 20-24 lab SEE aren't incorrectly blocked.
-    const labSeeMeetsFloor = !hasLabSplit || (labSeeFixed >= 20 && labSeeFixed <= 50);
+    // Lab SEE floor is 25/50 in every semester.
+    const labSeeMeetsFloor = !hasLabSplit || (labSeeFixed >= 25 && labSeeFixed <= 50);
 
     return bands.map(b=>{
       const neededAgg = b.min/100*maxTotal;
@@ -198,7 +210,7 @@ window.MCA = window.MCA || {};
             achievable: false,
             label: labSeeFixed > 50
               ? `Lab SEE can't exceed 50/50`
-              : `Lab SEE must be &ge;20/50 to pass at all (${labLabel} is below the floor)`
+              : `Lab SEE must be &ge;25/50 to pass at all (${labLabel} is below the floor)`
           };
         }
         return {
@@ -244,14 +256,13 @@ window.MCA = window.MCA || {};
     const cie = clampNum(v.cie,0,cieMax);
     const see = clampNum(v.see,0,seeMax);
     const total = cie+see, max = cieMax+seeMax;
-    // For theory-lab: Sem I (EL, labScheme='sem1') floor = 60/150 = 40%;
-    //                 Sems II & III (PBL, labScheme='sem23') floor = 75/150 = 50%.
-    // For all other types, 50% applies (theory: 40/100=40%; lab/seminar: 25/50=50%).
+    // SEE floor: theory 40/100 = 40%; theory + lab 75/150 = 50% in EVERY semester (labScheme no
+    // longer matters here); lab / seminar 25/50 = 50%.
     let seeFloorPct;
     if(type === 'theory'){
       seeFloorPct = 40;
     } else if(type === 'theory-lab'){
-      seeFloorPct = (labScheme === 'sem23') ? 50 : 40;
+      seeFloorPct = 50;
     } else {
       seeFloorPct = 50;
     }
@@ -340,8 +351,9 @@ window.MCA = window.MCA || {};
 
      Passing floors follow handbook Table 4.4:
        Theory without practice : Quiz+Test >=50%, CIE >=50%, SEE >=40%, aggregate >=50%
-       Theory with practice    : theory Quiz+Test >=40%, theory CIE >=40%, Lab >=50%,
-                                 total CIE >=50%; SEE theory >=40%, lab >=50%, total >=50%
+       Theory with practice    : calculator uses 50% for Quiz+Test and theory CIE (the course
+                                 rubrics' "minimum 50% in Test & Quiz"), Lab >=50%, total CIE >=50%;
+                                 SEE theory >=40%, lab >=50%, total >=50%
        Practice only           : CIE >=50%, SEE >=50%, aggregate >=50%
      ========================================================================== */
 
@@ -350,6 +362,8 @@ window.MCA = window.MCA || {};
   function computeCIE26(course, v){
     const model = course.model;
     let rows=[], total=0, max=0, note='', passesFloor=false;
+    const failures=[];
+    const need=(ok,label,val,min,of)=>{ if(!ok) failures.push(`${label}: ${fmt(val)}/${of}, needs at least ${min}/${of}`); };
 
     if(model==='theory' || model==='theory-lab'){
       const quiz = clampNum(v.q,0,10);                                   // ONE quiz, /10
@@ -367,18 +381,23 @@ window.MCA = window.MCA || {};
         total = theoryCIE; max = 100;
         const qtOk = quizTest>=25, totOk = total>=50;
         passesFloor = qtOk && totOk;
+        need(qtOk,'Quiz + Test (50%)',quizTest,25,50);
+        need(totOk,'Overall CIE (50%)',total,50,100);
         note = `Floors: Quiz+Test &ge;25/50 (${ok26(qtOk)}, yours ${fmt(quizTest)}) &amp; CIE &ge;50/100 (${ok26(totOk)}, yours ${fmt(total)}).`;
       } else {
         const lab = clampNum(v.lab,0,50);                                // lab work 30 + PBL review 10 + lab test 10
         total = theoryCIE + lab; max = 150;
         rows.push(['Theory CIE subtotal', fmt(theoryCIE)+' / 100']);
         rows.push(['Lab', fmt(lab)+' / 50']);
-        const qtOk = quizTest>=20, thOk = theoryCIE>=40, labOk = lab>=25, totOk = total>=75;
+        // 50% on the Quiz + Test part, the theory CIE, the lab and the overall CIE
+        // (the course rubrics' "minimum 50% in Test & Quiz").
+        const qtOk = quizTest>=25, thOk = theoryCIE>=50, labOk = lab>=25, totOk = total>=75;
         passesFloor = qtOk && thOk && labOk && totOk;
-        note = `Floors (Table 4.4, theory with practice): theory Quiz+Test &ge;20/50 (${ok26(qtOk)}) &amp; theory CIE &ge;40/100 (${ok26(thOk)}); Lab &ge;25/50 (${ok26(labOk)}); combined &ge;75/150 (${ok26(totOk)}).`;
-        if(qtOk && quizTest<25){
-          note += ` Heads-up: the course syllabus rubric says &ldquo;minimum 50% in Test &amp; Quiz&rdquo; (25/50) while handbook Table 4.4 says 40% for theory with practice - confirm with your faculty if you are in this range.`;
-        }
+        need(qtOk,'Quiz + Test (50%)',quizTest,25,50);
+        need(thOk,'Theory CIE (50%)',theoryCIE,50,100);
+        need(labOk,'Lab CIE (50%)',lab,25,50);
+        need(totOk,'Overall CIE (50%)',total,75,150);
+        note = `Floors: theory Quiz+Test &ge;25/50 (${ok26(qtOk)}) &amp; theory CIE &ge;50/100 (${ok26(thOk)}); Lab &ge;25/50 (${ok26(labOk)}); combined &ge;75/150 (${ok26(totOk)}).`;
       }
     } else if(model==='theory-50'){
       // AI Fundamentals: Quiz conducted for 10 and scaled down to 5; tests of 25 each,
@@ -396,6 +415,8 @@ window.MCA = window.MCA || {};
       ];
       const qtOk = quizTest>=12.5, totOk = total>=25;
       passesFloor = qtOk && totOk;
+      need(qtOk,'Quiz + Test (50%)',quizTest,12.5,25);
+      need(totOk,'Overall CIE (50%)',total,25,50);
       note = `Floors: Quiz+Test &ge;12.5/25 (${ok26(qtOk)}, yours ${fmt(quizTest)}) &amp; CIE &ge;25/50 (${ok26(totOk)}, yours ${fmt(total)}).`;
     } else if(model==='online-lab'){
       const modules = clampNum(v.modules,0,30), t1 = clampNum(v.lt1,0,10), t2 = clampNum(v.lt2,0,10);
@@ -406,6 +427,7 @@ window.MCA = window.MCA || {};
         ['Test II', fmt(t2)+' / 10'],
       ];
       passesFloor = total>=25;
+      need(passesFloor,'Overall CIE (50%)',total,25,50);
       note = `Floor: CIE &ge;25/50 - yours <b style="color:${passesFloor?'#16a34a':'#dc2626'}">${fmt(total)}/50 (${passesFloor?'met':'not met'})</b>.`;
     } else if(model==='dtl'){
       const r1 = clampNum(v.r1,0,10), r2 = clampNum(v.r2,0,20), r3 = clampNum(v.r3,0,15), rep = clampNum(v.rep,0,5);
@@ -417,6 +439,7 @@ window.MCA = window.MCA || {};
         ['Final report', fmt(rep)+' / 5'],
       ];
       passesFloor = total>=25;
+      need(passesFloor,'Overall CIE (50%)',total,25,50);
       note = `Floor: CIE &ge;25/50 - yours <b style="color:${passesFloor?'#16a34a':'#dc2626'}">${fmt(total)}/50 (${passesFloor?'met':'not met'})</b>.`;
     }
 
@@ -424,7 +447,7 @@ window.MCA = window.MCA || {};
     // Same department convention as 2024: the finalized CIE is rounded UP to the next whole mark.
     const finalTotal = Math.ceil(fmt(total));
     const finalPct = max ? fmt(finalTotal/max*10000)/100 : 0;
-    return { rows, total, max, pct, note, passesFloor, dx: !passesFloor, finalTotal, finalPct, seeMax: course.see };
+    return { rows, total, max, pct, note, passesFloor, dx: !passesFloor, failures, finalTotal, finalPct, seeMax: course.see };
   }
 
   /* Minimum SEE (out of the course's SEE max) needed just to be allowed to pass. */

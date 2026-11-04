@@ -348,6 +348,7 @@
         <div class="row total"><span>Finalized CIE</span><span>${fmt(r.total)} / ${r.max}</span></div>
         <div class="row total final-cie"><span>Final CIE (used for SEE):</span><span>${r.finalTotal} / ${r.max} (${r.finalPct.toFixed(2)}%)</span></div>
       </div>
+      ${r.dx ? `<div class="callout error"><b>Grade: DX (NSSR)</b> &ndash; Not Satisfied Sessional Requirement.<br>${(r.failures||[]).map(f=>`&bull; ${f}`).join('<br>')}<br>You cannot appear for the SEE in this course; it has to be re-registered.</div>` : ''}
       ${finalNote}`;
 
     const seeBtn = card.querySelector('.see-btn');
@@ -426,6 +427,7 @@
           <label for="labSeeFixedInput">Set Lab SEE Marks (Optional)</label>
           <input type="number" id="labSeeFixedInput" min="0" max="50" placeholder="0">
           <span class="hint">Max 50 marks${is2026 ? ' (lab SEE must be at least 25 to pass)' : ''}. Enter to see the adjusted theory SEE requirement.</span>
+          <div class="lab-see-error" id="labSeeError" role="alert" hidden></div>
         </div>`;
       document.getElementById('labSeeFixedInput').addEventListener('input', renderModalRows);
     } else {
@@ -441,8 +443,21 @@
     if(!state) return;
     const labInput = document.getElementById('labSeeFixedInput');
     const labSeeFixed = (labInput && labInput.value !== '') ? parseFloat(labInput.value) : null;
+    // Red explanation under the input when the entered Lab SEE can never pass: the lab part
+    // of the SEE needs at least 25/50 (50%) on its own, whatever the theory SEE turns out to be.
+    const labErr = document.getElementById('labSeeError');
+    if(labErr){
+      let msg = '';
+      if(labSeeFixed !== null && !isNaN(labSeeFixed)){
+        if(labSeeFixed < 0) msg = 'Marks cannot be negative.';
+        else if(labSeeFixed > 50) msg = 'Lab SEE cannot be more than 50/50.';
+        else if(labSeeFixed < 25) msg = `Lab SEE must be at least 25/50 (50%) to clear this course. With ${fmt(labSeeFixed)}/50 you cannot pass, however well you do in the theory SEE.`;
+      }
+      labErr.textContent = msg;
+      labErr.hidden = !msg;
+    }
     // Pass the course object so allGradeRequirements can honour any course-specific
-    // seeFloor (e.g. MCA427DL Design Thinking Lab has seeFloor:20 instead of 25).
+    // seeFloor (none set at the moment; every practice course uses 25/50).
     const courseForModal = courses.find(c => c.code === currentModalCode);
     const reqs = is2026
       ? allGradeRequirements26(courseForModal, state.total, state.max, labSeeFixed)

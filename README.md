@@ -70,7 +70,7 @@ The site is a plain set of statically linked HTML pages: `index.html` at the pro
 
 **Final Grade Calculator**
 - Takes just the two numbers that actually end up on a grade card: finalized CIE total and SEE total.
-- Checked against the Table 4.4 total-row passing conditions (CIE at least 50%, aggregate at least 50%, and an SEE floor that depends on the course type), with no quiz, test or lab sub-breakdown required at this stage. The SEE floor is 40% for a theory-only course, 40% for a Semester I theory + lab course, 50% for a Semester II or III theory + lab course (PBL scheme), and 50% for lab-only courses.
+- Checked against the Table 4.4 total-row passing conditions (CIE at least 50%, aggregate at least 50%, and an SEE floor that depends on the course type), with no quiz, test or lab sub-breakdown required at this stage. The SEE floor is 40% for a theory-only course and 50% for every theory + lab course (75/150, in all semesters) and every lab-only course (25/50, including the Design Thinking Lab).
 - For the Technical Seminar the two inputs are relabeled Project Phase 1 and Project Phase 2 instead of CIE and SEE.
 
 **Final SGPA Calculator**
@@ -218,11 +218,15 @@ The CIE Finalization page checks each course against the floor for its type, as 
 | ----- | ----- |
 | Theory only | Quiz+Test at least 30/60, and CIE at least 50/100 |
 | Theory + Lab, Semester I (EL) | Theory Quiz+Test at least 30/60, theory CIE at least 50/100, Lab at least 25/50, combined at least 75/150 |
-| Theory + Lab, Semesters II & III (PBL) | Quiz+Test at least 24/60, Quiz+Test+PBL at least 40/100, Lab at least 25/50, combined at least 75/150 |
+| Theory + Lab, Semesters II & III (PBL) | Quiz+Test at least 30/60, Quiz+Test+PBL at least 50/100, Lab at least 25/50, combined at least 75/150 |
 | Lab only | CIE at least 25/50 |
 | Technical Seminar | Combined phases at least 25/100 |
 
-On the SEE side, the SEE Marks Required popup uses a minimum SEE of 40/100 for theory, 60/150 for any theory + lab course (the conservative Semester I figure, since the popup does not distinguish EL from PBL), and 25/50 for lab-only courses. The Final Grade Calculator is stricter for theory + lab courses in Semesters II and III, where the SEE floor is 75/150. One course, the Semester II Design Thinking Lab (`MCA427DL`), carries a course-specific `seeFloor` of 20/50 in `data/courses.json`, which the engine honors in place of the default. For a theory + lab course, a fixed Lab SEE entry below 20/50 makes the course unpassable no matter what the theory SEE is, and the popup says so instead of reporting a grade as achievable.
+On the SEE side, both the SEE Marks Required popup and the Final Grade Calculator use a minimum SEE of 40/100 for theory, 75/150 for every theory + lab course in every semester, and 25/50 for lab-only courses, including the Semester II Design Thinking Lab (`MCA427DL`, which no longer carries a special `seeFloor`). For a theory + lab course, a fixed Lab SEE entry below 25/50 makes the course unpassable no matter what the theory SEE is, and the popup says so instead of reporting a grade as achievable.
+
+The CIE result also lists which condition was missed. When a floor is not met the card shows **Grade: DX (NSSR)**, meaning Not Satisfied Sessional Requirement (the handbook writes this grade as DX, NSAR / NSSR), with the failing condition (for example "Quiz + Test (50%): 22/50, needs at least 25/50"), and the SEE button is disabled because the student cannot appear for the SEE.
+
+The 2026 scheme uses the same 50% rule (theory Quiz+Test at least 25/50 and theory CIE at least 50/100 for theory + lab courses; Quiz+Test at least 25/50 and CIE at least 50/100 for theory courses; Quiz+Test at least 12.5/25 and CIE at least 25/50 for AI Fundamentals).
 
 **Rounding.** RVCE's MCA department finalizes a course's CIE by rounding **up** to the next whole mark, not to the nearest one, so a raw total of 135.1 and 135.9 both finalize as 136 (while 135.0 stays 135). The Quiz/Test/EL/Lab breakdown still shows exact decimals; the finalized total is what feeds every SEE requirement calculation, because it is the number the department will actually use. The same ceiling convention is applied to the aggregate on the Final Grade Calculator.
 

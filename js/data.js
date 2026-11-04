@@ -301,8 +301,7 @@ window.MCA.DATA = {
           "cie": 50,
           "see": 50,
           "page": 53,
-          "core": true,
-          "seeFloor": 20
+          "core": true
         }
       ]
     },
